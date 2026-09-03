@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1905">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#e9ecef" stroke-width="0.5"/></pattern>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#90a4ae"/></marker>
+    <marker id="cyan" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#1565c0"/></marker>
+    <marker id="green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#2e7d32"/></marker>
+    <marker id="rose" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#c62828"/></marker>
+    <style>
+      text{font-family:"PingFang SC","Microsoft YaHei",sans-serif;fill:#333}.title{fill:#333;font-size:24px;font-weight:700}.sub{fill:#777;font-size:12px}.laneTitle{fill:#333;font-size:18px;font-weight:700}.laneSub{fill:#666;font-size:11px}.phase{fill:#2BA471;font-size:13px;font-weight:700}.name{fill:#333;font-size:13px;font-weight:700}.desc{fill:#555;font-size:10px}.tiny{fill:#777;font-size:9px}.label{fill:#555;font-size:10px;font-weight:600}.note{fill:#e65100;font-size:10px}.customer{fill:#fce4ec;stroke:#c62828;stroke-width:1.5}.platform{fill:#e3f2fd;stroke:#1565c0;stroke-width:1.5}.supplier{fill:#e8f5e9;stroke:#2e7d32;stroke-width:1.5}.decision{fill:#fff3e0;stroke:#ff9800;stroke-width:1.5}.future{fill:#f3e5f5;stroke:#7b1fa2;stroke-width:1.5}.flow{fill:none;stroke:#90a4ae;stroke-width:1.8;marker-end:url(#arrow)}.flowC{fill:none;stroke:#1565c0;stroke-width:2;marker-end:url(#cyan)}.flowG{fill:none;stroke:#2e7d32;stroke-width:2;marker-end:url(#green)}.flowR{fill:none;stroke:#c62828;stroke-width:1.8;stroke-dasharray:7 5;marker-end:url(#rose)}
+    </style>
+  </defs>
+  <rect width="1600" height="2100" fill="#f8f9fa"/><rect width="1600" height="2100" fill="url(#grid)"/>
+  <text x="50" y="52" class="title">农产品平台三端业务全流程</text>
+  <text x="50" y="78" class="sub">从企业权限、客户下单、平台拆单、供应商履约到客户收货的端到端视图</text>
+
+  <!-- lanes -->
+  <rect x="40" y="112" width="480" height="1695" rx="16" fill="none" stroke="#c62828" stroke-dasharray="9 6"/>
+  <rect x="560" y="112" width="480" height="1695" rx="16" fill="none" stroke="#1565c0" stroke-dasharray="9 6"/>
+  <rect x="1080" y="112" width="480" height="1695" rx="16" fill="none" stroke="#2e7d32" stroke-dasharray="9 6"/>
+  <rect x="40" y="112" width="480" height="76" rx="16" class="customer"/><rect x="560" y="112" width="480" height="76" rx="16" class="platform"/><rect x="1080" y="112" width="480" height="76" rx="16" class="supplier"/>
+  <text x="280" y="143" text-anchor="middle" class="laneTitle">客户端 · 采购方</text><text x="280" y="166" text-anchor="middle" class="laneSub">账号管理 / 选品 / 采购下单 / 收货</text>
+  <text x="800" y="143" text-anchor="middle" class="laneTitle">平台端 · 交易与运营中心</text><text x="800" y="166" text-anchor="middle" class="laneSub">权限治理 / 销售确认 / 待采审核 / 拆单 / 履约联动</text>
+  <text x="1320" y="143" text-anchor="middle" class="laneTitle">供应商端 · 供货方</text><text x="1320" y="166" text-anchor="middle" class="laneSub">企业认证 / 接单 / 送货 / 欠单补发</text>
+
+  <!-- phase 0 -->
+  <text x="60" y="225" class="phase">0 · 准入与权限</text>
+  <rect x="105" y="250" width="350" height="90" rx="8" fill="#fff"/><rect x="105" y="250" width="350" height="90" rx="8" class="customer"/>
+  <text x="280" y="279" text-anchor="middle" class="name">客户企业管理员维护账号</text><text x="280" y="300" text-anchor="middle" class="desc">新增/编辑/启停登录人员</text><text x="280" y="319" text-anchor="middle" class="desc">从平台已授权角色中选择</text>
+  <rect x="625" y="235" width="350" height="120" rx="8" fill="#fff"/><rect x="625" y="235" width="350" height="120" rx="8" class="platform"/>
+  <text x="800" y="265" text-anchor="middle" class="name">平台统一权限治理</text><text x="800" y="288" text-anchor="middle" class="desc">定义角色 · 菜单 · 操作权限</text><text x="800" y="309" text-anchor="middle" class="desc">控制客户企业可分配的权限上限</text><text x="800" y="332" text-anchor="middle" class="tiny">客户端不自定义角色与菜单</text>
+  <rect x="1145" y="250" width="350" height="90" rx="8" fill="#fff"/><rect x="1145" y="250" width="350" height="90" rx="8" class="supplier"/>
+  <text x="1320" y="279" text-anchor="middle" class="name">供应商企业认证</text><text x="1320" y="301" text-anchor="middle" class="desc">提交资质 → 平台审核</text><text x="1320" y="320" text-anchor="middle" class="desc">通过后进入接单与履约</text>
+  <path d="M625 282H455" class="flowC"/><text x="540" y="271" text-anchor="middle" class="tiny">授权角色范围</text><path d="M1145 295H976" class="flowG"/><text x="1060" y="284" text-anchor="middle" class="tiny">认证/入驻审核</text>
+
+  <!-- phase 1 -->
+  <text x="60" y="405" class="phase">1 · 客户发起采购</text>
+  <rect x="105" y="430" width="350" height="125" rx="8" fill="#fff"/><rect x="105" y="430" width="350" height="125" rx="8" class="customer"/>
+  <text x="280" y="458" text-anchor="middle" class="name">选品并创建采购订单</text><text x="280" y="480" text-anchor="middle" class="desc">平台产品库 / 我的产品库</text><text x="280" y="501" text-anchor="middle" class="desc">登录人姓名电话自动带出</text><text x="280" y="522" text-anchor="middle" class="desc">选择收货人 → 电话、地址联动</text><text x="280" y="543" text-anchor="middle" class="tiny">客户采购单：创建订单</text>
+  <path d="M455 492H625" class="flowC"/><text x="540" y="480" text-anchor="middle" class="label">提交采购单</text>
+  <rect x="625" y="445" width="350" height="95" rx="8" fill="#fff"/><rect x="625" y="445" width="350" height="95" rx="8" class="platform"/>
+  <text x="800" y="474" text-anchor="middle" class="name">生成平台销售订单</text><text x="800" y="496" text-anchor="middle" class="desc">1客户采购单 → 1平台销售订单</text><text x="800" y="518" text-anchor="middle" class="tiny">客户端：发起采购 / 未发货</text>
+
+  <!-- phase 2 -->
+  <text x="580" y="600" class="phase">2 · 平台销售确认与待采审核</text>
+  <rect x="625" y="625" width="350" height="82" rx="8" fill="#fff"/><rect x="625" y="625" width="350" height="82" rx="8" class="platform"/><text x="800" y="655" text-anchor="middle" class="name">销售人员确认销售订单</text><text x="800" y="679" text-anchor="middle" class="desc">已确认，销售人员不可再修改</text>
+  <path d="M800 707V746" class="flowC"/>
+  <rect x="625" y="746" width="350" height="92" rx="8" fill="#fff"/><rect x="625" y="746" width="350" height="92" rx="8" class="platform"/><text x="800" y="774" text-anchor="middle" class="name">自动生成待采订单</text><text x="800" y="797" text-anchor="middle" class="desc">采购人员按产品明细选择供应商</text><text x="800" y="817" text-anchor="middle" class="tiny">销售订单(1) → 待采订单(1)</text>
+  <path d="M800 838V872" class="flowC"/>
+  <g transform="translate(800 922)"><polygon points="0,-50 78,0 0,50 -78,0" fill="#fff"/><polygon points="0,-50 78,0 0,50 -78,0" class="decision"/><text y="-5" text-anchor="middle" class="name">经理审核</text><text y="15" text-anchor="middle" class="desc">是否通过？</text></g>
+  <path d="M722 922H610V792H625" class="flowR"/><text x="655" y="910" class="note">驳回：填原因，返回修改</text>
+  <path d="M800 972V1018" class="flowC"/><text x="814" y="995" class="tiny">通过</text>
+
+  <!-- phase 3 -->
+  <text x="580" y="1048" class="phase">3 · 按供应商拆单</text>
+  <rect x="625" y="1073" width="350" height="112" rx="8" fill="#fff"/><rect x="625" y="1073" width="350" height="112" rx="8" class="platform"/>
+  <text x="800" y="1102" text-anchor="middle" class="name">系统自动拆分采购订单</text><text x="800" y="1125" text-anchor="middle" class="desc">1待采订单 → N平台采购订单</text><text x="800" y="1147" text-anchor="middle" class="desc">每张采购订单只对应一个供应商</text><text x="800" y="1168" text-anchor="middle" class="tiny">状态：发起采购</text>
+  <path d="M975 1129H1145" class="flowG"/><text x="1060" y="1117" text-anchor="middle" class="label">推送各供应商销售单</text>
+  <rect x="1145" y="1073" width="350" height="112" rx="8" fill="#fff"/><rect x="1145" y="1073" width="350" height="112" rx="8" class="supplier"/>
+  <text x="1320" y="1102" text-anchor="middle" class="name">供应商 A / B / … 独立接单</text><text x="1320" y="1125" text-anchor="middle" class="desc">销售单：待确认 → 已确认</text><text x="1320" y="1147" text-anchor="middle" class="desc">平台采购单：确认采购</text><text x="1320" y="1168" text-anchor="middle" class="tiny">多供应商并行，状态独立</text>
+
+  <!-- phase 4 -->
+  <text x="1100" y="1240" class="phase">4 · 供应商发货与客户收货</text>
+  <rect x="1145" y="1265" width="350" height="92" rx="8" fill="#fff"/><rect x="1145" y="1265" width="350" height="92" rx="8" class="supplier"/>
+  <text x="1320" y="1294" text-anchor="middle" class="name">创建送货单并申请验收</text><text x="1320" y="1317" text-anchor="middle" class="desc">填写实际发货数量 · 发货</text><text x="1320" y="1338" text-anchor="middle" class="tiny">送货单：已发货</text>
+  <text x="1320" y="1352" text-anchor="middle" class="note">若发货数&lt;订单数：系统自动生成供应商欠单</text>
+  <rect x="1110" y="1370" width="420" height="34" rx="6" fill="#fff3e0" stroke="#ff9800" stroke-dasharray="5 4"/>
+  <text x="1320" y="1392" text-anchor="middle" class="note">欠单类型 A：供应商主动少发 → 系统自动建欠单 → 供应商补发</text>
+  <path d="M1145 1311H975" class="flowG"/><rect x="625" y="1265" width="350" height="92" rx="8" fill="#fff"/><rect x="625" y="1265" width="350" height="92" rx="8" class="platform"/>
+  <text x="800" y="1294" text-anchor="middle" class="name">平台联动交货与出入库状态</text><text x="800" y="1317" text-anchor="middle" class="desc">采购订单：待收货</text><text x="800" y="1338" text-anchor="middle" class="tiny">销售订单聚合为部分/全部发货</text>
+  <path d="M625 1311H455" class="flowC"/><text x="540" y="1299" text-anchor="middle" class="label">自动生成客户收货单</text>
+  <rect x="105" y="1250" width="350" height="122" rx="8" fill="#fff"/><rect x="105" y="1250" width="350" height="122" rx="8" class="customer"/>
+  <text x="280" y="1279" text-anchor="middle" class="name">逐产品确认实际收货数量</text><text x="280" y="1302" text-anchor="middle" class="desc">默认=发货数量，可手动调小</text><text x="280" y="1323" text-anchor="middle" class="desc">0 ≤ 收货数量 ≤ 发货数量</text><text x="280" y="1345" text-anchor="middle" class="tiny">各供应商收货单独立确认</text>
+  <path d="M280 1372V1414" class="flow"/>
+  <text x="280" y="1404" text-anchor="middle" class="note">欠单类型 B：客户验收少收 → 客户自主选择是否创建</text>
+  <g transform="translate(280 1464)"><polygon points="0,-50 90,0 0,50 -90,0" fill="#fff"/><polygon points="0,-50 90,0 0,50 -90,0" class="decision"/><text y="-8" text-anchor="middle" class="name">每条明细是否</text><text y="14" text-anchor="middle" class="desc">收货数=发货数？</text></g>
+  <path d="M280 1514V1560" class="flow"/><text x="294" y="1540" class="tiny">全部相等</text>
+  <rect x="105" y="1560" width="350" height="80" rx="8" fill="#fff"/><rect x="105" y="1560" width="350" height="80" rx="8" class="customer"/><text x="280" y="1590" text-anchor="middle" class="name">直接确认收货完成</text><text x="280" y="1614" text-anchor="middle" class="desc">收货数量锁定，三端状态联动</text>
+  <path d="M370 1464H535" class="flowR"/><text x="440" y="1451" class="note">存在少收</text>
+  <g transform="translate(650 1464)"><polygon points="0,-50 90,0 0,50 -90,0" fill="#fff"/><polygon points="0,-50 90,0 0,50 -90,0" class="decision"/><text y="-7" text-anchor="middle" class="name">客户是否</text><text y="15" text-anchor="middle" class="desc">创建欠单？</text></g>
+  <path d="M650 1514V1560" class="flow"/><text x="664" y="1540" class="tiny">不创建</text><rect x="535" y="1560" width="230" height="80" rx="8" fill="#fff"/><rect x="535" y="1560" width="230" height="80" rx="8" class="platform"/><text x="650" y="1590" text-anchor="middle" class="name">确认收货完成</text><text x="650" y="1614" text-anchor="middle" class="desc">不再补发</text>
+  <path d="M740 1464H1125" class="flowR"/><text x="900" y="1451" class="note">创建：每条欠单数=发货数-实收数</text>
+  <rect x="1125" y="1414" width="370" height="100" rx="8" fill="#fff"/><rect x="1125" y="1414" width="370" height="100" rx="8" class="supplier"/>
+  <text x="1310" y="1444" text-anchor="middle" class="name">生成欠单送货单</text><text x="1310" y="1467" text-anchor="middle" class="desc">仅包含少收产品 · 待发货</text><text x="1310" y="1489" text-anchor="middle" class="tiny">供应商补发 → 客户再确认欠单收货</text>
+  <path d="M1310 1514V1590H455" class="flowG"/><text x="930" y="1577" text-anchor="middle" class="label">补发后生成欠单收货单 → 确认收货</text>
+
+  <!-- convergence -->
+  <path d="M280 1640V1680H800" class="flow"/><path d="M650 1640V1680H800" class="flow"/>
+  <rect x="625" y="1680" width="350" height="100" rx="8" fill="#fff"/><rect x="625" y="1680" width="350" height="100" rx="8" class="platform"/>
+  <text x="800" y="1710" text-anchor="middle" class="name">履约聚合完成</text><text x="800" y="1734" text-anchor="middle" class="desc">客户：全部收货 · 平台：各采购单收货完成</text><text x="800" y="1757" text-anchor="middle" class="desc">供应商：送货单已收货</text>
+
+  <!-- footer legend -->
+  <rect x="70" y="1825" width="1460" height="46" rx="8" fill="#fff" stroke="#ddd"/>
+  <circle cx="110" cy="1848" r="7" fill="#c62828"/><text x="127" y="1852" class="tiny">客户端</text><circle cx="235" cy="1848" r="7" fill="#1565c0"/><text x="252" y="1852" class="tiny">平台端</text><circle cx="360" cy="1848" r="7" fill="#2e7d32"/><text x="377" y="1852" class="tiny">供应商端</text><circle cx="520" cy="1848" r="7" fill="#ff9800"/><text x="537" y="1852" class="tiny">判断/审核</text><text x="760" y="1852" class="tiny">核心单据映射：客户采购单(1) → 平台销售单(1) → 待采单(1) → 平台采购单(N) → 供应商销售单(N)</text>
+</svg>

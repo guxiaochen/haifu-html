@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查看采购订单 - 元象农产品买家工作台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            font-size: 14px;
+            min-height: 100vh;
+        }
+
+        /* ===== 顶部绿色通栏 ===== */
+        .top-nav {
+            height: 56px; background: #2BA471; color: #fff;
+            display: flex; align-items: center; padding: 0 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .top-nav-left { display: flex; align-items: center; gap: 16px; }
+        .brand-logo {
+            width: 32px; height: 32px; background: rgba(255,255,255,0.2);
+            border-radius: 4px; display: flex; align-items: center;
+            justify-content: center; font-size: 14px; font-weight: 600;
+        }
+        .brand-name { font-size: 16px; font-weight: 600; }
+        .brand-sub {
+            font-size: 13px; color: rgba(255,255,255,0.85);
+            padding-left: 12px; border-left: 1px solid rgba(255,255,255,0.3);
+        }
+        .top-nav-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+        .back-shop-btn {
+            background: transparent; border: 1px solid rgba(255,255,255,0.6);
+            color: #fff; padding: 6px 14px; border-radius: 4px;
+            cursor: pointer; font-size: 13px;
+        }
+        .back-shop-btn:hover { background: rgba(255,255,255,0.1); }
+        .top-nav-icon {
+            cursor: pointer; color: #fff; position: relative;
+            font-size: 18px; padding: 4px 8px;
+        }
+        .top-nav-icon .badge {
+            position: absolute; top: 0; right: 0;
+            background: #ff4d4f; color: #fff; font-size: 11px;
+            min-width: 18px; height: 18px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 5px; line-height: 1;
+        }
+        .account-dropdown {
+            display: flex; align-items: center; gap: 6px;
+            cursor: pointer; padding: 4px 10px; border-radius: 4px;
+            color: #fff; font-size: 13px; position: relative;
+        }
+        .account-dropdown:hover { background: rgba(255,255,255,0.1); }
+        .account-menu {
+            display: none; position: absolute; top: 100%; right: 0;
+            background: #fff; border: 1px solid #f0f0f0;
+            border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            min-width: 140px; z-index: 200; padding: 4px 0;
+            margin-top: 4px;
+        }
+        .account-dropdown:hover .account-menu { display: block; }
+        .account-menu-item {
+            padding: 9px 16px; color: #333; font-size: 13px;
+            cursor: pointer; white-space: nowrap;
+        }
+        .account-menu-item:hover { background: #f5f5f5; color: #2BA471; }
+        .account-menu-divider {
+            height: 1px; background: #f0f0f0; margin: 4px 0;
+        }
+
+        /* ===== 左右分栏 ===== */
+        .layout { display: flex; min-height: calc(100vh - 56px); }
+
+        /* 左侧菜单 */
+        .sidebar {
+            width: 180px; background: #fff;
+            border-right: 1px solid #f0f0f0;
+            flex-shrink: 0; padding: 12px 0;
+        }
+        .menu-item {
+            padding: 10px 24px 10px 48px; color: #666; cursor: pointer;
+            font-size: 13px;
+            border-left: 3px solid transparent;
+            transition: all 0.15s;
+        }
+        .menu-item:hover { background: #f5f5f5; color: #2BA471; }
+        .menu-item.active {
+            color: #2BA471;
+            border-left-color: #2BA471;
+            background: #f0faf5;
+            font-weight: 500;
+        }
+        .menu-group-title {
+            padding: 10px 20px; color: #333;
+            font-size: 15px; font-weight: 600; margin-top: 8px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .menu-group-title:first-of-type { margin-top: 4px; }
+        .menu-group-icon {
+            font-size: 16px; width: 20px; text-align: center;
+        }
+        .menu-item.standalone {
+            padding-left: 24px; font-size: 15px; font-weight: 600;
+            color: #333;
+        }
+
+        /* 右侧 */
+        .main { flex: 1; padding: 18px; overflow-x: auto; }
+
+        /* 页面标题 */
+        .page-title-bar {
+            background: #fff; padding: 16px 20px;
+            border-radius: 4px; margin-bottom: 14px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px;
+        }
+        .page-title { font-size: 18px; font-weight: 600; color: #222; text-align: left; }
+
+        /* 标题副栏：收货单胶囊（与标题同一水平面、垂直居中、整行水平居中） */
+        .title-subbar { display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .order-status-tag {
+            display: inline-block; padding: 3px 12px; border-radius: 11px;
+            font-size: 12px; font-weight: 500; line-height: 1.5;
+        }
+        .order-status-tag.st-draft { background: #f5f5f5; color: #999; }
+        .order-status-tag.st-pending { background: #fff7e6; color: #d46b08; }
+        .order-status-tag.st-confirmed { background: #e6f7ff; color: #1890ff; }
+        .order-status-tag.st-completed { background: #f0faf5; color: #2BA471; }
+        .order-status-tag.st-cancelled { background: #fff1f0; color: #ff4d4f; }
+        .receipt-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 3px 12px; border-radius: 11px; cursor: pointer;
+            background: #e6f7ff; color: #1890ff; font-size: 12px; font-weight: 500;
+            text-decoration: none; transition: all 0.15s;
+        }
+        .receipt-pill:hover { background: #bae0ff; }
+        .receipt-pill .pill-count {
+            background: #1890ff; color: #fff; border-radius: 9px;
+            padding: 0 7px; min-width: 18px; height: 18px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 11px; line-height: 1;
+        }
+
+        /* 面包屑导航 */
+        .breadcrumb-bar {
+            font-size: 13px; color: #999; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 6px;
+            padding: 0 4px;
+        }
+        .breadcrumb-bar a {
+            color: #2BA471; text-decoration: none; cursor: pointer;
+        }
+        .breadcrumb-bar a:hover { text-decoration: underline; }
+        .breadcrumb-bar .sep { color: #d9d9d9; }
+        .breadcrumb-bar .current { color: #333; }
+
+        /* 卡片 */
+        .card {
+            background: #fff; border-radius: 4px;
+            padding: 20px 24px; margin-bottom: 14px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+
+        /* 操作栏 + 步骤条 */
+        .action-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding-bottom: 16px; margin-bottom: 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .action-left { display: flex; gap: 8px; }
+        .btn {
+            padding: 7px 18px; border: none; border-radius: 4px;
+            cursor: pointer; font-size: 13px; font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: #2BA471; color: #fff; }
+        .btn-primary:hover { background: #259163; }
+        .btn-default {
+            background: #fff; color: #666; border: 1px solid #d9d9d9;
+        }
+        .btn-default:hover { border-color: #2BA471; color: #2BA471; }
+
+        /* 步骤条 */
+        .steps-bar {
+            display: flex; align-items: center; gap: 0;
+        }
+        .step {
+            padding: 6px 18px; background: #f5f5f5;
+            color: #666; font-size: 13px;
+            clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%, 8px 50%);
+            margin-right: -8px;
+        }
+        .step:first-child { clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%); }
+        .step:last-child { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 8px 50%); margin-right: 0; }
+        .step.active {
+            background: #2BA471; color: #fff;
+            padding: 6px 18px;
+        }
+
+        /* 采购单名称输入 */
+        .order-name-bar {
+            display: flex; align-items: center; gap: 12px;
+            padding-bottom: 16px; margin-bottom: 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .order-name-label {
+            font-size: 14px; font-weight: 500; color: #333; white-space: nowrap;
+        }
+        .order-name-input {
+            flex: 1; padding: 8px 12px; border: 1px solid #d9d9d9;
+            border-radius: 4px; font-size: 14px; outline: none;
+            font-family: inherit; transition: border-color 0.2s;
+        }
+        .order-name-input:focus { border-color: #2BA471; }
+        .order-name-input::placeholder { color: #bbb; }
+
+        /* 只读详情样式 */
+        .form-value {
+            flex: 1; padding: 7px 0; font-size: 13px; color: #333;
+            line-height: 1.6;
+        }
+        .form-value.readonly {
+            color: #666;
+        }
+        .form-value.text-muted { color: #ccc; }
+
+        /* 表单 */
+        .form-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 18px 60px; margin-bottom: 16px;
+        }
+        .form-item { display: flex; align-items: center; gap: 12px; }
+        .form-label {
+            min-width: 100px; color: #333; font-size: 13px;
+            text-align: right; flex-shrink: 0;
+        }
+        .form-label .required { color: #ff4d4f; margin-right: 2px; }
+        .form-input,
+        .form-select {
+            flex: 1; padding: 7px 12px; border: 1px solid #d9d9d9;
+            border-radius: 4px; font-size: 13px; outline: none;
+            background: #fff; font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus,
+        .form-select:focus { border-color: #2BA471; }
+        .form-input:read-only { background: #fafafa; color: #666; cursor: not-allowed; }
+        .form-input.invalid { border-color: #ff4d4f; }
+        textarea.form-input {
+            min-height: 80px; resize: vertical; line-height: 1.6;
+        }
+
+        /* Tab */
+        .tab-bar {
+            display: flex; gap: 4px; margin-bottom: 14px;
+        }
+        .tab-btn {
+            padding: 8px 20px; border: 1px solid #d9d9d9;
+            background: #fff; border-radius: 4px;
+            cursor: pointer; font-size: 13px; color: #555;
+        }
+        .tab-btn.active {
+            background: #2BA471; color: #fff; border-color: #2BA471;
+        }
+
+        /* 表格 */
+        .table-scroll {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 2px;
+        }
+        .items-table {
+            width: 100%; min-width: 1180px; border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 13px; margin-bottom: 12px;
+        }
+        .items-table th {
+            background: #fafafa; color: #555; font-weight: 500;
+            padding: 12px; text-align: left;
+            border-bottom: 1px solid #f0f0f0; white-space: nowrap;
+        }
+        .items-table th.col-num { width: 50px; text-align: center; }
+        .items-table th.col-qty,
+        .items-table th.col-price,
+        .items-table th.col-amount { text-align: right; }
+        .items-table th.col-action { width: 80px; text-align: center; }
+        .items-table td {
+            padding: 12px; border-bottom: 1px solid #f5f5f5;
+            vertical-align: middle; overflow-wrap: anywhere; word-break: break-word;
+        }
+        .col-num { width: 50px; text-align: center; color: #999; }
+        .col-qty { width: 80px; text-align: right; }
+        .col-price { width: 100px; text-align: right; }
+        .col-amount { width: 110px; text-align: right; }
+        .col-action { width: 80px; text-align: center; }
+        .items-table .empty-row td {
+            text-align: center; padding: 40px; color: #999;
+        }
+        .product-info { line-height: 1.5; }
+        .product-thumb { width: 40px; height: 40px; border-radius: 4px; background: #f5f5f5; display: inline-flex; align-items: center; justify-content: center; margin-right: 8px; vertical-align: middle; font-size: 18px; }
+        .items-table th:nth-child(1) { width: 50px; }
+        .items-table th:nth-child(2) { width: 88px; }
+        .items-table th:nth-child(3) { width: 138px; }
+        .items-table th:nth-child(4) { width: 72px; }
+        .items-table th:nth-child(5) { width: 120px; }
+        .items-table th:nth-child(6) { width: 128px; }
+        .items-table th:nth-child(7) { width: 64px; }
+        .items-table th:nth-child(8) { width: 56px; }
+        .items-table th:nth-child(9) { width: 96px; }
+        .items-table th:nth-child(10) { width: 62px; }
+        .items-table th:nth-child(11) { width: 108px; }
+        .items-table th:nth-child(12) { width: 96px; }
+        .product-code { color: #999; font-size: 11px; margin-top: 2px; }
+        .stock-days { width: 74px; padding: 6px 8px; border: 1px solid #d9d9d9; border-radius: 4px; font: inherit; text-align: right; }
+        .stock-days:invalid { border-color: #ff4d4f; }
+        .tax-tag {
+            display: inline-block; padding: 2px 8px; background: #f5f5f5;
+            color: #666; border-radius: 3px; font-size: 11px;
+        }
+        .delete-link {
+            color: #ff4d4f; cursor: pointer; font-size: 13px;
+            background: none; border: none; padding: 0;
+        }
+        .delete-link:hover { text-decoration: underline; }
+
+        .item-actions {
+            display: flex; gap: 20px; padding: 12px 0;
+        }
+        .item-action-link {
+            color: #2BA471; cursor: pointer; font-size: 13px;
+        }
+        .item-action-link:hover { text-decoration: underline; }
+
+        .footer-bar {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            margin-top: 20px; padding-top: 16px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .terms-link { font-size: 12px; color: #666; }
+        .terms-link a { color: #2BA471; text-decoration: none; }
+        .totals { text-align: right; line-height: 2; font-size: 13px; }
+        .totals .row { display: flex; justify-content: flex-end; gap: 24px; }
+        .totals .label { color: #666; min-width: 100px; text-align: left; }
+        .totals .value { color: #333; min-width: 110px; text-align: right; }
+        .totals .total-amount { color: #2BA471; font-weight: 600; font-size: 14px; }
+
+        /* 主提交按钮（页面右下角） */
+        .page-submit-area {
+            display: flex; justify-content: flex-end;
+            padding: 16px 20px;
+            background: #fff; border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+
+        /* 其他信息分组 */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .info-group-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 20px 40px; margin-bottom: 16px;
+        }
+        .info-group {
+            border-left: 3px solid #2BA471; padding-left: 12px;
+        }
+        .info-group-title {
+            font-size: 14px; font-weight: 600; color: #222;
+            margin-bottom: 14px;
+        }
+        .info-group .form-item { margin-bottom: 12px; }
+        .radio-group { display: flex; gap: 20px; align-items: center; flex: 1; }
+        .radio-item {
+            display: flex; align-items: center; gap: 6px;
+            cursor: pointer; font-size: 13px;
+        }
+        .radio-circle {
+            width: 16px; height: 16px; border-radius: 50%;
+            border: 1px solid #d9d9d9; background: #fff;
+            position: relative; flex-shrink: 0;
+        }
+        .radio-circle.checked {
+            border-color: #2BA471;
+        }
+        .radio-circle.checked::after {
+            content: ''; position: absolute;
+            top: 3px; left: 3px; width: 8px; height: 8px;
+            border-radius: 50%; background: #2BA471;
+        }
+        .owner-tag {
+            display: inline-block; padding: 2px 8px;
+            background: #9254de; color: #fff; border-radius: 3px;
+            font-size: 11px; margin-right: 8px;
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.45); z-index: 1000;
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: #fff; border-radius: 4px; width: 720px;
+            max-height: 80vh; display: flex; flex-direction: column; overflow: hidden;
+        }
+        .modal-header {
+            padding: 14px 18px; border-bottom: 1px solid #f0f0f0;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .modal-title { font-size: 15px; font-weight: 600; }
+        .modal-close {
+            background: none; border: none; font-size: 18px; cursor: pointer;
+            color: #999; padding: 4px 8px;
+        }
+        .modal-body { padding: 18px; overflow-y: auto; flex: 1; }
+        .modal-footer {
+            padding: 12px 18px; border-top: 1px solid #f0f0f0;
+            display: flex; justify-content: flex-end; gap: 8px;
+        }
+        .search-bar { display: flex; gap: 8px; margin-bottom: 14px; }
+        .search-bar input {
+            flex: 1; padding: 7px 12px; border: 1px solid #d9d9d9;
+            border-radius: 4px; font-size: 13px; outline: none;
+        }
+        .tab-source {
+            display: flex; gap: 0; margin-bottom: 14px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .tab-source-item {
+            padding: 10px 20px; cursor: pointer; font-size: 13px;
+            color: #666; border-bottom: 2px solid transparent;
+        }
+        .tab-source-item.active {
+            color: #2BA471; border-bottom-color: #2BA471;
+        }
+        .product-list { max-height: 360px; overflow-y: auto; }
+        .product-row {
+            display: flex; align-items: center; padding: 10px;
+            border: 1px solid #f0f0f0; border-radius: 4px;
+            margin-bottom: 8px; gap: 12px;
+        }
+        .product-row:hover { background: #fafafa; border-color: #2BA471; cursor: pointer; }
+        .product-row-info { flex: 1; }
+        .product-row-name { font-size: 13px; font-weight: 500; }
+        .product-row-meta { font-size: 11px; color: #999; margin-top: 2px; }
+        .product-row-price { color: #2BA471; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部绿色通栏 -->
+    <div class="top-nav">
+        <div class="top-nav-left">
+            <div class="brand-logo">元</div>
+            <div class="brand-name">元象农产品</div>
+            <div class="brand-sub">买家工作台</div>
+        </div>
+        <div class="top-nav-right">
+            <button class="back-shop-btn" onclick="location.href='采购订单列表.html'">← 返回列表</button>
+            <div class="top-nav-icon" title="通知">
+                🔔
+                <span class="badge">6</span>
+            </div>
+            <div class="account-dropdown">
+                <span>超级管理员</span>
+                <span>▾</span>
+                <div class="account-menu">
+                    <div class="account-menu-item">💼 账户信息</div>
+                    <div class="account-menu-item">📍 收货地址</div>
+                    <div class="account-menu-item">🔒 安全设置</div>
+                    <div class="account-menu-item">🔔 消息中心</div>
+                    <div class="account-menu-divider"></div>
+                    <div class="account-menu-item" style="color:#ff4d4f;">退出登录</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layout">
+
+        <!-- 左侧菜单（组件化） -->
+        <div id="sidebar-container"></div>
+        <script src="sidebar.js"></script>
+
+        <!-- 右侧 -->
+        <main class="main">
+
+            <!-- 面包屑导航 -->
+            <div class="breadcrumb-bar">
+                <a onclick="location.href='采购订单列表.html'">采购订单</a>
+                <span class="sep">/</span>
+                <span class="current">查看采购订单</span>
+            </div>
+
+            <!-- 页面标题 -->
+            <div class="page-title-bar">
+                <div class="page-title">查看采购订单</div>
+                <div class="title-subbar">
+                    <a class="receipt-pill" id="receiptPill" onclick="goReceiptList()">
+                        <span class="pill-text">收货单</span>
+                        <span class="pill-count" id="receiptCount">× 0</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 主表单卡片 -->
+            <div class="card">
+
+                <!-- 操作栏 + 步骤条 -->
+                <div class="action-bar">
+                    <div class="action-left">
+                        <button class="btn btn-default" onclick="location.href='采购订单列表.html'">← 返回列表</button>
+                    </div>
+                    <div class="steps-bar">
+                        <div class="step" id="step-0">创建订单</div>
+                        <div class="step" id="step-1">发起采购</div>
+                        <div class="step" id="step-2">平台确认</div>
+                        <div class="step" id="step-3">收货完成</div>
+                    </div>
+                </div>
+
+                <!-- 采购单名称 -->
+                <div class="order-name-bar">
+                    <span class="order-name-label">采购单名称：</span>
+                    <span class="form-value" style="font-size:14px; font-weight:500;">2026年8月办公物资采购</span>
+                </div>
+
+                <!-- 公共表单（只读展示） -->
+                <div class="form-grid">
+                    <div class="form-item">
+                        <label class="form-label">订单日期</label>
+                        <span class="form-value readonly">2026年08月04日 09时19分</span>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">联系人</label>
+                        <span class="form-value readonly">侯振鲁</span>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">收货人</label>
+                        <span class="form-value readonly">侯振鲁</span>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">联系人电话</label>
+                        <span class="form-value readonly">17505308090</span>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">收货人电话</label>
+                        <span class="form-value readonly">17505308090</span>
+                    </div>
+
+                    <div class="form-item">
+                        <label class="form-label">收货地址</label>
+                        <span class="form-value readonly">山东省济南市历下区经十路9999号</span>
+                    </div>
+                    <div class="form-item" style="grid-column: span 2;">
+                        <label class="form-label">备注说明</label>
+                        <span class="form-value readonly">请按期交货，包装需符合运输标准</span>
+                    </div>
+                </div>
+
+                <!-- Tab 切换（仅切换产品明细/其他信息） -->
+                <div class="tab-bar">
+                    <div class="tab-btn active" onclick="switchTab('detail', this)">订单明细</div>
+                    <!-- <div class="tab-btn" onclick="switchTab('other', this)">其他信息</div> -->
+                </div>
+
+                <!-- 订单明细（仅含产品表格+操作+底部） -->
+                <div class="tab-content active" id="tab-detail">
+
+                    <!-- 商品表格 -->
+                    <div class="table-scroll">
+                    <table class="items-table" id="itemsTable">
+                        <thead>
+                            <tr>
+                                <th class="col-num">序号</th>
+                                <th>物料编码</th>
+                                <th>产品名称</th>
+                                <th>产品图片</th>
+                                <th>规格</th>
+                                <th>品牌</th>
+                                <th class="col-qty">数量</th>
+                                <th>单位</th>
+                                <th class="col-price">单价</th>
+                                <th>税率</th>
+                                <th class="col-amount">含税金额</th>
+                                <th>备货期（天）</th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsTbody">
+                            <tr data-row-id="1">
+                                <td class="col-num">1</td>
+                                <td>00000805</td>
+                                <td>
+                                    <div class="product-info">手动液压搬运车<div class="product-code">SFH1016-115...</div></div>
+                                </td>
+                                <td><span class="product-thumb">📦</span></td>
+                                <td>SFH1016-115...</td>
+                                <td>NOBLELIFT/诺力</td>
+                                <td class="col-qty">5</td>
+                                <td>辆</td>
+                                <td class="col-price">4,717.98</td>
+                                <td><span class="tax-tag">13%</span></td>
+                                <td class="col-amount">¥ 4,717.98</td>
+                                <td><input class="stock-days" type="number" min="7" value="7" onchange="enforceStockDays(this)"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </div>
+
+                    <div class="footer-bar">
+                        <div class="terms-link">条款和条件: <a href="http://cs2.haifuyun.cn/terms">http://cs2.haifuyun.cn/terms</a></div>
+                        <div class="totals">
+                            <div class="row"><span class="label">未税金额:</span><span class="value">¥ 4,175.20</span></div>
+                            <div class="row"><span class="label">增值税13%:</span><span class="value">¥ 542.78</span></div>
+                            <div class="row"><span class="label">总计:</span><span class="value total-amount">¥ 4,717.98</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 其他信息 -->
+                <div class="tab-content" id="tab-other">
+                    <div class="info-group-grid">
+                        <div class="info-group">
+                            <div class="info-group-title">销售</div>
+                            <div class="form-item">
+                                <label class="form-label">销售人员</label>
+                                <div class="form-value readonly">
+                                    <span class="owner-tag">侯</span>侯振鲁
+                                </div>
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label">销售团队</label>
+                                <span class="form-value readonly">销售</span>
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label">线上签署</label>
+                                <span class="form-value readonly">是</span>
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label">在线支付</label>
+                                <span class="form-value readonly">否</span>
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label">客户参考号</label>
+                                <span class="form-value readonly">—</span>
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label">标签</label>
+                                <span class="form-value readonly">—</span>
+                            </div>
+                        </div>
+
+                        <div class="info-group">
+                            <div class="info-group-title">开票</div>
+                            <div class="form-item">
+                                <label class="form-label">财政状况</label>
+                                <span class="form-value readonly">—</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 订单日期自动填充（详情页为只读展示，无需自动填充）
+        // 菜单跳转
+        function goNew() { location.href = '新建采购订单.html'; }
+        function enforceStockDays(input) {
+            var minimum = Number(input.min) || 0;
+            if (Number(input.value) < minimum) {
+                input.value = minimum;
+                alert('备货期不可少于产品库默认备货期 ' + minimum + ' 天');
+            }
+        }
+
+        // 根据URL参数动态设置步骤条状态
+        // 状态映射: draft=创建订单, pending=发起采购, confirmed=平台确认, completed=已完成, cancelled=已取消
+        function initSteps() {
+            // 兼容 file:// 协议的 URL 参数解析
+            var search = window.location.search || '';
+            // 同时兼容 hash 中的参数（file:// 可能用 hash）
+            var hash = window.location.hash || '';
+            if (hash.indexOf('?') >= 0) {
+                search = hash.substring(hash.indexOf('?'));
+            }
+            if (search.charAt(0) === '?') search = search.substring(1);
+            var params = {};
+            search.split('&').forEach(function(pair) {
+                if (!pair) return;
+                var parts = pair.split('=');
+                params[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1] || '');
+            });
+            var status = params['status'] || 'pending';
+
+            var step0 = document.getElementById('step-0');
+            var step1 = document.getElementById('step-1');
+            var step2 = document.getElementById('step-2');
+            var step3 = document.getElementById('step-3');
+            if (!step0) return; // DOM 未就绪
+
+            function setDone(el) {
+                el.style.backgroundColor = '#e8e8e8';
+                el.style.color = '#999';
+            }
+            function setActive(el) {
+                el.style.backgroundColor = '#2BA471';
+                el.style.color = '#fff';
+            }
+
+            if (status === 'draft') {
+                setActive(step0); setDone(step1); setDone(step2); setDone(step3);
+            } else if (status === 'pending') {
+                setDone(step0); setActive(step1); setDone(step2); setDone(step3);
+            } else if (status === 'confirmed' || status === 'partial') {
+                setDone(step0); setDone(step1); setActive(step2); setDone(step3);
+            } else if (status === 'completed') {
+                setDone(step0); setDone(step1); setDone(step2); setActive(step3);
+            } else if (status === 'cancelled') {
+                // 已取消：不再进入收货流程，移除最后的“收货完成”步骤
+                setDone(step0); setDone(step1);
+                step2.textContent = '已取消';
+                setActive(step2);
+                step3.style.display = 'none';
+            } else {
+                setDone(step0); setActive(step1); setDone(step2); setDone(step3);
+            }
+        }
+        // 直接执行（script 在 DOM 之后，无需等待 DOMContentLoaded）
+        initSteps();
+
+        // 订单状态标签 + 收货单胶囊（演示数据）
+        // 与"收货单列表.html"同源：按当前订单状态反查采购订单号，取该订单下真实送货单条数
+        (function() {
+            // 各采购订单下的送货单（与 收货单列表.html 的 RECEIPTS 保持一致）
+            var RECEIPTS_BY_ORDER = {
+                "PO20260802003": 4,  // 待收货：DS00082/DS00083/DS00084/SH20260802001
+                "PO20260730004": 2,  // 部分收货：SH20260730001/SH20260730002
+                "PO20260728005": 2   // 已完成：DS00085/DS00086
+            };
+            // status -> 采购订单号（与 goReceiptList 映射一致）
+            var statusToOrder = {
+                confirmed: "PO20260802003",
+                partial:   "PO20260730004",
+                completed: "PO20260728005"
+            };
+            var statusMap = {
+                draft:     { text: '创建订单', cls: 'st-draft' },
+                pending:   { text: '发起采购', cls: 'st-pending' },
+                confirmed: { text: '平台确认', cls: 'st-confirmed' },
+                partial:   { text: '平台确认', cls: 'st-confirmed' },
+                completed: { text: '已完成',   cls: 'st-completed' },
+                cancelled: { text: '已取消',   cls: 'st-cancelled' }
+            };
+            var st = (window.location.search.match(/[?&]status=([^&]*)/) || [,'pending'])[1] || 'pending';
+            var info = statusMap[st] || statusMap.pending;
+            // 收货单数量：有对应订单则取真实条数，否则 0
+            var receiptCount = statusToOrder[st] ? (RECEIPTS_BY_ORDER[statusToOrder[st]] || 0) : 0;
+            var cnt = document.getElementById('receiptCount');
+            if (cnt) cnt.textContent = '× ' + receiptCount;
+            var pill = document.getElementById('receiptPill');
+            if (pill) pill.style.display = receiptCount > 0 ? 'inline-flex' : 'none';
+        })();
+
+        function goReceiptList() {
+            var st = (window.location.search.match(/[?&]status=([^&]*)/) || [,'pending'])[1] || 'pending';
+            // 由当前订单状态推导对应采购订单号（演示数据映射），便于联动收货单列表
+            var orderNo = 'PO20260802003';
+            if (st === 'partial') orderNo = 'PO20260730004';
+            else if (st === 'completed') orderNo = 'PO20260728005';
+            location.href = '收货单列表.html?order=' + orderNo;
+        }
+
+        // Tab 切换
+        function switchTab(tab, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+        }
+
+        // 提交订单
+        function submitOrder() {
+            const orderName = document.getElementById('orderName').value.trim();
+            if (!orderName) {
+                alert('请输入采购单名称');
+                document.getElementById('orderName').focus();
+                return;
+            }
+            if (!confirm('确认提交采购订单？')) return;
+            document.getElementById('step-0').classList.remove('active');
+            document.getElementById('step-0').style.background = '#e8e8e8';
+            document.getElementById('step-0').style.color = '#999';
+            document.getElementById('step-1').classList.add('active');
+            document.getElementById('step-2').classList.add('active');
+            document.getElementById('step-3').classList.add('active');
+            alert('采购订单已提交!\n当前步骤: 创建订单 → 发起采购');
+            setTimeout(function() {
+                location.href = '采购订单列表.html';
+            }, 1500);
+        }
+
+    </script>
+</body>
+</html>

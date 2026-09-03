@@ -1,0 +1,75 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>采购订单流程图（当前评审版）</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:20px;background:#f8f9fa;color:#333;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",Arial,sans-serif}.container{max-width:1800px;margin:auto;padding:36px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.08)}h1{text-align:center;margin:0 0 6px;font-size:24px}.version-tag{text-align:center;font-size:13px;color:#888;margin-bottom:22px}.legend{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:28px;font-size:14px}.legend-item{display:flex;align-items:center;gap:7px}.legend-dot{width:14px;height:14px;border-radius:3px}.section-title{font-size:18px;font-weight:700;margin:30px 0 16px;padding-left:12px;border-left:4px solid #2BA471}.flow-layout{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:22px;align-items:start}.diagram-box{padding:18px;background:#fafafa;border:1px solid #eee;border-radius:8px;overflow:auto}.mermaid{display:flex;justify-content:center}.info-note{margin-bottom:16px;padding:11px 16px;border-left:4px solid #2BA471;border-radius:0 4px 4px 0;background:#f0faf5;color:#555;font-size:13px;line-height:1.7}.owing-card{overflow:hidden;border:2px solid #ff9800;border-radius:8px;background:#fff}.card-header{padding:12px 16px;text-align:center;background:#fff3e0;color:#e65100;font-size:15px;font-weight:700}.owing-table{width:100%;border-collapse:collapse;font-size:12px}.owing-table th,.owing-table td{padding:9px 10px;text-align:left;vertical-align:top;border-bottom:1px solid #eee;line-height:1.55}.owing-table th{background:#fafafa;color:#555}.tag{display:inline-block;padding:2px 7px;border-radius:3px;font-weight:600}.tag.a{background:#e8f5e9;color:#2e7d32}.tag.b{background:#fce4ec;color:#c62828}.owing-chain{padding:12px 14px;background:#fafafa}.chain-title{margin-bottom:8px;font-size:13px;font-weight:700}.chain-line{display:flex;align-items:center;gap:5px;flex-wrap:wrap}.chain-node{padding:4px 8px;border:1px dashed #ff9800;border-radius:4px;background:#fff3e0;color:#e65100;font-size:11px;font-weight:600}.chain-arrow{color:#aaa}.mapping{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:22px;background:#fafafa;border:1px solid #eee;border-radius:8px}.doc{min-width:170px;padding:14px 12px;text-align:center;border-radius:7px;font-weight:700}.doc small{display:block;margin-top:5px;color:#666;font-weight:400}.doc.client{background:#fce4ec;border:1px solid #c62828}.doc.platform{background:#e3f2fd;border:1px solid #1565c0}.doc.supplier{background:#e8f5e9;border:1px solid #2e7d32}.map-arrow{color:#888;font-size:22px;font-weight:700}.rule-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}.rule{padding:14px;border:1px solid #e4e4e4;border-radius:7px}.rule strong{display:block;margin-bottom:6px;color:#2BA471;font-size:14px}.rule p{margin:0;color:#666;font-size:12px;line-height:1.65}.review-box{padding:18px 22px;border-radius:8px;background:#f0faf5;color:#555;font-size:13px;line-height:1.9}.review-box ul{margin:0;padding-left:20px}.download-btn{display:block;margin:28px auto 0;padding:11px 24px;border:0;border-radius:4px;background:#1565c0;color:#fff;font-size:15px;cursor:pointer}@media(max-width:1100px){.flow-layout{grid-template-columns:1fr}.rule-grid{grid-template-columns:repeat(2,1fr)}}
+</style></head><body><div class="container" id="capture-container">
+<h1>采购订单与发货履约交互流程</h1><div class="version-tag">当前评审版 · 三端主流程 / 双欠单规则 / 多供应商单据关系</div>
+<div class="legend"><div class="legend-item"><span class="legend-dot" style="background:#fce4ec;border:2px solid #c62828"></span>客户端</div><div class="legend-item"><span class="legend-dot" style="background:#e3f2fd;border:2px solid #1565c0"></span>平台端</div><div class="legend-item"><span class="legend-dot" style="background:#e8f5e9;border:2px solid #2e7d32"></span>供应商端</div><div class="legend-item"><span class="legend-dot" style="background:#fff3e0;border:2px solid #ff9800"></span>欠单</div></div>
+<div class="section-title">一、三端采购履约主流程</div><div class="info-note"><strong>阅读口径：</strong>主图中的“供应商端”代表拆单后的任一供应商。多个供应商独立确认、发货和收货，不互相阻塞；平台与客户端按全部子单结果聚合整体状态。</div>
+<div class="flow-layout"><div class="diagram-box"><div class="mermaid" id="main-flow">
+sequenceDiagram
+ participant 客户端
+ participant 平台端
+ participant 供应商端
+ rect rgb(252, 228, 236)
+ Note over 客户端,平台端: 阶段一 · 客户发起采购
+ 客户端->>客户端: 01 新建并提交采购订单
+ Note right of 客户端: 登录人姓名、电话自动带出<br/>选择收货人后联动电话与地址
+ 客户端->>平台端: 02 生成平台销售订单
+ Note right of 平台端: 客户采购单(1) → 平台销售单(1)
+ end
+ rect rgb(227, 242, 253)
+ Note over 平台端: 阶段二 · 销售确认与待采审核
+ 平台端->>平台端: 03 销售人员确认销售订单
+ 平台端->>平台端: 04 自动生成待采订单
+ 平台端->>平台端: 05 采购人员逐明细选择供应商
+ 平台端->>平台端: 06 提交经理审核
+ alt 审核驳回
+  平台端-->>平台端: 填写原因并退回采购人员修改
+ else 审核通过
+  平台端->>平台端: 07 按供应商自动拆分采购订单
+  Note right of 平台端: 待采单(1) → 平台采购单(N)<br/>每张采购单仅对应一个供应商
+ end
+ end
+ rect rgb(232, 245, 233)
+ Note over 平台端,供应商端: 阶段三 · 供应商独立接单与发货
+ 平台端->>供应商端: 08 推送各供应商销售订单
+ 供应商端->>供应商端: 09 确认销售订单
+ 供应商端->>供应商端: 10 创建送货单并发货
+ alt 发货数量小于订单数量
+  供应商端->>供应商端: 自动生成供应商欠单
+  Note right of 供应商端: 欠单A = 订单数量 - 发货数量
+ else 发货数量等于订单数量
+  供应商端->>平台端: 正常同步发货结果
+ end
+ 供应商端-->>平台端: 联动采购、交货及出入库状态
+ 平台端-->>客户端: 按送货单自动生成客户收货单
+ end
+ rect rgb(255, 243, 224)
+ Note over 客户端,供应商端: 阶段四 · 客户逐单、逐产品验收
+ 客户端->>客户端: 11 填写实际收货数量
+ Note right of 客户端: 默认等于发货数量，可修改<br/>0 ≤ 实收数量 ≤ 发货数量
+ alt 所有产品实收数量等于发货数量
+  客户端->>客户端: 12 直接确认收货完成
+ else 存在产品实收数量小于发货数量
+  客户端->>客户端: 13 询问是否创建客户验收欠单
+  alt 客户选择不创建
+   客户端->>客户端: 确认收货完成，不再补发
+  else 客户选择创建
+   客户端->>供应商端: 生成欠单送货任务及欠单收货单
+   Note over 客户端,供应商端: 欠单B = 发货数量 - 实际收货数量<br/>仅包含少收的产品明细
+   供应商端->>客户端: 14 补发，客户确认欠单收货
+  end
+ end
+ 客户端-->>平台端: 回传收货结果
+ 平台端-->>供应商端: 联动送货单与子订单状态
+ Note over 客户端,供应商端: 所有供应商子单分别完成后，聚合为整体履约完成
+ end
+</div></div>
+<aside class="owing-card"><div class="card-header">双欠单规则对照</div><table class="owing-table"><thead><tr><th>维度</th><th>欠单 A：供应商少发</th><th>欠单 B：客户验收少收</th></tr></thead><tbody>
+<tr><td><strong>业务原因</strong></td><td>供应商本次未足量发货</td><td>客户实际收到少于本次发货</td></tr><tr><td><strong>触发条件</strong></td><td>发货数量＜订单数量</td><td>实收数量＜发货数量</td></tr><tr><td><strong>判定粒度</strong></td><td>逐产品明细</td><td>逐产品明细</td></tr><tr><td><strong>创建方式</strong></td><td><span class="tag a">系统自动</span></td><td><span class="tag b">客户选择</span></td></tr><tr><td><strong>欠单数量</strong></td><td>订单数量－发货数量</td><td>发货数量－实际收货数量</td></tr><tr><td><strong>不创建结果</strong></td><td>不适用，满足条件即创建</td><td>确认本次收货完成，不再补发</td></tr><tr><td><strong>后续动作</strong></td><td colspan="2">供应商补发 → 欠单收货单 → 客户确认欠单收货</td></tr></tbody></table>
+<div class="owing-chain"><div class="chain-title">欠单履约闭环</div><div class="chain-line"><span class="chain-node">待发货</span><span class="chain-arrow">→</span><span class="chain-node">供应商补发</span><span class="chain-arrow">→</span><span class="chain-node">客户确认欠单收货</span><span class="chain-arrow">→</span><span class="chain-node">已完成</span></div></div></aside></div>
+<div class="section-title">二、单据映射与多供应商规则</div><div class="mapping"><div class="doc client">客户采购订单<small>1 张</small></div><span class="map-arrow">→</span><div class="doc platform">平台销售订单<small>1 张</small></div><span class="map-arrow">→</span><div class="doc platform">待采订单<small>1 张</small></div><span class="map-arrow">→</span><div class="doc platform">平台采购订单<small>N 张 · 按供应商拆分</small></div><span class="map-arrow">→</span><div class="doc supplier">供应商销售订单<small>N 张 · 与采购单一一对应</small></div></div>
+<div class="rule-grid"><div class="rule"><strong>供应商一采购单</strong><p>同一待采订单内，同一供应商的产品归入对应平台采购订单。</p></div><div class="rule"><strong>履约互不阻塞</strong><p>各供应商独立确认、发货、补发；某一供应商欠单不阻塞其他供应商。</p></div><div class="rule"><strong>收货逐单确认</strong><p>客户端按供应商送货单分别验收，并逐产品录入实际收货数量。</p></div><div class="rule"><strong>整体状态聚合</strong><p>平台和客户端依据全部子单结果显示部分发货、全部发货及履约完成。</p></div></div>
+<div class="section-title">三、评审口径</div><div class="review-box"><ul><li>销售人员先确认销售订单，系统再生成待采订单；采购人员选定供应商后提交经理审核。</li><li>经理审核为互斥分支：驳回则填写原因并退回修改，通过才允许系统拆单。</li><li>欠单 A 与欠单 B 同时保留，二者的原因、触发时点、创建方式和数量口径不同。</li></ul></div></div>
+<button class="download-btn" onclick="downloadImage()">下载 PNG 图片</button><script>mermaid.initialize({startOnLoad:true,theme:'default',sequence:{useMaxWidth:true,wrap:true},themeVariables:{fontFamily:'PingFang SC, Microsoft YaHei, sans-serif',fontSize:'13px',primaryTextColor:'#333'}});function downloadImage(){var c=document.getElementById('capture-container'),b=document.querySelector('.download-btn');b.style.display='none';htmlToImage.toPng(c,{quality:.95,backgroundColor:'#fff',pixelRatio:2}).then(function(d){var l=document.createElement('a');l.download='采购订单流程图-当前评审版.png';l.href=d;l.click()}).catch(function(e){console.error(e);alert('截图失败')}).finally(function(){b.style.display='block'})}</script></body></html>

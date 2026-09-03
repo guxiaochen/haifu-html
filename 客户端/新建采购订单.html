@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新建采购订单 - 元象农产品买家工作台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            font-size: 14px;
+            min-height: 100vh;
+        }
+
+        /* ===== 顶部绿色通栏 ===== */
+        .top-nav {
+            height: 56px; background: #2BA471; color: #fff;
+            display: flex; align-items: center; padding: 0 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .top-nav-left { display: flex; align-items: center; gap: 16px; }
+        .brand-logo {
+            width: 32px; height: 32px; background: rgba(255,255,255,0.2);
+            border-radius: 4px; display: flex; align-items: center;
+            justify-content: center; font-size: 14px; font-weight: 600;
+        }
+        .brand-name { font-size: 16px; font-weight: 600; }
+        .brand-sub {
+            font-size: 13px; color: rgba(255,255,255,0.85);
+            padding-left: 12px; border-left: 1px solid rgba(255,255,255,0.3);
+        }
+        .top-nav-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+        .back-shop-btn {
+            background: transparent; border: 1px solid rgba(255,255,255,0.6);
+            color: #fff; padding: 6px 14px; border-radius: 4px;
+            cursor: pointer; font-size: 13px;
+        }
+        .back-shop-btn:hover { background: rgba(255,255,255,0.1); }
+        .top-nav-icon {
+            cursor: pointer; color: #fff; position: relative;
+            font-size: 18px; padding: 4px 8px;
+        }
+        .top-nav-icon .badge {
+            position: absolute; top: 0; right: 0;
+            background: #ff4d4f; color: #fff; font-size: 11px;
+            min-width: 18px; height: 18px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 5px; line-height: 1;
+        }
+        .account-dropdown {
+            display: flex; align-items: center; gap: 6px;
+            cursor: pointer; padding: 4px 10px; border-radius: 4px;
+            color: #fff; font-size: 13px; position: relative;
+        }
+        .account-dropdown:hover { background: rgba(255,255,255,0.1); }
+        .account-menu {
+            display: none; position: absolute; top: 100%; right: 0;
+            background: #fff; border: 1px solid #f0f0f0;
+            border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            min-width: 140px; z-index: 200; padding: 4px 0;
+            margin-top: 4px;
+        }
+        .account-dropdown:hover .account-menu { display: block; }
+        .account-menu-item {
+            padding: 9px 16px; color: #333; font-size: 13px;
+            cursor: pointer; white-space: nowrap;
+        }
+        .account-menu-item:hover { background: #f5f5f5; color: #2BA471; }
+        .account-menu-divider {
+            height: 1px; background: #f0f0f0; margin: 4px 0;
+        }
+
+        /* ===== 左右分栏 ===== */
+        .layout { display: flex; min-height: calc(100vh - 56px); }
+
+        /* 左侧菜单 */
+        .sidebar {
+            width: 180px; background: #fff;
+            border-right: 1px solid #f0f0f0;
+            flex-shrink: 0; padding: 12px 0;
+        }
+        .menu-item {
+            padding: 10px 24px 10px 48px; color: #666; cursor: pointer;
+            font-size: 13px;
+            border-left: 3px solid transparent;
+            transition: all 0.15s;
+        }
+        .menu-item:hover { background: #f5f5f5; color: #2BA471; }
+        .menu-item.active {
+            color: #2BA471;
+            border-left-color: #2BA471;
+            background: #f0faf5;
+            font-weight: 500;
+        }
+        .menu-group-title {
+            padding: 10px 20px; color: #333;
+            font-size: 15px; font-weight: 600; margin-top: 8px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .menu-group-title:first-of-type { margin-top: 4px; }
+        .menu-group-icon {
+            font-size: 16px; width: 20px; text-align: center;
+        }
+        .menu-item.standalone {
+            padding-left: 24px; font-size: 15px; font-weight: 600;
+            color: #333;
+        }
+
+        /* 右侧 */
+        .main { flex: 1; padding: 18px; overflow-x: auto; }
+
+        /* 页面标题 */
+        .page-title-bar {
+            background: #fff; padding: 16px 20px;
+            border-radius: 4px; margin-bottom: 14px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        .page-title { font-size: 18px; font-weight: 600; color: #222; }
+
+        /* 面包屑导航 */
+        .breadcrumb-bar {
+            font-size: 13px; color: #999; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 6px;
+            padding: 0 4px;
+        }
+        .breadcrumb-bar a {
+            color: #2BA471; text-decoration: none; cursor: pointer;
+        }
+        .breadcrumb-bar a:hover { text-decoration: underline; }
+        .breadcrumb-bar .sep { color: #d9d9d9; }
+        .breadcrumb-bar .current { color: #333; }
+
+        /* 卡片 */
+        .card {
+            background: #fff; border-radius: 4px;
+            padding: 20px 24px; margin-bottom: 14px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+
+        /* 操作栏 + 步骤条 */
+        .action-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding-bottom: 16px; margin-bottom: 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .action-left { display: flex; gap: 8px; }
+        .btn {
+            padding: 7px 18px; border: none; border-radius: 4px;
+            cursor: pointer; font-size: 13px; font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: #2BA471; color: #fff; }
+        .btn-primary:hover { background: #259163; }
+        .btn-default {
+            background: #fff; color: #666; border: 1px solid #d9d9d9;
+        }
+        .btn-default:hover { border-color: #2BA471; color: #2BA471; }
+
+        /* 步骤条 */
+        .steps-bar {
+            display: flex; align-items: center; gap: 0;
+        }
+        .step {
+            padding: 6px 18px; background: #f5f5f5;
+            color: #666; font-size: 13px;
+            clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%, 8px 50%);
+            margin-right: -8px;
+        }
+        .step:first-child { clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%); }
+        .step:last-child { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 8px 50%); margin-right: 0; }
+        .step.active {
+            background: #2BA471; color: #fff;
+            padding: 6px 18px;
+        }
+
+        /* 采购单名称输入 */
+        .order-name-bar {
+            display: flex; align-items: center; gap: 12px;
+            padding-bottom: 16px; margin-bottom: 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .order-name-label {
+            font-size: 14px; font-weight: 500; color: #333; white-space: nowrap;
+        }
+        .order-name-input {
+            flex: 1; padding: 8px 12px; border: 1px solid #d9d9d9;
+            border-radius: 4px; font-size: 14px; outline: none;
+            font-family: inherit; transition: border-color 0.2s;
+        }
+        .order-name-input:focus { border-color: #2BA471; }
+        .order-name-input::placeholder { color: #bbb; }
+
+        /* 表单 */
+        .form-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 18px 60px; margin-bottom: 16px;
+        }
+        .form-item { display: flex; align-items: center; gap: 12px; }
+        .form-label {
+            min-width: 100px; color: #333; font-size: 13px;
+            text-align: right; flex-shrink: 0;
+        }
+        .form-label .required { color: #ff4d4f; margin-right: 2px; }
+        .form-input,
+        .form-select {
+            flex: 1; padding: 7px 12px; border: 1px solid #d9d9d9;
+            border-radius: 4px; font-size: 13px; outline: none;
+            background: #fff; font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus,
+        .form-select:focus { border-color: #2BA471; }
+        .form-input:read-only { background: #fafafa; color: #666; cursor: not-allowed; }
+        .form-input.invalid { border-color: #ff4d4f; }
+        textarea.form-input {
+            min-height: 80px; resize: vertical; line-height: 1.6;
+        }
+
+        /* 下拉+图标组合（用于联系人/收货人） */
+        .select-wrapper {
+            flex: 1; position: relative;
+            display: flex; align-items: center;
+        }
+        .select-wrapper select {
+            flex: 1; padding: 7px 44px 7px 12px;
+            border: 1px solid #d9d9d9; border-radius: 4px;
+            font-size: 13px; outline: none; background: #fff;
+            font-family: inherit;
+            appearance: none; -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat; background-position: right 10px center;
+        }
+        .select-wrapper select:focus { border-color: #2BA471; }
+        .select-trigger-icon {
+            position: absolute; right: 30px; top: 50%;
+            transform: translateY(-50%);
+            color: #2BA471; cursor: pointer; font-size: 18px;
+            padding: 2px 4px; font-weight: 600;
+            line-height: 1; z-index: 2;
+        }
+        .select-trigger-icon:hover { color: #259163; }
+
+        /* Tab */
+        .tab-bar {
+            display: flex; gap: 4px; margin-bottom: 14px;
+        }
+        .tab-btn {
+            padding: 8px 20px; border: 1px solid #d9d9d9;
+            background: #fff; border-radius: 4px;
+            cursor: pointer; font-size: 13px; color: #555;
+        }
+        .tab-btn.active {
+            background: #2BA471; color: #fff; border-color: #2BA471;
+        }
+
+        /* 表格 */
+        .items-table {
+            width: 100%; table-layout: fixed; border-collapse: collapse;
+            font-size: 13px; margin-bottom: 12px;
+        }
+        .items-table th {
+            background: #fafafa; color: #555; font-weight: 500;
+            padding: 10px 8px; text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .items-table th.col-num { width: 50px; text-align: center; }
+        .items-table th.col-qty,
+        .items-table th.col-price,
+        .items-table th.col-amount { text-align: right; }
+        .items-table th.col-action { width: 80px; text-align: center; }
+        .items-table th:nth-child(2) { width: 8%; }
+        .items-table th:nth-child(3) { width: 13%; }
+        .items-table th.col-supplier { width: 18%; }
+        .items-table th:nth-child(6),.items-table th:nth-child(7) { width: 8%; }
+        .items-table td { 
+            padding: 10px 8px; border-bottom: 1px solid #f5f5f5;
+            vertical-align: middle; overflow:hidden;
+        }
+        .col-num { width: 50px; text-align: center; color: #999; }
+        .col-qty { width: 80px; text-align: right; }
+        .col-price { width: 100px; text-align: right; }
+        .col-amount { width: 110px; text-align: right; }
+        .col-action { width: 80px; text-align: center; }
+        .qty-input {
+            width: 70px; height: 30px; border: 1px solid #d9d9d9;
+            border-radius: 4px; padding: 0 8px; font-family: inherit;
+            font-size: 13px; text-align: right; color: #333;
+        }
+        .qty-input:focus { border-color: #2BA471; outline: none; }
+        .items-table .empty-row td {
+            text-align: center; padding: 40px; color: #999;
+        }
+        .product-info,.supplier-cell { line-height:1.5; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .product-info { width:100%; }
+        .supplier-cell { width:100%; }
+        .product-image-cell { width: 56px; text-align: center; }
+        .product-thumb { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; background: #f5f7fa; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 20px; }
+        .product-code { color: #999; font-size: 11px; margin-top: 2px; }
+        .tax-tag {
+            display: inline-block; padding: 2px 8px; background: #f5f5f5;
+            color: #666; border-radius: 3px; font-size: 11px;
+        }
+        .delete-link {
+            color: #ff4d4f; cursor: pointer; font-size: 13px;
+            background: none; border: none; padding: 0;
+        }
+        .delete-link:hover { text-decoration: underline; }
+
+        .item-actions {
+            display: flex; gap: 20px; padding: 12px 0;
+        }
+        .item-action-link {
+            color: #2BA471; cursor: pointer; font-size: 13px;
+        }
+        .item-action-link:hover { text-decoration: underline; }
+
+        .footer-bar {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            margin-top: 20px; padding-top: 16px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .terms-link { font-size: 12px; color: #666; }
+        .terms-link a { color: #2BA471; text-decoration: none; }
+        .totals { text-align: right; line-height: 2; font-size: 13px; }
+        .totals .row { display: flex; justify-content: flex-end; gap: 24px; }
+        .totals .label { color: #666; min-width: 100px; text-align: left; }
+        .totals .value { color: #333; min-width: 110px; text-align: right; }
+        .totals .total-amount { color: #2BA471; font-weight: 600; font-size: 14px; }
+
+        /* 主提交按钮（页面右下角） */
+        .page-submit-area {
+            display: flex; justify-content: flex-end;
+            padding: 16px 20px;
+            background: #fff; border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+
+        /* 其他信息分组 */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .info-group-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 20px 40px; margin-bottom: 16px;
+        }
+        .info-group {
+            border-left: 3px solid #2BA471; padding-left: 12px;
+        }
+        .info-group-title {
+            font-size: 14px; font-weight: 600; color: #222;
+            margin-bottom: 14px;
+        }
+        .info-group .form-item { margin-bottom: 12px; }
+        .radio-group { display: flex; gap: 20px; align-items: center; flex: 1; }
+        .radio-item {
+            display: flex; align-items: center; gap: 6px;
+            cursor: pointer; font-size: 13px;
+        }
+        .radio-circle {
+            width: 16px; height: 16px; border-radius: 50%;
+            border: 1px solid #d9d9d9; background: #fff;
+            position: relative; flex-shrink: 0;
+        }
+        .radio-circle.checked {
+            border-color: #2BA471;
+        }
+        .radio-circle.checked::after {
+            content: ''; position: absolute;
+            top: 3px; left: 3px; width: 8px; height: 8px;
+            border-radius: 50%; background: #2BA471;
+        }
+        .owner-tag {
+            display: inline-block; padding: 2px 8px;
+            background: #9254de; color: #fff; border-radius: 3px;
+            font-size: 11px; margin-right: 8px;
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.45); z-index: 1000;
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: #fff; border-radius: 4px; width: 720px;
+            max-height: 80vh; display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        /* 联系人管理弹窗（参考截图样式） */
+        .modal-contact {
+            width: 80vw; max-width: 1100px; height: 70vh;
+            display: flex; flex-direction: column;
+        }
+        .modal-contact .modal-body {
+            display: flex; flex-direction: column; flex: 1;
+            padding: 0;
+        }
+        .modal-filter-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 18px; gap: 12px;
+        }
+        .modal-filter-item {
+            display: flex; align-items: center; gap: 8px; flex: 1;
+        }
+        .modal-filter-label {
+            font-size: 13px; color: #666;
+        }
+        .modal-filter-select {
+            padding: 6px 10px; border: 1px solid #d9d9d9;
+            border-radius: 4px; font-size: 13px; background: #fff;
+        }
+        .modal-filter-input {
+            flex: 1; max-width: 360px;
+            padding: 6px 10px; border: 1px solid #d9d9d9;
+            border-radius: 4px; font-size: 13px; outline: none;
+        }
+        .modal-pager {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .modal-pager-info {
+            font-size: 12px; color: #666;
+        }
+        .modal-page-btn {
+            width: 28px; height: 28px; border: 1px solid #d9d9d9;
+            background: #fff; border-radius: 4px;
+            cursor: pointer; font-size: 14px; color: #666;
+        }
+        .modal-page-btn:hover { border-color: #2BA471; color: #2BA471; }
+        .contact-table {
+            width: 100%; border-collapse: collapse;
+            font-size: 13px; flex: 1;
+        }
+        .contact-table thead th {
+            background: #fff; color: #555; font-weight: 500;
+            padding: 12px 16px; text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+            border-top: 1px solid #f0f0f0;
+        }
+        .contact-table tbody td {
+            padding: 14px 16px; border-bottom: 1px solid #f5f5f5;
+            color: #333;
+        }
+        .contact-table tbody tr { cursor: pointer; }
+        .contact-table tbody tr:hover td { background: #f5f9f7; }
+        .contact-dot {
+            display: inline-block; width: 8px; height: 8px;
+            border-radius: 50%; background: #2BA471;
+        }
+        .contact-clock {
+            display: inline-block; width: 14px; height: 14px;
+            border: 1.5px solid #999; border-radius: 50%;
+            position: relative;
+        }
+        .contact-clock::before {
+            content: ''; position: absolute;
+            top: 50%; left: 50%; width: 1.5px; height: 5px;
+            background: #999; transform-origin: bottom center;
+            transform: translate(-50%, -100%);
+        }
+        .contact-clock::after {
+            content: ''; position: absolute;
+            top: 50%; left: 50%; width: 5px; height: 1.5px;
+            background: #999; transform-origin: left center;
+            transform: translate(0, -50%);
+        }
+        .modal-footer-left {
+            display: flex; gap: 8px; padding: 12px 18px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        /* 联系人新建表单弹窗 */
+        .modal-contact-form {
+            width: 640px; max-height: 90vh;
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .modal-contact-form .modal-body {
+            padding: 18px 24px;
+        }
+        .contact-form-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 14px 28px;
+        }
+        .contact-form-grid .full-row { grid-column: span 2; }
+        .contact-form-grid .form-item { margin-bottom: 0; gap: 10px; }
+        .contact-form-grid .form-label { min-width: 80px; font-size: 13px; }
+        .contact-form-grid .form-input { padding: 7px 12px; font-size: 13px; }
+        .contact-form-grid textarea.form-input { min-height: 56px; }
+        .modal-header {
+            padding: 14px 18px; border-bottom: 1px solid #f0f0f0;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .modal-title { font-size: 15px; font-weight: 600; }
+        .modal-close {
+            background: none; border: none; font-size: 18px; cursor: pointer;
+            color: #999; padding: 4px 8px;
+        }
+        .modal-body { padding: 18px; overflow-y: auto; flex: 1; }
+        .modal-footer {
+            padding: 12px 18px; border-top: 1px solid #f0f0f0;
+            display: flex; justify-content: flex-end; gap: 8px;
+        }
+        .search-bar { display: flex; gap: 8px; margin-bottom: 14px; }
+        .search-bar input {
+            flex: 1; padding: 7px 12px; border: 1px solid #d9d9d9;
+            border-radius: 4px; font-size: 13px; outline: none;
+        }
+        .tab-source {
+            display: flex; gap: 0; margin-bottom: 14px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .tab-source-item {
+            padding: 10px 20px; cursor: pointer; font-size: 13px;
+            color: #666; border-bottom: 2px solid transparent;
+        }
+        .tab-source-item.active {
+            color: #2BA471; border-bottom-color: #2BA471;
+        }
+        .product-list { max-height: 360px; overflow-y: auto; }
+        .product-row {
+            display: flex; align-items: center; padding: 10px;
+            border: 1px solid #f0f0f0; border-radius: 4px;
+            margin-bottom: 8px; gap: 12px;
+        }
+        .product-row:hover { background: #fafafa; border-color: #2BA471; cursor: pointer; }
+        .product-row-info { flex: 1; }
+        .product-row-name { font-size: 13px; font-weight: 500; }
+        .product-row-meta { font-size: 11px; color: #999; margin-top: 2px; }
+        .product-row-price { color: #2BA471; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部绿色通栏 -->
+    <div class="top-nav">
+        <div class="top-nav-left">
+            <div class="brand-logo">元</div>
+            <div class="brand-name">元象农产品</div>
+            <div class="brand-sub">买家工作台</div>
+        </div>
+        <div class="top-nav-right">
+            <button class="back-shop-btn" onclick="location.href='采购订单列表.html'">← 返回列表</button>
+            <div class="top-nav-icon" title="通知">
+                🔔
+                <span class="badge">6</span>
+            </div>
+            <div class="account-dropdown">
+                <span>超级管理员</span>
+                <span>▾</span>
+                <div class="account-menu">
+                    <div class="account-menu-item">💼 账户信息</div>
+                    <div class="account-menu-item">📍 收货地址</div>
+                    <div class="account-menu-item">🔒 安全设置</div>
+                    <div class="account-menu-item">🔔 消息中心</div>
+                    <div class="account-menu-divider"></div>
+                    <div class="account-menu-item" style="color:#ff4d4f;">退出登录</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layout">
+
+        <!-- 左侧菜单（组件化） -->
+        <div id="sidebar-container"></div>
+        <script src="sidebar.js"></script>
+
+        <!-- 右侧 -->
+        <main class="main">
+
+            <!-- 面包屑导航 -->
+            <div class="breadcrumb-bar">
+                <a onclick="location.href='采购订单列表.html'">采购订单</a>
+                <span class="sep">/</span>
+                <span class="current" id="pageBreadcrumbTitle">新建采购订单</span>
+            </div>
+
+            <!-- 页面标题 -->
+            <div class="page-title-bar">
+                <div class="page-title" id="pageTitle">新建采购订单</div>
+            </div>
+
+            <!-- 主表单卡片 -->
+            <div class="card">
+
+                <!-- 操作栏 + 步骤条 -->
+                <div class="action-bar">
+                    <div class="action-left">
+                        <button class="btn btn-primary" onclick="submitOrder()">提交</button>
+                    </div>
+                    <div class="steps-bar">
+                        <div class="step active" id="step-0">创建订单</div>
+                        <div class="step" id="step-1">发起采购</div>
+                        <div class="step" id="step-2">平台确认</div>
+                        <div class="step" id="step-3">已完成</div>
+                    </div>
+                </div>
+
+                <!-- 采购单名称输入 -->
+                <div class="order-name-bar">
+                    <span class="order-name-label"><span style="color:#ff4d4f;">*</span>采购单名称：</span>
+                    <input class="order-name-input" id="orderName" placeholder="请输入采购单名称或编号，如：2026年8月办公物资采购">
+                </div>
+
+                <!-- 公共表单（始终展示，不随Tab切换） -->
+                <div class="form-grid">
+                    <div class="form-item">
+                        <label class="form-label">公司名称</label>
+                        <input class="form-input" value="aqtest薄眠（山东）数字产业发展有限公司" readonly>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label"><span class="required">*</span>订单日期</label>
+                        <input class="form-input" id="orderDate" readonly>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">联系人</label>
+                        <div class="select-wrapper">
+                            <select id="contactSelect" onchange="onContactChange()" disabled>
+                                <option value="侯振鲁" data-phone="17505308090" selected>侯振鲁</option>
+                                <option value="李钦彤" data-phone="18480941200">李钦彤</option>
+                                <option value="邱艳" data-phone="18765008620">邱艳</option>
+                                <option value="测试01" data-phone="13800000000">测试01</option>
+                            </select>
+                            <span class="select-trigger-icon" title="当前登录联系人" style="display:none">＋</span>
+                            <span class="select-trigger-icon" title="当前登录联系人" style="display:none">✚</span>
+                        </div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">收货人</label>
+                        <div class="select-wrapper">
+                            <select id="receiverSelect" onchange="onReceiverChange()">
+                                <option value="侯振鲁" data-phone="17505308090" data-address="山东省菏泽市历下区元象仓库" selected>侯振鲁</option>
+                                <option value="李钦彤" data-phone="18480941200" data-address="山东省菏泽市牡丹区采购仓库">李钦彤</option>
+                                <option value="邱艳" data-phone="18765008620" data-address="山东省菏泽市高新区物流中心">邱艳</option>
+                                <option value="测试01" data-phone="13800000000" data-address="山东省济南市历下区">测试01</option>
+                            </select>
+                            <span class="select-trigger-icon" title="选择收货人" onclick="openContactModal('receiver')">＋</span>
+                            <span class="select-trigger-icon" title="新建收货人" onclick="openContactForm('receiver')">✚</span>
+                        </div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">联系人电话</label>
+                        <input class="form-input" id="contactPhone" readonly value="17505308090">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">收货人电话</label>
+                        <input class="form-input" id="receiverPhone" readonly value="17505308090">
+                    </div>
+                   
+        
+                    <div class="form-item" style="grid-column:2;">
+                        <label class="form-label"><span class="required">*</span>收货地址</label>
+                        <input class="form-input" id="shipAddress" placeholder="选择收货人后自动带出" readonly>
+                    </div>
+                    <div class="form-item" style="grid-column: span 2;">
+                        <label class="form-label">备注说明</label>
+                        <textarea class="form-input" placeholder="供货地要求、供货能力要求、采购要求说明等"></textarea>
+                    </div>
+                </div>
+
+                <!-- Tab 切换（仅切换产品明细/其他信息） -->
+                <div class="tab-bar">
+                    <div class="tab-btn active" onclick="switchTab('detail', this)">订单明细</div>
+                    <!-- <div class="tab-btn" onclick="switchTab('other', this)">其他信息</div> -->
+                </div>
+
+                <!-- 订单明细（仅含产品表格+操作+底部） -->
+                <div class="tab-content active" id="tab-detail">
+
+                    <!-- 商品表格 -->
+                    <table class="items-table" id="itemsTable">
+                        <thead>
+                            <tr>
+                                <th class="col-num">序号</th>
+                                <th>产品编码</th>
+                                <th>产品名称</th>
+                                <th class="product-image-cell">产品图片</th>
+                                <th class="col-supplier">供应商</th>
+                                <th>规格</th>
+                                <th>品牌</th>
+                                <th class="col-qty">数量</th>
+                                <th>单位</th>
+                                <th class="col-price">单价</th>
+                                <th>税项</th>
+                                <th class="col-amount">含税小计</th>
+                                <th class="col-action">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsTbody">
+                            <tr data-row-id="1" data-price="4717.98" data-tax="13">
+                                <td class="col-num">1</td>
+                                <td>00000805</td>
+                                <td><div class="product-info">手动液压搬运车</div></td>
+                                <td class="product-image-cell"><span class="product-thumb">📦</span></td>
+                                <td class="supplier-cell">aqtest海赋（山东）数字产业发展有限公司LL</td>
+                                <td>SFH1016-115...</td>
+                                <td>NOBLELIFT/诺力</td>
+                                <td class="col-qty"><input class="qty-input" type="number" min="0" step="1" value="1" oninput="recalculate()"></td>
+                                <td>辆</td>
+                                <td class="col-price">4,717.98</td>
+                                <td><span class="tax-tag">13%销项税...</span></td>
+                                <td class="col-amount">¥ 4,717.98</td>
+                                <td class="col-action">
+                                    <button class="delete-link" onclick="deleteRow(this)">删除</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="item-actions">
+                        <a class="item-action-link" onclick="openProductModal()">添加产品</a>
+                    </div>
+
+                    <div class="footer-bar">
+                        <div class="terms-link">条款和条件: <a href="http://cs2.haifuyun.cn/terms">http://cs2.haifuyun.cn/terms</a></div>
+                        <div class="totals">
+                            <div class="row"><span class="label">未税金额:</span><span class="value">¥ 4,175.20</span></div>
+                            <div class="row"><span class="label">增值税13%:</span><span class="value">¥ 542.78</span></div>
+                            <div class="row"><span class="label">总计:</span><span class="value total-amount">¥ 4,717.98</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 其他信息 -->
+                <div class="tab-content" id="tab-other">
+                    <div class="info-group-grid">
+                        <div class="info-group">
+                            <div class="info-group-title">销售</div>
+                            <div class="form-item">
+                                <label class="form-label">销售人员</label>
+                                <div style="flex:1; padding: 7px 0;">
+                                    <span class="owner-tag">侯</span>
+                                    <span style="font-size:13px;">侯振鲁</span>
+                                </div>
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label">销售团队</label>
+                                <input class="form-input" value="销售">
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label"><span class="required">*</span>线上签署</label>
+                                <div class="radio-group">
+                                    <div class="radio-item" onclick="setRadio(this)">
+                                        <div class="radio-circle checked"></div><span>是</span>
+                                    </div>
+                                    <div class="radio-item" onclick="setRadio(this)">
+                                        <div class="radio-circle"></div><span>否</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label"><span class="required">*</span>在线支付</label>
+                                <div class="radio-group">
+                                    <div class="radio-item" onclick="setRadio(this)">
+                                        <div class="radio-circle"></div><span>是</span>
+                                    </div>
+                                    <div class="radio-item" onclick="setRadio(this)">
+                                        <div class="radio-circle checked"></div><span>否</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label">客户参考号</label>
+                                <input class="form-input">
+                            </div>
+                            <div class="form-item">
+                                <label class="form-label">标签</label>
+                                <input class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="info-group">
+                            <div class="info-group-title">开票</div>
+                            <div class="form-item">
+                                <label class="form-label">财政状况</label>
+                                <input class="form-input">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- 联系人维护弹窗 -->
+    <div class="modal-overlay" id="contactModal">
+        <div class="modal modal-contact">
+            <div class="modal-header">
+                <div class="modal-title" id="contactModalTitle">联系人管理</div>
+                <button class="modal-close" onclick="closeContactModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-filter-row">
+                    <div class="modal-filter-item">
+                        <span class="modal-filter-label">搜索</span>
+                        <select class="modal-filter-select">
+                            <option>全部字段</option>
+                            <option>名称</option>
+                            <option>电话</option>
+                            <option>电子邮件</option>
+                        </select>
+                        <input class="modal-filter-input" placeholder="搜索...">
+                    </div>
+                    <div class="modal-pager">
+                        <span class="modal-pager-info">1 - 4 / 4</span>
+                        <button class="modal-page-btn">‹</button>
+                        <button class="modal-page-btn">›</button>
+                    </div>
+                </div>
+                <table class="contact-table">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>电话</th>
+                            <th>电子邮件</th>
+                            <th>销售员</th>
+                            <th>活动</th>
+                            <th>城市</th>
+                            <th>国家/地区</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contactBody">
+                        <tr data-name="侯振鲁" data-phone="17505308090" onclick="selectContact(this)">
+                            <td>侯振鲁</td>
+                            <td>17505308090</td>
+                            <td>mayingying45@1...</td>
+                            <td style="text-align:center;">
+                                <span class="contact-dot"></span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span class="contact-clock"></span>
+                            </td>
+                            <td>菏泽</td>
+                            <td>中国</td>
+                        </tr>
+                        <tr data-name="李钦彤" data-phone="18480941200" onclick="selectContact(this)">
+                            <td>李钦彤</td>
+                            <td>18480941200</td>
+                            <td></td>
+                            <td></td>
+                            <td style="text-align:center;">
+                                <span class="contact-clock"></span>
+                            </td>
+                            <td>菏泽</td>
+                            <td>中国</td>
+                        </tr>
+                        <tr data-name="测试01" data-phone="13800000000" onclick="selectContact(this)">
+                            <td>测试 01</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td style="text-align:center;">
+                                <span class="contact-clock"></span>
+                            </td>
+                            <td>济南市</td>
+                            <td>中国</td>
+                        </tr>
+                        <tr data-name="邱艳" data-phone="18765008620" onclick="selectContact(this)">
+                            <td>邱艳</td>
+                            <td>18765008620</td>
+                            <td>1263576996@qq...</td>
+                            <td style="text-align:center;">
+                                <span class="contact-dot"></span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span class="contact-clock"></span>
+                            </td>
+                            <td>菏泽</td>
+                            <td>中国</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="modal-footer-left">
+                    <button class="btn btn-primary" onclick="createContact()">新建</button>
+                    <button class="btn btn-default" onclick="closeContactModal()">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 联系人新建表单弹窗 -->
+    <div class="modal-overlay" id="contactFormModal">
+        <div class="modal modal-contact-form">
+            <div class="modal-header">
+                <div class="modal-title" id="contactFormTitle">新建联系人</div>
+                <button class="modal-close" onclick="closeContactForm()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="contact-form-grid">
+                    <div class="form-item full-row">
+                        <label class="form-label"><span class="required">*</span>姓名</label>
+                        <input class="form-input" id="newContactName" placeholder="请输入姓名">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label"><span class="required">*</span>手机号</label>
+                        <input class="form-input" id="newContactPhone" placeholder="请输入手机号">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">固定电话</label>
+                        <input class="form-input" id="newContactTel" placeholder="请输入固定电话">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">电子邮箱</label>
+                        <input class="form-input" id="newContactEmail" placeholder="请输入邮箱">
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">职位</label>
+                        <input class="form-input" id="newContactTitle" placeholder="请输入职位">
+                    </div>
+                    <div class="form-item full-row">
+                        <label class="form-label">所在城市</label>
+                        <input class="form-input" id="newContactCity" placeholder="请输入所在城市">
+                    </div>
+                    <div class="form-item full-row">
+                        <label class="form-label">收货地址</label>
+                        <input class="form-input" id="newContactAddr" placeholder="请输入收货地址">
+                    </div>
+                    <div class="form-item full-row">
+                        <label class="form-label">备注</label>
+                        <textarea class="form-input" id="newContactRemark" placeholder="备注信息"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closeContactForm()">取消</button>
+                <button class="btn btn-primary" onclick="saveContact()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 产品选择弹窗 -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">选择产品</div>
+                <button class="modal-close" onclick="closeProductModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="search-bar">
+                    <input placeholder="搜索产品名称/编码">
+                    <button class="btn btn-primary">搜索</button>
+                </div>
+                <div class="tab-source">
+                    <div class="tab-source-item active" onclick="switchSource(this)">全部</div>
+                    <div class="tab-source-item" onclick="switchSource(this)">平台产品库</div>
+                    <div class="tab-source-item" onclick="switchSource(this)">我的产品库</div>
+                </div>
+                <div class="product-list">
+                    <div class="product-row" onclick="selectProduct('00000805','手动液压搬运车','SFH1016-115...','NOBLELIFT/诺力','辆',4717.98,'📦')">
+                        <span class="product-thumb">📦</span>
+                        <div class="product-row-info">
+                            <div class="product-row-name">[00000805] 手动液压搬运车</div>
+                            <div class="product-row-meta">SFH1016-115... · NOBLELIFT/诺力 · 辆</div>
+                        </div>
+                        <div class="product-row-price">¥ 4,717.98</div>
+                    </div>
+                    <div class="product-row" onclick="selectProduct('00000806','商用空调','XYZ-001','海尔','台',2580.00,'❄️')">
+                        <span class="product-thumb">❄️</span>
+                        <div class="product-row-info">
+                            <div class="product-row-name">[00000806] 商用空调</div>
+                            <div class="product-row-meta">XYZ-001 · 海尔 · 台</div>
+                        </div>
+                        <div class="product-row-price">¥ 2,580.00</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closeProductModal()">取消</button>
+                <button class="btn btn-primary">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 订单日期自动填充
+        (function() {
+            var params = new URLSearchParams(location.search);
+            if (params.get('mode') === 'edit') {
+                document.title = '编辑采购订单 - 元象农产品买家工作台';
+                document.getElementById('pageTitle').textContent = '编辑采购订单';
+                document.getElementById('pageBreadcrumbTitle').textContent = '编辑采购订单';
+                document.getElementById('orderName').value = '2026年8月办公物资采购';
+            }
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            const h = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('orderDate').value = `${y}年${m}月${d}日 ${h}时${min}分`;
+        })();
+
+        // 初始化联系人数据并同步到联系人、收货人下拉框
+        syncContactOptions();
+        renderContactList();
+
+        // 初始金额计算
+        recalculate();
+
+        // 菜单跳转
+        function goNew() { location.href = '新建采购订单.html'; }
+
+        // Tab 切换
+        function switchTab(tab, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+        }
+
+        // 提交订单
+        function submitOrder() {
+            const orderName = document.getElementById('orderName').value.trim();
+            if (!orderName) {
+                alert('请输入采购单名称');
+                document.getElementById('orderName').focus();
+                return;
+            }
+            if (!confirm('确认提交采购订单？')) return;
+            document.getElementById('step-0').classList.remove('active');
+            document.getElementById('step-0').style.background = '#e8e8e8';
+            document.getElementById('step-0').style.color = '#999';
+            document.getElementById('step-1').classList.add('active');
+            document.getElementById('step-2').classList.remove('active');
+            document.getElementById('step-3').classList.remove('active');
+            alert('采购订单已提交!\n当前步骤: 创建订单 → 发起采购');
+            setTimeout(function() {
+                location.href = '采购订单列表.html';
+            }, 1500);
+        }
+
+        // 删除行
+        function deleteRow(btn) {
+            if (!confirm('确认删除该产品？')) return;
+            const tr = btn.closest('tr');
+            tr.remove();
+            if (document.querySelectorAll('#itemsTbody tr').length === 0) {
+                document.getElementById('itemsTbody').innerHTML = `
+                    <tr class="empty-row"><td colspan="13">暂无产品,请添加</td></tr>`;
+            }
+            recalculate();
+            renumberItems();
+        }
+
+        // 动态计算金额（数量 × 单价 = 含税小计；13% 增值税拆算）
+        function recalculate() {
+            var rows = document.querySelectorAll('#itemsTbody tr[data-row-id]');
+            var totalTaxed = 0, totalUntaxed = 0, totalTax = 0;
+            rows.forEach(function (tr) {
+                var price = parseFloat(tr.getAttribute('data-price')) || 0;
+                var qtyInput = tr.querySelector('.qty-input');
+                var qty = qtyInput ? (parseFloat(qtyInput.value) || 0) : 1;
+                var amount = price * qty;
+                var amtCell = tr.querySelector('.col-amount');
+                if (amtCell) amtCell.textContent = '¥ ' + amount.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                var taxRate = parseFloat(tr.getAttribute('data-tax')) || 13;
+                totalTaxed += amount;
+                totalUntaxed += amount / (1 + taxRate / 100);
+                totalTax += amount - amount / (1 + taxRate / 100);
+            });
+            document.querySelectorAll('#itemsTable .totals .row').forEach(function (r) {
+                var label = r.querySelector('.label').textContent;
+                var valEl = r.querySelector('.value');
+                if (label.indexOf('未税') >= 0) valEl.textContent = '¥ ' + totalUntaxed.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                else if (label.indexOf('增值税') >= 0 || label.indexOf('税额') >= 0) valEl.textContent = '¥ ' + totalTax.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                else if (label.indexOf('总计') >= 0) valEl.textContent = '¥ ' + totalTaxed.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            });
+        }
+
+        // 单选
+        function setRadio(el) {
+            const group = el.parentElement;
+            group.querySelectorAll('.radio-circle').forEach(c => c.classList.remove('checked'));
+            el.querySelector('.radio-circle').classList.add('checked');
+        }
+
+        // 弹窗
+        function openProductModal() { document.getElementById('productModal').classList.add('active'); }
+        function closeProductModal() { document.getElementById('productModal').classList.remove('active'); }
+
+        // 联系人列表弹窗
+        var contactTarget = 'contact';
+        var contactStorageKey = 'clientContacts';
+        var contactDefaults = [
+            { name: '侯振鲁', phone: '17505308090', email: 'mayingying45@163.com', city: '菏泽', address: '山东省菏泽市历下区元象仓库' },
+            { name: '李钦彤', phone: '18480941200', email: '', city: '菏泽', address: '山东省菏泽市牡丹区采购仓库' },
+            { name: '测试01', phone: '13800000000', email: '', city: '济南市', address: '山东省济南市历下区' },
+            { name: '邱艳', phone: '18765008620', email: '1263576996@qq.com', city: '菏泽', address: '山东省菏泽市高新区物流中心' }
+        ];
+        function getClientContacts() {
+            try {
+                var saved = JSON.parse(localStorage.getItem(contactStorageKey) || 'null');
+                if (Array.isArray(saved) && saved.length) return saved;
+            } catch (e) {}
+            return contactDefaults.slice();
+        }
+        function syncContactOptions() {
+            var contacts = getClientContacts();
+            var receiverSelect = document.getElementById('receiverSelect');
+            var currentReceiver = receiverSelect.value;
+            receiverSelect.innerHTML = contacts.map(function (item) {
+                return '<option value="' + item.name + '" data-phone="' + (item.phone || '') + '" data-address="' + (item.address || '') + '">' + item.name + '</option>';
+            }).join('');
+            receiverSelect.value = contacts.some(function (item) { return item.name === currentReceiver; }) ? currentReceiver : (contacts[0] ? contacts[0].name : '');
+            // 下单联系人始终取当前登录账号关联的姓名和电话。
+            var loginUser = { name: '侯振鲁', phone: '17505308090' };
+            try { loginUser = JSON.parse(localStorage.getItem('currentClientUser') || 'null') || loginUser; } catch (e) {}
+            document.getElementById('contactSelect').innerHTML = '<option value="' + loginUser.name + '" data-phone="' + loginUser.phone + '" selected>' + loginUser.name + '</option>';
+            onContactChange();
+            onReceiverChange();
+        }
+        function renderContactList() {
+            var body = document.getElementById('contactBody');
+            if (!body) return;
+            body.innerHTML = getClientContacts().map(function (item) {
+                return '<tr data-name="' + item.name + '" data-phone="' + (item.phone || '') + '" data-address="' + (item.address || '') + '" onclick="selectContact(this)"><td>' + item.name + '</td><td>' + (item.phone || '') + '</td><td>' + (item.email || '') + '</td><td></td><td><span class="contact-clock"></span></td><td>' + (item.city || '') + '</td><td>中国</td></tr>';
+            }).join('');
+        }
+        function openContactModal(target) {
+            contactTarget = target || 'contact';
+            document.getElementById('contactModalTitle').textContent =
+                contactTarget === 'receiver' ? '收货人管理' : '联系人管理';
+            renderContactList();
+            document.getElementById('contactModal').classList.add('active');
+        }
+        function closeContactModal() {
+            document.getElementById('contactModal').classList.remove('active');
+        }
+        function selectContact(tr) {
+            var name = tr.getAttribute('data-name');
+            var phone = tr.getAttribute('data-phone') || '';
+            var address = tr.getAttribute('data-address') || '';
+            if (contactTarget === 'receiver') {
+                document.getElementById('receiverSelect').value = name;
+                document.getElementById('receiverPhone').value = phone;
+                document.getElementById('shipAddress').value = address;
+            } else {
+                document.getElementById('contactSelect').value = name;
+                document.getElementById('contactPhone').value = phone;
+            }
+            closeContactModal();
+        }
+        function createContact() {
+            closeContactModal();
+            openContactForm(contactTarget);
+        }
+
+        // 联系人新建表单弹窗
+        function openContactForm(target) {
+            contactTarget = target || 'contact';
+            document.getElementById('contactFormTitle').textContent =
+                contactTarget === 'receiver' ? '新建收货人' : '新建联系人';
+            // 清空表单
+            document.getElementById('newContactName').value = '';
+            document.getElementById('newContactPhone').value = '';
+            document.getElementById('newContactTel').value = '';
+            document.getElementById('newContactEmail').value = '';
+            document.getElementById('newContactTitle').value = '';
+            document.getElementById('newContactCity').value = '';
+            document.getElementById('newContactAddr').value = '';
+            document.getElementById('newContactRemark').value = '';
+            document.getElementById('contactFormModal').classList.add('active');
+        }
+        function closeContactForm() {
+            document.getElementById('contactFormModal').classList.remove('active');
+        }
+        function saveContact() {
+            var name = document.getElementById('newContactName').value.trim();
+            var phone = document.getElementById('newContactPhone').value.trim();
+            if (!name) { alert('请输入姓名'); return; }
+            if (!phone) { alert('请输入手机号'); return; }
+
+            var contact = {
+                name: name,
+                phone: phone,
+                tel: document.getElementById('newContactTel').value.trim(),
+                email: document.getElementById('newContactEmail').value.trim(),
+                title: document.getElementById('newContactTitle').value.trim(),
+                city: document.getElementById('newContactCity').value.trim(),
+                address: document.getElementById('newContactAddr').value.trim(),
+                remark: document.getElementById('newContactRemark').value.trim()
+            };
+            var contacts = getClientContacts().filter(function (item) { return item.name !== name; });
+            contacts.push(contact);
+            localStorage.setItem(contactStorageKey, JSON.stringify(contacts));
+            syncContactOptions();
+            renderContactList();
+            // 添加到对应下拉框
+            if (contactTarget === 'receiver') {
+                var rSel = document.getElementById('receiverSelect');
+                var rOpt = document.createElement('option');
+                rOpt.value = name;
+                rOpt.textContent = name;
+                rOpt.setAttribute('data-phone', phone);
+                rOpt.setAttribute('data-address', contact.address);
+                rSel.appendChild(rOpt);
+                rSel.value = name;
+                document.getElementById('receiverPhone').value = phone;
+                document.getElementById('shipAddress').value = contact.address;
+            } else {
+                var cSel = document.getElementById('contactSelect');
+                var cOpt = document.createElement('option');
+                cOpt.value = name;
+                cOpt.textContent = name;
+                cOpt.setAttribute('data-phone', phone);
+                cSel.appendChild(cOpt);
+                cSel.value = name;
+                document.getElementById('contactPhone').value = phone;
+            }
+            closeContactForm();
+        }
+
+        // 下拉联动电话
+        function onContactChange() {
+            var sel = document.getElementById('contactSelect');
+            var opt = sel.options[sel.selectedIndex];
+            document.getElementById('contactPhone').value = opt.getAttribute('data-phone') || '';
+        }
+        function onReceiverChange() {
+            var sel = document.getElementById('receiverSelect');
+            var opt = sel.options[sel.selectedIndex];
+            document.getElementById('receiverPhone').value = opt.getAttribute('data-phone') || '';
+            document.getElementById('shipAddress').value = opt.getAttribute('data-address') || '';
+        }
+
+        function switchSource(el) {
+            document.querySelectorAll('.tab-source-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function selectProduct(code, name, spec, brand, unit, price, image) {
+            const empty = document.querySelector('#itemsTbody .empty-row');
+            if (empty) empty.remove();
+
+            const tbody = document.getElementById('itemsTbody');
+            const newRow = document.createElement('tr');
+            newRow.setAttribute('data-row-id', Date.now());
+            newRow.setAttribute('data-price', price);
+            newRow.setAttribute('data-tax', '13');
+            newRow.innerHTML = `
+                <td class="col-num"></td>
+                <td>${code}</td>
+                <td><div class="product-info">${name}</div></td>
+                <td class="product-image-cell"><span class="product-thumb">${image || '📦'}</span></td>
+                <td class="supplier-cell"></td>
+                <td>${spec}</td>
+                <td>${brand}</td>
+                <td class="col-qty"><input class="qty-input" type="number" min="0" step="1" value="1" oninput="recalculate()"></td>
+                <td>${unit}</td>
+                <td class="col-price">${Number(price).toLocaleString()}</td>
+                <td><span class="tax-tag">13%销项税...</span></td>
+                <td class="col-amount">¥ ${Number(price).toLocaleString()}</td>
+                <td class="col-action">
+                    <button class="delete-link" onclick="deleteRow(this)">删除</button>
+                </td>
+            `;
+            tbody.appendChild(newRow);
+            renumberItems();
+            recalculate();
+            closeProductModal();
+        }
+        function renumberItems() {
+            document.querySelectorAll('#itemsTbody tr[data-row-id]').forEach(function (row, index) {
+                var cell = row.querySelector('.col-num');
+                if (cell) cell.textContent = index + 1;
+            });
+        }
+    </script>
+    <script>
+        /* 平台报价单进入时：仅回填已接受的报价明细。 */
+        (function () {
+            var params = new URLSearchParams(location.search);
+            if (!params.get('quote')) return;
+            var sourceLines = [
+                { code: 'AGRI-001', name: '大蒜', spec: '4.0', brand: '金乡', unit: '吨', qty: 5, price: 2000, tax: 13, supplier: 'aqtest海赋供应链', image: '🧄' },
+                { code: 'AGRI-002', name: '洋葱', spec: '3.2', brand: '金乡', unit: '吨', qty: 8, price: 1115, tax: 5, supplier: '天津市思睿国际贸易有限公司', image: '🧅' }
+            ];
+            var accepted = (params.get('accepted') || '').split(',').map(function (value) { return Number(value); }).filter(function (index) { return Number.isInteger(index) && sourceLines[index]; });
+            var selected = accepted.map(function (index) { return sourceLines[index]; });
+            if (!selected.length) return;
+            var tbody = document.getElementById('itemsTbody');
+            tbody.innerHTML = selected.map(function (item, index) {
+                var subtotal = item.qty * item.price;
+                return '<tr data-row-id="quote-' + index + '" data-price="' + item.price + '" data-tax="' + item.tax + '">' +
+                    '<td class="col-num">' + (index + 1) + '</td><td>' + item.code + '</td>' +
+                    '<td><div class="product-info">' + item.name + '</div></td>' +
+                    '<td class="product-image-cell"><span class="product-thumb">' + item.image + '</span></td>' +
+                    '<td class="supplier-cell">' + item.supplier + '</td><td>' + item.spec + '</td><td>' + item.brand + '</td>' +
+                    '<td class="col-qty"><input class="qty-input" type="number" min="0" step="1" value="' + item.qty + '" oninput="recalculate()"></td>' +
+                    '<td>' + item.unit + '</td><td class="col-price">' + item.price.toLocaleString('zh-CN', { minimumFractionDigits: 2 }) + '</td>' +
+                    '<td><span class="tax-tag">' + item.tax + '% 进项税</span></td><td class="col-amount">¥ ' + subtotal.toLocaleString('zh-CN', { minimumFractionDigits: 2 }) + '</td>' +
+                    '<td class="col-action"><button class="delete-link" onclick="deleteRow(this)">删除</button></td></tr>';
+            }).join('');
+            var taxLabel = document.querySelector('.totals .row:nth-child(2) .label');
+            if (taxLabel) taxLabel.textContent = '税额:';
+            document.getElementById('orderName').value = '平台报价单 ' + params.get('quote') + ' 采购订单';
+            recalculate();
+        })();
+    </script>
+</body>
+</html>

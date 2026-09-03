@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>销售订单 - 供应商端</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#1890ff;--blue-dark:#096dd9;--ink:#1f2937;--muted:#8c98a8;--line:#edf0f4;--surface:#fff;--page:#f4f6f9}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--page);color:var(--ink);font-size:14px;min-height:100vh}
+.main-area{margin-left:200px;min-height:100vh}.top-nav{height:64px;background:#fff;display:flex;align-items:center;padding:0 32px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.breadcrumb{display:flex;align-items:center;gap:9px;color:#9aa5b1;font-size:13px}.breadcrumb a{color:#667382;text-decoration:none}.breadcrumb a:hover{color:var(--blue)}.breadcrumb .current{color:#253142;font-weight:600}.sep{color:#cfd6de}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:22px;color:#778393}.notice{font-size:18px;position:relative;cursor:pointer}.badge{position:absolute;top:-7px;right:-8px;background:#ff4d4f;border:2px solid #fff;color:#fff;min-width:16px;height:16px;padding:0 4px;border-radius:9px;font-size:10px;display:flex;align-items:center;justify-content:center}.user{display:flex;align-items:center;gap:9px;color:#475467;cursor:pointer}.avatar{width:30px;height:30px;border-radius:50%;background:#e6f4ff;color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:600}
+.main{padding:26px 32px 40px;max-width:1600px}.page-banner{font-size:20px;color:#253142;font-weight:600;margin-bottom:16px}.page-intro{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px}.eyebrow{font-size:11px;color:var(--blue);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px;font-weight:600}.page-title{font-size:25px;letter-spacing:-.02em;font-weight:650;color:#182230}.page-desc{font-size:13px;color:var(--muted);margin-top:7px}.summary{display:flex;gap:10px}.summary-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:13px 18px;min-width:112px}.summary-card .label{color:#8b96a3;font-size:12px;margin-bottom:4px}.summary-card strong{font-size:20px;color:#253142;font-weight:650}.summary-card.accent{border-color:#b7dcff;background:#f5fbff}.summary-card.accent strong{color:var(--blue)}
+.filter-card,.table-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 16px rgba(29,45,61,.03)}.filter-card{padding:18px 20px;margin-bottom:16px}.filter-row{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}.filter-item{display:flex;flex-direction:column;gap:7px}.filter-label{font-size:12px;color:#667382}.filter-input,.filter-select{height:34px;border:1px solid #d8dee6;border-radius:4px;padding:0 10px;outline:none;color:#344054;background:#fff;font-family:inherit;font-size:13px;min-width:160px}.filter-input.date{min-width:145px}.filter-input:focus,.filter-select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(24,144,255,.12)}.filter-actions{display:flex;gap:8px;margin-left:auto}.btn{height:34px;padding:0 17px;border-radius:4px;font-family:inherit;font-size:13px;cursor:pointer;transition:all .2s}.btn-primary{border:1px solid var(--blue);color:#fff;background:var(--blue)}.btn-primary:hover{background:var(--blue-dark);border-color:var(--blue-dark)}.btn-default{border:1px solid #d8dee6;color:#52606f;background:#fff}.btn-default:hover{border-color:var(--blue);color:var(--blue)}
+.table-head{height:58px;display:flex;align-items:center;padding:0 20px;border-bottom:1px solid var(--line)}.table-title{font-size:15px;font-weight:600;color:#253142}.table-title span{font-size:12px;color:#98a2b3;font-weight:400;margin-left:6px}.table-tools{margin-left:auto;display:flex;gap:8px}.tool-btn{border:1px solid #d8dee6;background:#fff;color:#667382;height:30px;padding:0 12px;border-radius:4px;cursor:pointer;font-size:12px}.tool-btn:hover{color:var(--blue);border-color:var(--blue)}.table-wrap{overflow-x:auto;padding-left:20px}.data-table{width:100%;min-width:1120px;border-collapse:collapse;font-size:13px}.data-table th{height:44px;background:#fafbfd;color:#667382;font-weight:600;text-align:left;padding:0 14px;border-bottom:1px solid var(--line);white-space:nowrap}.data-table td{height:64px;padding:0 14px;border-bottom:1px solid #f2f4f7;color:#344054;white-space:nowrap}.data-table tbody tr:hover{background:#fbfdff}.order-no{color:var(--blue);font-weight:600;cursor:pointer}.order-no:hover{text-decoration:underline}.money{font-variant-numeric:tabular-nums;font-weight:600;color:#253142}.status{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:4px;font-size:12px}.status::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}.status-confirm{color:#1677d2;background:#eaf4ff}.status-accept{color:#d46b08;background:#fff7e6}.status-done{color:#389e0d;background:#f1fae9}.status-unpaid{color:#667382;background:#f4f5f7}.status-partial{color:#d46b08;background:#fff7e6}.status-paid{color:#389e0d;background:#f1fae9}.action-link{color:var(--blue);cursor:pointer;margin-right:14px}.action-link:hover{text-decoration:underline}.pagination{height:64px;display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:0 20px;color:#98a2b3;font-size:12px}.page-btn{min-width:28px;height:28px;border:1px solid #d8dee6;background:#fff;color:#667382;border-radius:4px;cursor:pointer}.page-btn:hover,.page-btn.active{border-color:var(--blue);color:var(--blue)}.page-btn.active{background:var(--blue);color:#fff}.page-btn:disabled{color:#cbd2da;cursor:not-allowed}
+.toast{position:fixed;top:82px;left:50%;transform:translateX(-50%);padding:11px 20px;border:1px solid #b7dcff;background:#f5fbff;color:#1677d2;border-radius:5px;box-shadow:0 7px 20px rgba(24,144,255,.12);display:none;z-index:50}.toast.show{display:block}
+@media(max-width:1000px){.sidebar{width:180px}.main-area{margin-left:180px}.top-nav,.main{padding-left:20px;padding-right:20px}.page-intro{align-items:flex-start;gap:18px;flex-direction:column}.summary{width:100%}.summary-card{flex:1}.filter-actions{margin-left:0}}
+</style>
+</head>
+<body>
+<script src="sidebar.js"></script>
+<div class="main-area">
+    <header class="top-nav">
+        <div class="breadcrumb"><a href="#">首页</a><span class="sep">/</span><span class="current">销售订单</span></div>
+        <div class="top-actions"><span class="notice">♧<span class="badge">3</span></span><div class="user"><span class="avatar">管</span><span>超级管理员</span><span style="font-size:11px">⌄</span></div></div>
+    </header>
+    <main class="main">
+        <div class="page-banner">销售订单列表</div>
+        <!-- <section class="page-intro">
+            <div><div class="eyebrow">Supplier workspace / Order center</div><h1 class="page-title">销售订单</h1><p class="page-desc">管理平台分配的销售订单，跟进确认、验收与收款进度。</p></div>
+            <div class="summary"><div class="summary-card accent"><div class="label">待处理订单</div><strong>11</strong></div><div class="summary-card"><div class="label">本月订单</div><strong>14</strong></div><div class="summary-card"><div class="label">本月金额</div><strong>¥642.4k</strong></div></div>
+        </section> -->
+        <section class="filter-card">
+            <div class="filter-row">
+                <div class="filter-item" style="flex-direction:row;align-items:center;gap:8px"><label class="filter-label" style="min-width:auto;margin-bottom:0">订单号</label><input class="filter-input" id="keyword" placeholder="请输入订单号"></div>
+                <div class="filter-item" style="flex-direction:row;align-items:center;gap:8px"><label class="filter-label" style="min-width:auto;margin-bottom:0">订单状态</label><select class="filter-select" id="statusFilter"><option value="">全部状态</option><option value="pending">待确认</option><option value="confirmed">已确认</option></select></div>
+                <div class="filter-item" style="flex-direction:row;align-items:center;gap:8px"><label class="filter-label" style="min-width:auto;margin-bottom:0">发货状态</label><select class="filter-select" id="shipFilter"><option value="">全部状态</option><option value="unshipped">未发货</option><option value="partial">部分发货</option><option value="complete">全部发货</option></select></div>
+                <div class="filter-item" style="flex-direction:row;align-items:center;gap:8px"><label class="filter-label" style="min-width:auto;margin-bottom:0">订单日期</label><input class="filter-input date" type="date"></div>
+                <div class="filter-item" style="flex-direction:row;align-items:center;gap:8px"><label class="filter-label" style="min-width:auto;margin-bottom:0">至</label><input class="filter-input date" type="date"></div>
+                <div class="filter-actions"><button class="btn btn-primary" onclick="searchOrders()">查询</button><button class="btn btn-default" onclick="resetFilter()">重置</button></div>
+            </div>
+        </section>
+        <section class="table-card">
+            <div class="table-head"><div class="table-tools"><button class="tool-btn" onclick="showToast('导出任务已创建')">↓ 导出订单</button></div></div>
+            <div class="table-wrap">
+                <table class="data-table"><thead><tr><th>序号</th><th>订单号</th><th>订单日期</th><th>确认日期</th><th>金额</th><th>订单状态</th><th>发货状态</th><th>发票状态</th><th>收款状态</th><th>操作</th></tr></thead>
+                <tbody id="orderBody"></tbody></table>
+            </div>
+            <div class="pagination" id="pagination"><span style="margin-right:10px" id="pageTotal">共 4 条</span><button class="page-btn" disabled>‹</button><button class="page-btn active">1</button><button class="page-btn" disabled>›</button></div>
+        </section>
+    </main>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+// ===== 订单数据 =====
+// 4 条数据覆盖 4 种组合：
+// #1 待确认-未发货  #2 已确认-未发货  #3 已发货-全部发货  #4 已发货-部分发货
+var ORDERS = [
+    {no:'PO000015',date:'2025-07-19 14:54',confirm:'2025-07-19 14:35',amount:105000.00,status:'pending',shipment:'unshipped',invoice:'paid',pay:'unpaid'},
+    {no:'PO000019',date:'2025-07-19 23:53',confirm:'2025-07-19 23:53',amount:15000.00,status:'confirmed',shipment:'unshipped',invoice:'unpaid',pay:'unpaid'},
+    {no:'PO000023',date:'2025-07-21 20:02',confirm:'2025-07-21 20:02',amount:10000.00,status:'confirmed',shipment:'complete',invoice:'paid',pay:'unpaid'},
+    {no:'PO000026',date:'2025-07-22 11:20',confirm:'2025-07-22 11:20',amount:88000.00,status:'confirmed',shipment:'partial',invoice:'partial',pay:'partial'}
+];
+
+var STATUS_MAP = {
+    pending:{label:'待确认',cls:'status-confirm'},
+    confirmed:{label:'已确认',cls:'status-accept'}
+};
+var INVOICE_MAP = {
+    paid:{label:'全部开票',cls:'status-paid'},
+    partial:{label:'部分开票',cls:'status-partial'},
+    unpaid:{label:'未开票',cls:'status-unpaid'}
+};
+var PAY_MAP = {
+    paid:{label:'全额收款',cls:'status-paid'},
+    partial:{label:'部分收款',cls:'status-partial'},
+    unpaid:{label:'未收款',cls:'status-unpaid'}
+};
+var SHIPMENT_MAP = {
+    complete:{label:'全部发货',cls:'status-paid'},
+    partial:{label:'部分发货',cls:'status-partial'},
+    unshipped:{label:'未发货',cls:'status-unpaid'}
+};
+
+function fmtMoney(n){return '¥ ' + n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function statusTag(map,key){var m=map[key];return '<span class="status '+m.cls+'">'+m.label+'</span>';}
+
+// ===== 渲染 =====
+function render(list){
+    var body=document.getElementById('orderBody');
+    if(!list.length){body.innerHTML='<tr><td colspan="10" style="height:120px;text-align:center;color:#98a2b3">未查询到匹配的订单</td></tr>';}
+    else{
+        body.innerHTML=list.map(function(o,idx){
+            return '<tr>'
+                +'<td style="color:#98a2b3">'+ (idx+1) +'</td>'
+                +'<td><span class="order-no" onclick="goDetail(\''+o.no+'\',\''+o.status+'\')">'+o.no+'</span></td>'
+                +'<td>'+o.date+'</td>'
+                +'<td>'+o.confirm+'</td>'
+                +'<td class="money">'+fmtMoney(o.amount)+'</td>'
+                +'<td>'+statusTag(STATUS_MAP,o.status)+'</td>'
+                +'<td>'+statusTag(SHIPMENT_MAP,o.shipment)+'</td>'
+                +'<td>'+statusTag(INVOICE_MAP,o.invoice)+'</td>'
+                +'<td>'+statusTag(PAY_MAP,o.pay)+'</td>'
+                +'<td><span class="action-link" onclick="goDetail(\''+o.no+'\',\''+o.status+'\')">查看</span></td>'
+                +'</tr>';
+        }).join('');
+    }
+    document.getElementById('pageTotal').textContent='共 '+list.length+' 条';
+}
+
+// ===== 交互 =====
+function goDetail(no,status){location.href='销售订单详情.html?order='+no+'&status='+status;}
+function showToast(message){var toast=document.getElementById('toast');toast.textContent=message;toast.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(function(){toast.classList.remove('show')},2200)}
+function searchOrders(){
+    var kw=document.getElementById('keyword').value.trim().toLowerCase();
+    var st=document.getElementById('statusFilter').value;
+    var ship=document.getElementById('shipFilter').value;
+    var r=ORDERS.filter(function(o){
+        if(kw && o.no.toLowerCase().indexOf(kw)<0) return false;
+        if(st && o.status!==st) return false;
+        if(ship && o.shipment!==ship) return false;
+        return true;
+    });
+    render(r);
+    showToast(r.length?'已查询到 '+r.length+' 条订单':'未查询到匹配订单');
+}
+function resetFilter(){
+    document.querySelectorAll('.filter-input').forEach(function(input){input.value=''});
+    document.getElementById('statusFilter').value='';
+    document.getElementById('shipFilter').value='';
+    render(ORDERS);
+    showToast('筛选条件已重置');
+}
+
+// 初始化
+render(ORDERS);
+</script>
+</body>
+</html>

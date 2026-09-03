@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>送货单 - 供应商端</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+          "Microsoft YaHei", sans-serif;
+        color: #1f2937;
+        background: #f4f6f9;
+        font-size: 14px;
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      .app-header {
+        display: none;
+      }
+      .page {
+        padding: 10px 18px 36px;
+      }
+      .breadcrumb {
+        height: 42px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #9aa5b1;
+        font-size: 13px;
+      }
+      .breadcrumb a {
+        color: #667382;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .breadcrumb a:hover {
+        color: #1890ff;
+      }
+      .breadcrumb .current {
+        color: #253142;
+        font-weight: 600;
+      }
+      .sep {
+        color: #cfd6de;
+      }
+      .filter-card {
+        background: #fff;
+        border: 1px solid #edf0f4;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(29, 45, 61, 0.03);
+        padding: 18px 20px;
+        margin-bottom: 16px;
+      }
+      .filter-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+      .filter-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .filter-label {
+        color: #667382;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      .filter-input,
+      .filter-select {
+        height: 34px;
+        min-width: 180px;
+        border: 1px solid #d8dee6;
+        border-radius: 4px;
+        padding: 0 10px;
+        outline: none;
+        color: #344054;
+        background: #fff;
+        font-family: inherit;
+        font-size: 13px;
+      }
+      .filter-input:focus,
+      .filter-select:focus {
+        border-color: #1890ff;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.12);
+      }
+      .filter-actions {
+        display: flex;
+        gap: 8px;
+        margin-left: auto;
+      }
+      .btn {
+        height: 34px;
+        padding: 0 17px;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn-primary {
+        border: 1px solid #1890ff;
+        color: #fff;
+        background: #1890ff;
+      }
+      .btn-primary:hover {
+        background: #096dd9;
+        border-color: #096dd9;
+      }
+      .btn-default {
+        border: 1px solid #d8dee6;
+        color: #52606f;
+        background: #fff;
+      }
+      .btn-default:hover {
+        border-color: #1890ff;
+        color: #1890ff;
+      }
+      .page-btn {
+        min-width: 28px;
+        height: 28px;
+        border: 1px solid #d8dee6;
+        border-radius: 4px;
+        background: #fff;
+        color: #667382;
+        cursor: pointer;
+      }
+      .page-btn:hover,
+      .page-btn.active {
+        border-color: #1890ff;
+        color: #1890ff;
+      }
+      .page-btn.active {
+        background: #1890ff;
+        color: #fff;
+      }
+      .page-btn:disabled {
+        color: #cbd2da;
+        cursor: not-allowed;
+      }
+      .pagination {
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 6px;
+        padding: 0 20px;
+        color: #98a2b3;
+        font-size: 12px;
+      }
+      .table-card {
+        background: #fff;
+        border: 1px solid #edf0f4;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(29, 45, 61, 0.03);
+        overflow: hidden;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      .ship-summary {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        padding: 14px 20px;
+        border-bottom: 1px solid #edf0f4;
+        flex-wrap: wrap;
+      }
+      .ship-summary .sum-item {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .ship-summary .sum-label {
+        font-size: 12px;
+        color: #8b96a3;
+      }
+      .ship-summary .sum-value {
+        font-size: 19px;
+        font-weight: 650;
+        color: #253142;
+        font-variant-numeric: tabular-nums;
+      }
+      .ship-summary .sum-value.remain {
+        color: #d46b08;
+      }
+      .ship-summary .sum-value.done {
+        color: #389e0d;
+      }
+      .ship-summary .sum-divider {
+        width: 1px;
+        height: 32px;
+        background: #edf0f4;
+      }
+      .ship-summary .sum-badge {
+        margin-left: auto;
+        padding: 5px 12px;
+        border-radius: 14px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .ship-summary .sum-badge.partial {
+        color: #d46b08;
+        background: #fff7e6;
+        border: 1px solid #ffd591;
+      }
+      .ship-summary .sum-badge.full {
+        color: #389e0d;
+        background: #f1fae9;
+        border: 1px solid #b7eb8f;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      .data-table {
+        min-width: 900px;
+      }
+      .data-table th {
+        height: 44px;
+        background: #fafbfd;
+        color: #667382;
+        text-align: left;
+        font-weight: 600;
+        padding: 0 14px;
+        border-bottom: 1px solid #edf0f4;
+        white-space: nowrap;
+      }
+      .data-table td {
+        height: 64px;
+        padding: 0 14px;
+        border-bottom: 1px solid #f2f4f7;
+        color: #344054;
+        white-space: nowrap;
+      }
+      .data-table tr:last-child td {
+        border-bottom: 0;
+      }
+      .data-table tbody tr:hover td {
+        background: #fbfdff;
+      }
+      .link {
+        color: #1890ff;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .link:hover {
+        text-decoration: underline;
+      }
+      .muted {
+        color: #667382;
+      }
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 9px;
+        border-radius: 4px;
+        font-size: 12px;
+      }
+      .status:before {
+        content: "";
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+      .pending {
+        color: #667382;
+        background: #f4f5f7;
+      }
+      .sent {
+        color: #389e0d;
+        background: #f1fae9;
+      }
+      .received {
+        color: #1677d2;
+        background: #eaf4ff;
+      }
+      .empty {
+        text-align: center;
+        height: 120px;
+        color: #98a2b3;
+      }
+      .toast {
+        position: fixed;
+        top: 76px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: none;
+        padding: 10px 18px;
+        background: #f0faf5;
+        border: 1px solid #b7eb8f;
+        color: #2f8f62;
+        border-radius: 6px;
+      }
+      .toast.show {
+        display: block;
+      }
+      .main-area {
+        margin-left: 200px;
+        min-height: 100vh;
+      }
+      .top-nav {
+        height: 64px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        padding: 0 32px;
+        border-bottom: 1px solid #edf0f4;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      .top-actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        color: #778393;
+      }
+      .nav-notice {
+        font-size: 18px;
+        position: relative;
+        cursor: pointer;
+      }
+      .nav-badge {
+        position: absolute;
+        top: -7px;
+        right: -8px;
+        background: #ff4d4f;
+        border: 2px solid #fff;
+        color: #fff;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 4px;
+        border-radius: 9px;
+        font-size: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .nav-user {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #475467;
+        cursor: pointer;
+      }
+      .nav-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #e6f4ff;
+        color: #1890ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+      }
+      .main {
+        padding: 26px 32px 40px;
+        max-width: 1600px;
+      }
+      .page-banner {
+        font-size: 20px;
+        font-weight: 600;
+        color: #253142;
+        margin-bottom: 16px;
+      }
+      @media (max-width: 900px) {
+        .app-nav {
+          gap: 12px;
+        }
+        .search {
+          width: 240px;
+        }
+        .data-table {
+          min-width: 900px;
+        }
+        .table-card {
+          overflow-x: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <script src="sidebar.js"></script>
+    <div class="main-area">
+      <header class="top-nav">
+        <div class="breadcrumb">
+          <a href="销售订单列表.html">销售订单</a><span class="sep">/</span
+          ><span class="current" id="breadOrder">PO000015</span>
+        </div>
+        <div class="top-actions">
+          <span class="nav-notice">♧<span class="nav-badge">3</span></span>
+          <div class="nav-user"><span class="nav-avatar">管</span><span>超级管理员</span><span style="font-size:11px">⌄</span></div>
+        </div>
+      </header>
+      <main class="main">
+        <div class="page-banner">送货单列表</div>
+        <!-- <section class="filter-card"> -->
+          <!-- <div class="filter-row"> -->
+         
+            <!-- <div class="filter-item">
+              <label class="filter-label">送货状态</label>
+              <select class="filter-select" id="statusFilter">
+                <option value="">全部状态</option>
+                <option value="pending">待发货</option>
+                <option value="sent">已发货</option>
+                <option value="received">已收货</option>
+              </select>
+            </div>
+            <div class="filter-actions">
+              <button class="btn btn-primary" onclick="filterList()">查询</button>
+              <button class="btn btn-default" onclick="resetFilter()">重置</button>
+            </div>
+          </div> -->
+        <!-- </section> -->
+        <section class="table-card">
+          <div class="ship-summary" id="shipSummary"></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>销售单号</th>
+                  <th>送货单号</th>
+                  <th>客户名称</th>
+                  <th>订单日期</th>
+                  <th>安排日期</th>
+                  <th>状态</th>
+                </tr>
+              </thead>
+              <tbody id="body"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span id="pageCount">共 2 条</span>
+            <button class="page-btn" disabled>‹</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">›</button>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script>
+      function param(n) {
+        var m = location.search.match(new RegExp("[?&]" + n + "=([^&]*)"));
+        return m ? decodeURIComponent(m[1]) : "";
+      }
+      // 按销售订单号索引的送货单字典（status: pending=待发货 / sent=已发货 / received=已收货）
+      var CUSTOMER = "海赋（山东）数字产业发展有限公司";
+      // 客户下单产品总量（用于判断发货进度）
+      var ORDER_PRODUCTS = {
+        PO000015: [{ code: "00000002", name: "锂电池电钻", unit: "台", required: 15 }, { code: "00000003", name: "接近开关", unit: "个", required: 5 }],
+        PO000019: [{ code: "00000002", name: "锂电池电钻", unit: "台", required: 8 }, { code: "00000003", name: "接近开关", unit: "个", required: 3 }],
+        PO000023: [{ code: "00000002", name: "锂电池电钻", unit: "台", required: 10 }, { code: "00000003", name: "接近开关", unit: "个", required: 4 }],
+        PO000026: [{ code: "00000002", name: "锂电池电钻", unit: "台", required: 15 }, { code: "00000003", name: "接近开关", unit: "个", required: 5 }]
+      };
+      // 每张送货单的发货数量（按产品 code）
+      var SHIP_QTY = {
+        PO000015: { "DS/00001": { "00000002": 0, "00000003": 0 } },
+        PO000019: { "DS/00001": { "00000002": 0, "00000003": 0 } },
+        PO000023: { "DS/00001": { "00000002": 10, "00000003": 4 } },
+        PO000026: {
+          "DS/00001": { "00000002": 6, "00000003": 2 },
+          "DS/00002": { "00000002": 6, "00000003": 2 },
+          "DS/00003": { "00000002": 3, "00000003": 1 }
+        }
+      };
+      var SHIPMENT_DB = {
+        // 待确认-未发货 → 1 条待发货
+        PO000015: [
+          { sale: "PO000015", delivery: "DS/00001", customer: CUSTOMER, orderDate: "2025年07月19日", arrangeDate: "2025年07月21日", status: "pending", label: "待发货" }
+        ],
+        // 已确认-未发货 → 1 条待发货（点击申请验收后联动变为已发货）
+        PO000019: [
+          { sale: "PO000019", delivery: "DS/00001", customer: CUSTOMER, orderDate: "2025年07月19日", arrangeDate: "2025年07月21日", status: "pending", label: "待发货" }
+        ],
+        // 已发货-全部发货 → 1 条已发货
+        PO000023: [
+          { sale: "PO000023", delivery: "DS/00001", customer: CUSTOMER, orderDate: "2025年07月21日", arrangeDate: "2025年07月22日", status: "sent", label: "已发货" }
+        ],
+        // 已发货-部分发货 → 3 条：待发货 + 已发货 + 已收货
+        PO000026: [
+          { sale: "PO000026", delivery: "DS/00001", customer: CUSTOMER, orderDate: "2025年07月22日", arrangeDate: "2025年07月23日", status: "pending", label: "待发货" },
+          { sale: "PO000026", delivery: "DS/00002", customer: CUSTOMER, orderDate: "2025年07月22日", arrangeDate: "2025年07月24日", status: "sent", label: "已发货" },
+          { sale: "PO000026", delivery: "DS/00003", customer: CUSTOMER, orderDate: "2025年07月22日", arrangeDate: "2025年07月25日", status: "received", label: "已收货" }
+        ]
+      };
+      // 汇总某订单的发货进度：总数量 / 已发货 / 剩余
+      // 已发货数量只统计「已发货(sent)」「已收货(received)」的送货单，待发货(pending)不计入
+      function summary(order) {
+        var prods = ORDER_PRODUCTS[order] || [];
+        var qtys = SHIP_QTY[order] || {};
+        var shipmentList = SHIPMENT_DB[order] || [];
+        var total = 0, shipped = 0;
+        prods.forEach(function (p) { total += p.required; });
+        shipmentList.forEach(function (s) {
+          if (s.status === "pending") return; // 待发货不统计
+          var q = qtys[s.delivery] || {};
+          prods.forEach(function (p) { shipped += (q[p.code] || 0); });
+        });
+        return { total: total, shipped: shipped, remain: total - shipped, done: total > 0 && shipped >= total };
+      }
+      function buildRows(order) {
+        if (!order || !SHIPMENT_DB[order]) return [];
+        // 深拷贝，避免污染原始字典
+        var list = SHIPMENT_DB[order].map(function (r) { return Object.assign({}, r); });
+        // 联动：该送货单已在详情页申请验收，则翻为已发货（按单号持久化）
+        list.forEach(function (r) {
+          var sentFlag = false;
+          try { sentFlag = localStorage.getItem("shipment_sent_" + order + "_" + r.delivery) === "1"; } catch (e) {}
+          if (sentFlag && r.status === "pending") { r.status = "sent"; r.label = "已发货"; }
+        });
+        return list;
+      }
+      function goOrder(no) {
+        location.href = "销售订单详情.html?order=" + encodeURIComponent(no);
+      }
+      function openDetail(order, no) {
+        location.href =
+          "送货单详情.html?order=" +
+          encodeURIComponent(order) +
+          "&shipment=" +
+          encodeURIComponent(no);
+      }
+      function render(list) {
+        document.getElementById("body").innerHTML = list.length
+          ? list
+              .map(function (r) {
+                return (
+                  '<tr><td><span class="link" onclick="goOrder(\'' +
+                  r.sale +
+                  "')\">" +
+                  r.sale +
+                  '</span></td><td><span class="link" onclick="openDetail(\'' +
+                  r.sale +
+                  "','" +
+                  r.delivery +
+                  "')\">" +
+                  r.delivery +
+                  "</span></td><td>" +
+                  r.customer +
+                  '</td><td class="muted">' +
+                  r.orderDate +
+                  '</td><td class="muted">' +
+                  r.arrangeDate +
+                  '</td><td><span class="status ' +
+                  r.status +
+                  '">' +
+                  r.label +
+                  "</span></td></tr>"
+                );
+              })
+              .join("")
+          : '<tr><td colspan="6" class="empty">暂无送货单</td></tr>';
+        document.getElementById("pageCount").textContent = "共 " + list.length + " 条";
+      }
+      function filterList() {
+        var q = document.getElementById("keyword").value.trim().toLowerCase();
+        var st = document.getElementById("statusFilter").value;
+        var r = rows.filter(function (row) {
+          if (q && row.delivery.toLowerCase().indexOf(q) < 0 && row.customer.toLowerCase().indexOf(q) < 0)
+            return false;
+          if (st && row.status !== st) return false;
+          return true;
+        });
+        render(r);
+        showToast(r.length ? "已查询到 " + r.length + " 条送货单" : "未查询到匹配送货单");
+      }
+      function resetFilter() {
+        document.getElementById("keyword").value = "";
+        document.getElementById("statusFilter").value = "";
+        render(rows);
+        showToast("筛选条件已重置");
+      }
+      function showToast(msg) {
+        var el = document.getElementById("toast");
+        el.textContent = msg;
+        el.classList.add("show");
+        clearTimeout(window.toastTimer);
+        window.toastTimer = setTimeout(function () {
+          el.classList.remove("show");
+        }, 1800);
+      }
+      var order = param("order");
+      var rows = buildRows(order);
+      if (order) document.getElementById("breadOrder").textContent = order;
+      renderSummary(order);
+      render(rows);
+      function renderSummary(orderNo) {
+        var box = document.getElementById("shipSummary");
+        if (!orderNo || !ORDER_PRODUCTS[orderNo]) { box.style.display = "none"; return; }
+        var s = summary(orderNo);
+        var badge = s.done
+          ? '<span class="sum-badge full">已全额发货</span>'
+          : '<span class="sum-badge partial">发货未完成 · 剩余 ' + s.remain + ' 件</span>';
+        box.innerHTML =
+          '<div class="sum-item"><span class="sum-label">客户下单总量</span><span class="sum-value">' + s.total + '</span></div>' +
+          '<div class="sum-divider"></div>' +
+          '<div class="sum-item"><span class="sum-label">已发货数量</span><span class="sum-value">' + s.shipped + '</span></div>' +
+          '<div class="sum-divider"></div>' +
+          '<div class="sum-item"><span class="sum-label">剩余数量</span><span class="sum-value ' + (s.done ? "done" : "remain") + '">' + s.remain + '</span></div>' +
+          badge;
+      }
+    </script>
+  </body>
+</html>

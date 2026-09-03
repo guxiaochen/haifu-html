@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>供应商报价详情 - 商家管理平台</title>
+  <style>
+    *{box-sizing:border-box}:root{--blue:#1890ff;--blue-dark:#096dd9;--ink:#1f2937;--muted:#8c98a8;--line:#edf0f4;--page:#f4f6f9}body{margin:0;min-width:1180px;background:var(--page);color:var(--ink);font:14px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}.main-area{margin-left:200px;min-height:100vh}.top-nav{height:64px;display:flex;align-items:center;padding:0 32px;border-bottom:1px solid var(--line);background:#fff}.breadcrumb{display:flex;align-items:center;gap:9px;color:#9aa5b1;font-size:13px}.breadcrumb a{color:#667382;text-decoration:none}.breadcrumb a:hover{color:var(--blue)}.current{color:#253142!important;font-weight:600}.sep{color:#cfd6de}.top-actions{display:flex;align-items:center;gap:22px;margin-left:auto;color:#778393}.notice{position:relative;font-size:18px;cursor:pointer}.badge{position:absolute;top:-7px;right:-8px;display:grid;min-width:16px;height:16px;place-items:center;padding:0 4px;border:2px solid #fff;border-radius:9px;background:#ff4d4f;color:#fff;font-size:10px}.user{display:flex;align-items:center;gap:9px;color:#475467}.avatar{display:grid;width:30px;height:30px;place-items:center;border-radius:50%;background:#e6f4ff;color:var(--blue);font-weight:600}.main{max-width:1600px;padding:26px 32px 40px}.card{margin-bottom:16px;border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:0 4px 16px rgba(29,45,61,.03)}.head-card{display:flex;align-items:center;padding:18px 20px}.head-card h1{margin:0;color:#182230;font-size:20px}.head-card p{margin:6px 0 0;color:var(--muted);font-size:13px}.state{display:inline-flex;align-items:center;gap:6px;margin-left:auto;padding:5px 10px;border-radius:4px;background:#eaf4ff;color:#1677d2;font-size:12px}.state:before{width:5px;height:5px;border-radius:50%;background:currentColor;content:""}.state.submitted{background:#f1fae9;color:#389e0d}.state.expired{background:#f4f5f7;color:#667382}.content{padding:20px 24px 24px}.actionbar{display:flex;align-items:center;gap:8px;padding-bottom:18px;border-bottom:1px solid var(--line)}.btn{height:34px;padding:0 17px;border:1px solid #d8dee6;border-radius:4px;background:#fff;color:#52606f;cursor:pointer;font:13px inherit}.btn:hover{border-color:var(--blue);color:var(--blue)}.btn.primary{border-color:var(--blue);background:var(--blue);color:#fff}.btn.primary:hover{border-color:var(--blue-dark);background:var(--blue-dark);color:#fff}.submit-note{margin-left:auto;color:var(--muted);font-size:12px}.info{display:grid;grid-template-columns:1fr 1fr;gap:28px;padding:22px 0}.info section+section{padding-left:28px;border-left:1px solid var(--line)}.section-title{margin-bottom:16px;padding-left:9px;border-left:3px solid var(--blue);font-size:15px;font-weight:600}.fields{display:grid;gap:13px}.field{display:flex;min-width:0;gap:16px;line-height:20px}.field label{flex:0 0 88px;width:88px;color:#667382;text-align:right;font-size:13px}.field span{min-width:0;overflow-wrap:anywhere;font-size:13px}.blue{color:var(--blue);font-weight:500}.detail-title{display:flex;align-items:center;padding:16px 0 12px;border-top:1px solid var(--line);font-size:15px;font-weight:600}.detail-title small{margin-left:8px;color:#98a2b3;font-size:12px;font-weight:400}.table-wrap{overflow-x:auto;border:1px solid #f0f2f5}.grid{width:100%;min-width:1640px;border-collapse:collapse;font-size:13px}.grid th{padding:10px 9px;border-bottom:1px solid var(--line);background:#fafbfd;color:#667382;text-align:left;font-weight:600;white-space:nowrap}.grid td{padding:10px 9px;border-bottom:1px solid #f2f4f7;vertical-align:middle;white-space:nowrap}.grid tbody tr:hover{background:#fbfdff}.grid input,.grid select{height:30px;padding:0 7px;border:1px solid #d8dee6;border-radius:4px;outline:0;background:#fff;font:13px inherit}.grid input:focus,.grid select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(24,144,255,.12)}.grid input[disabled],.grid select[disabled]{border-color:transparent;background:transparent;color:#344054;opacity:1}.price{width:100px}.short{width:70px}.valid{width:130px}.note{width:150px}.money{text-align:right;font-variant-numeric:tabular-nums}.total{display:flex;justify-content:flex-end;gap:25px;padding:15px 2px 0;color:#667382;font-size:13px}.total b{color:var(--blue);font-size:15px}.toast{position:fixed;top:82px;left:50%;z-index:50;display:none;transform:translateX(-50%);padding:11px 20px;border:1px solid #b7dcff;border-radius:5px;background:#f5fbff;color:#1677d2;box-shadow:0 7px 20px rgba(24,144,255,.12)}.toast.show{display:block}.readonly-banner{display:none;margin:0 0 16px;padding:10px 13px;border-left:3px solid #91d5ff;background:#f5fbff;color:#52718e;font-size:13px}@media(max-width:1000px){.main-area{margin-left:180px}.main,.top-nav{padding-left:20px;padding-right:20px}.info{grid-template-columns:1fr}.info section+section{padding-left:0;border-left:0;border-top:1px solid var(--line);padding-top:20px}}
+  </style>
+</head>
+<body>
+  <script src="sidebar.js"></script>
+  <div class="main-area">
+    <header class="top-nav"><div class="breadcrumb"><a href="#">首页</a><span class="sep">/</span><a href="供应商报价列表.html">供应商报价</a><span class="sep">/</span><span class="current" id="breadcrumbNo">XJ2026080062</span></div><div class="top-actions"><span class="notice" title="供应商报价邀请">♧<span class="badge">2</span></span><div class="user"><span class="avatar">管</span><span>超级管理员</span><span style="font-size:11px">⌄</span></div></div></header>
+    <main class="main">
+      <section class="card head-card"><div><h1>供应商报价单 <span id="quoteNo">XJ2026080062</span></h1><p id="quoteName">2026年8月农产品采购询价 · 请按每条询价明细填写含税报价、实际税率、承诺交期及价格有效期。</p></div><span class="state" id="state">待填报</span></section>
+      <section class="card content">
+        <div class="actionbar" id="actionbar"><button class="btn primary" id="submitButton" onclick="submitQuote()">提交报价</button><span class="submit-note" id="submitNote">平台生成平台报价单前可修改报价；请确认所有报价信息无误。</span></div>
+        <div class="readonly-banner" id="readonlyBanner"></div>
+        <div class="info">
+          <section><div class="section-title">询价与供应商信息</div><div class="fields"><div class="field"><label>供应商</label><span class="blue">aqtest海赋（山东）数字产业发展有限公司HZ</span></div><div class="field"><label>报价截止日期</label><span>2026年08月27日 16时00分00秒</span></div><div class="field"><label>预警分钟数</label><span>60</span></div><div class="field"><label>公司</label><span class="blue">海赋（山东）数字产业发展有限公司</span></div></div></section><section><div class="section-title">客户与收货信息</div><div class="fields"><div class="field"><label>客户</label><span>aqtest海赋（山东）数字产业发展有限公司LL</span></div><div class="field"><label>联系人</label><span>侯振鲁</span></div><div class="field"><label>联系电话</label><span>17505308090</span></div><div class="field"><label>收货地址</label><span>山东省菏泽市单县港镇哈伦街1123</span></div></div></section>
+        </div>
+        <div class="detail-title">询价明细 <small>以下为客户提交的询价信息；订购数量按整数展示，请按产品分别报价。</small></div>
+        <div class="table-wrap"><table class="grid"><thead><tr><th>序号</th><th>产品名称</th><th>产品图片</th><th>品牌</th><th>规格</th><th>单位</th><th class="money">订购数量</th><th>期望交期</th><th>期望税率</th><th>备注</th><th>实际税率<span style="color:#ff4d4f">*</span></th><th>含税单价<span style="color:#ff4d4f">*</span></th><th class="money">含税总价</th><th>承诺交期（天）<span style="color:#ff4d4f">*</span></th><th>价格有效期<span style="color:#ff4d4f">*</span></th></tr></thead><tbody>
+          <tr id="productRow1" data-qty="5"><td>100</td><td>大蒜</td><td>📦</td><td>金乡</td><td>4.0</td><td>吨</td><td class="money">5</td><td>2026-08-31</td><td>13%</td><td>需冷链运输</td><td><select class="tax"><option value="">请选择</option><option>13%</option><option>5%</option><option>3%</option><option>0%</option></select></td><td><input class="price" type="number" min="0" step="0.01" placeholder="请输入"></td><td class="money total-cell">¥0.00</td><td><input class="short" type="number" min="1" step="1" placeholder="天"></td><td><input class="valid" type="date"></td></tr>
+          <tr id="productRow2" data-qty="8"><td>101</td><td>洋葱</td><td>📦</td><td>金乡</td><td>3.2</td><td>吨</td><td class="money">8</td><td>2026-09-02</td><td>5%</td><td>—</td><td><select class="tax"><option value="">请选择</option><option>13%</option><option>5%</option><option>3%</option><option>0%</option></select></td><td><input class="price" type="number" min="0" step="0.01" placeholder="请输入"></td><td class="money total-cell">¥0.00</td><td><input class="short" type="number" min="1" step="1" placeholder="天"></td><td><input class="valid" type="date"></td></tr>
+        </tbody></table></div><div class="total"><span>报价产品：<b id="productCount">2</b> 条</span><span>含税报价合计：<b id="grandTotal">¥0.00</b></span></div>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script>
+    const query = new URLSearchParams(window.location.search);
+    const status = query.get('status') || '待填报';
+    const adopted = query.get('adopted') === '1';
+    const platformQuoteGenerated = query.get('locked') === '1';
+    const changedAdopted = query.get('changedAdopted') === '1';
+    const inquiryNo = query.get('no') || 'XJ2026080062';
+    const inquiryMap = {
+      'XJ2026080062': { name:'2026年8月农产品采购询价', products:[['100','大蒜','金乡','4.0','吨','5','2026-08-31','13%'],['101','洋葱','金乡','3.2','吨','8','2026-09-02','5%']] },
+      'XJ2026080067': { name:'山东区域蔬菜采购询价', products:[['100','土豆','荷兰','中等','吨','6','2026-09-03','13%']] },
+      'XJ2026080058': { name:'冷链农产品补货询价', products:[['100','生姜','安丘','中等','吨','3','2026-08-30','13%'],['101','胡萝卜','寿光','大号','吨','7','2026-09-01','3%']] },
+      'XJ2026080049': { name:'农产品月度采购询价', products:[['100','生姜','安丘','大号','吨','4','2026-09-05','5%']] }
+    };
+    const inquiry = inquiryMap[inquiryNo] || inquiryMap['XJ2026080062'];
+    document.getElementById('breadcrumbNo').textContent = inquiryNo;
+    document.getElementById('quoteNo').textContent = inquiryNo;
+    document.getElementById('quoteName').textContent = inquiry.name + ' · 请按每条询价明细填写含税报价、实际税率、承诺交期及价格有效期。';
+    document.getElementById('productCount').textContent = inquiry.products.length;
+    inquiry.products.forEach(function(product, index) {
+      const row = document.getElementById('productRow' + (index + 1));
+      row.style.display = '';
+      product.forEach(function(value, cellIndex) { row.cells[cellIndex].textContent = value; });
+      row.dataset.qty = product[5];
+      row.cells[5].className = 'money';
+    });
+    for (let index = inquiry.products.length; index < 2; index += 1) document.getElementById('productRow' + (index + 1)).style.display = 'none';
+    const state = document.getElementById('state');
+    const readonly = status === '已过期' || platformQuoteGenerated;
+    const stateClass = { '待填报':'', '已提交':' submitted', '已过期':' expired' };
+    state.textContent = status; state.className = 'state' + (stateClass[status] || '');
+    function syncTotal() { let sum = 0; document.querySelectorAll('tbody tr[data-qty]').forEach(function(row) { const price = Number(row.querySelector('.price').value) || 0; const total = price * Number(row.dataset.qty); row.querySelector('.total-cell').textContent = '¥' + total.toFixed(2); sum += total; }); document.getElementById('grandTotal').textContent = '¥' + sum.toFixed(2); }
+    document.querySelectorAll('.price').forEach(function(input) { input.addEventListener('input', syncTotal); });
+    function showToast(message) { const toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show'); clearTimeout(window.timer); window.timer = setTimeout(function(){ toast.classList.remove('show'); }, 2400); }
+    function submitQuote() { const rows = Array.from(document.querySelectorAll('tbody tr[data-qty]')).filter(function(row) { return row.style.display !== 'none'; }); const invalid = rows.some(function(row) { return !row.querySelector('.tax').value || !row.querySelector('.price').value || !row.querySelector('.short').value || !row.querySelector('.valid').value; }); if (invalid) { showToast('请完整填写每条产品的实际税率、含税单价、承诺交期和价格有效期。'); return; } const changed = status === '已提交'; showToast(changed ? '报价已更新，平台将重新获取本次报价。' : '报价已提交，平台已收到本次报价。'); setTimeout(function(){ location.href = '供应商报价详情.html?no=' + encodeURIComponent(inquiryNo) + '&status=已提交' + (adopted ? '&adopted=1&changedAdopted=1' : ''); }, 800); }
+    if (status === '已提交') {
+      const rows = Array.from(document.querySelectorAll('tbody tr[data-qty]')).filter(function(row) { return row.style.display !== 'none'; });
+      rows[0].querySelector('.tax').value = '13%'; rows[0].querySelector('.price').value = inquiryNo === 'XJ2026080058' ? '1200' : '2000'; rows[0].querySelector('.short').value = '4'; rows[0].querySelector('.valid').value = '2026-08-31';
+      if (rows[1]) { rows[1].querySelector('.tax').value = '5%'; rows[1].querySelector('.price').value = inquiryNo === 'XJ2026080058' ? '950' : '1115'; rows[1].querySelector('.short').value = '5'; rows[1].querySelector('.valid').value = '2026-08-31'; }
+      syncTotal();
+      document.getElementById('submitButton').textContent = '更新报价';
+      document.getElementById('submitNote').textContent = '平台生成平台报价单前可继续修改；修改已采用报价后，平台需重新确认采用结果。';
+    }
+    if (changedAdopted) { const banner = document.getElementById('readonlyBanner'); banner.style.display = 'block'; banner.style.borderLeftColor = '#faad14'; banner.style.background = '#fffbe6'; banner.style.color = '#ad6800'; banner.textContent = '采用报价已变更，请重新确认采用结果。平台将不会继续按原采用价格生成平台报价单。'; }
+    if (readonly) { document.querySelectorAll('.grid input,.grid select').forEach(function(el){ el.disabled = true; }); document.getElementById('actionbar').style.display = 'none'; const banner = document.getElementById('readonlyBanner'); banner.style.display = 'block'; banner.textContent = status === '已过期' ? '该询价已过期，无法继续填写或修改报价。' : '平台报价单已生成，本次供应商报价已锁定，无法继续修改。'; }
+  </script>
+</body>
+</html>

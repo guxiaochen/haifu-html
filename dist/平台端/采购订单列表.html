@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>采购订单列表 - 运营管理平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+            background: #f5f7fa; color: #333; font-size: 14px; min-height: 100vh;
+        }
+
+        /* ===== 顶部绿色通栏 ===== */
+        .top-nav {
+            height: 56px; background: #fff; color: #333;
+            display: flex; align-items: center; padding: 0 20px;
+            border-bottom: 1px solid #f0f0f0;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .top-nav-left { display: flex; align-items: center; gap: 24px; }
+        .brand { display: flex; align-items: center; gap: 8px; }
+        .brand-logo {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #2BA471 0%, #5BC09F 100%);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px;
+        }
+        .brand-name { font-size: 16px; font-weight: 600; color: #333; }
+
+        .top-nav-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+        .top-nav-icon {
+            cursor: pointer; color: #666; position: relative;
+            font-size: 18px; padding: 6px;
+            border-radius: 4px;
+        }
+        .top-nav-icon:hover { background: #f5f5f5; color: #2BA471; }
+        .top-nav-icon .badge {
+            position: absolute; top: 2px; right: 2px;
+            background: #ff4d4f; color: #fff; font-size: 11px;
+            min-width: 16px; height: 16px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 4px; line-height: 1;
+        }
+        .account {
+            display: flex; align-items: center; gap: 8px;
+            cursor: pointer; padding: 4px 10px; border-radius: 4px;
+            font-size: 13px; color: #333;
+        }
+        .account:hover { background: #f5f5f5; }
+        .account-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: linear-gradient(135deg, #2BA471, #5BC09F);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 500;
+        }
+        .account-name { font-size: 13px; }
+
+        /* ===== 左右分栏 ===== */
+        .layout { display: flex; min-height: calc(100vh - 56px); }
+
+        /* 右侧主内容 */
+        .main { flex: 1; padding: 16px 20px; overflow-x: auto; }
+        .breadcrumb-bar {
+            background: #fff; padding: 12px 20px;
+            border-radius: 4px; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 8px;
+            font-size: 13px; color: #666;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        .breadcrumb-bar .menu-toggle { font-size: 18px; color: #666; cursor: pointer; margin-right: 8px; }
+        .breadcrumb-bar .home-icon { color: #2BA471; cursor: pointer; }
+        .breadcrumb-bar a { color: #666; text-decoration: none; cursor: pointer; }
+        .breadcrumb-bar a:hover { color: #2BA471; }
+        .breadcrumb-bar .sep { color: #d9d9d9; margin: 0 2px; }
+        .breadcrumb-bar .current { color: #333; font-weight: 500; }
+
+        /* 搜索筛选区 */
+        .filter-card {
+            background: #fff; padding: 20px;
+            border-radius: 4px; margin-bottom: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        .filter-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .filter-item { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+        .filter-item label { color: #666; white-space: nowrap; }
+        .filter-item input, .filter-item select {
+            padding: 6px 10px; border: 1px solid #d9d9d9;
+            border-radius: 2px; font-size: 13px;
+            outline: none; min-width: 140px;
+            transition: border-color .2s;
+        }
+        .filter-item input:focus, .filter-item select:focus { border-color: #2BA471; }
+        .filter-actions { margin-left: auto; display: flex; gap: 8px; }
+
+        /* 按钮 */
+        .btn {
+            padding: 6px 16px; border: 1px solid #d9d9d9;
+            background: #fff; border-radius: 2px;
+            cursor: pointer; font-size: 13px; color: #333;
+            transition: all .2s;
+        }
+        .btn:hover { color: #2BA471; border-color: #2BA471; }
+        .btn-primary {
+            background: #2BA471; color: #fff; border-color: #2BA471;
+        }
+        .btn-primary:hover { background: #229963; border-color: #229963; color: #fff; }
+        .btn-search { background: #fff; }
+
+        /* 列表表格 */
+        .table-card {
+            background: #fff; padding: 16px 20px;
+            border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        .table-toolbar {
+            display: flex; align-items: center; margin-bottom: 14px;
+        }
+        .table-title { font-size: 15px; font-weight: 600; color: #333; }
+        .table-title .count {
+            color: #999; font-weight: 400; font-size: 13px; margin-left: 6px;
+        }
+        .table-toolbar-right { margin-left: auto; display: flex; gap: 8px; }
+        .btn-add {
+            background: #2BA471; color: #fff; border: none;
+            padding: 7px 18px; border-radius: 2px; font-size: 13px;
+            cursor: pointer;
+        }
+        .btn-add:hover { background: #229963; }
+
+        table {
+            width: 100%; border-collapse: collapse; font-size: 13px;
+        }
+        table thead {
+            background: #fafafa;
+        }
+        table th {
+            padding: 10px 10px; text-align: left; color: #555;
+            font-weight: 500; border-bottom: 1px solid #f0f0f0;
+            white-space: nowrap;
+        }
+        table td {
+            padding: 12px 10px; color: #333; border-bottom: 1px solid #f5f5f5;
+        }
+        table tbody tr:hover { background: #fafdfb; }
+
+        /* 状态徽标 */
+        .status {
+            display: inline-block; padding: 2px 10px;
+            border-radius: 10px; font-size: 12px; font-weight: 500;
+        }
+        .status-confirm { background: #e6fffb; color: #00b578; border: 1px solid #87e8de; }
+        .status-pending { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+        .status-done { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .status-cancel { background: #f5f5f5; color: #999; border: 1px solid #d9d9d9; }
+
+        /* 收货状态 */
+        .receive-status {
+            display: inline-block; padding: 2px 10px;
+            border-radius: 10px; font-size: 12px; font-weight: 500;
+        }
+        .receive-none { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+        .receive-partial { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+        .receive-all { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+
+        /* 操作链接 */
+        .link { color: #2BA471; cursor: pointer; text-decoration: none; margin-right: 12px; }
+        .link:hover { text-decoration: underline; }
+        .link-danger { color: #ff4d4f; }
+        .link-danger:hover { color: #ff7875; }
+
+        /* 星标收藏 */
+        .star-col { width: 40px; text-align: center; }
+        .star-btn {
+            font-size: 16px; cursor: pointer; color: #d9d9d9;
+            transition: color .15s;
+        }
+        .star-btn:hover, .star-btn.active { color: #faad14; }
+
+        /* 活动图标 */
+        .activity-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 24px; height: 24px; border-radius: 50%;
+            background: #f5f5f5; color: #999; font-size: 12px;
+        }
+
+        /* 分页 */
+        .pagination {
+            display: flex; align-items: center; justify-content: flex-end;
+            gap: 8px; margin-top: 16px; font-size: 13px; color: #666;
+        }
+        .pagination .page-info { margin-right: 16px; }
+        .page-btn {
+            min-width: 28px; height: 28px; padding: 0 8px;
+            border: 1px solid #d9d9d9; background: #fff;
+            border-radius: 2px; cursor: pointer; font-size: 13px;
+        }
+        .page-btn:hover { color: #2BA471; border-color: #2BA471; }
+        .page-btn.active { background: #2BA471; color: #fff; border-color: #2BA471; }
+        .page-btn:disabled { color: #ccc; cursor: not-allowed; }
+        .page-jumper input {
+            width: 40px; padding: 4px 6px; border: 1px solid #d9d9d9;
+            border-radius: 2px; margin: 0 4px; text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="top-nav">
+    <div class="top-nav-left">
+        <div class="brand">
+            <div class="brand-logo">叶</div>
+            <div class="brand-name">运营管理平台</div>
+        </div>
+    </div>
+    <div class="top-nav-right">
+
+        <div class="top-nav-icon" title="消息">
+            🔔<span class="badge">13</span>
+        </div>
+        <div class="account">
+            <div class="account-avatar">A</div>
+            <div class="account-name">Administrator</div>
+        </div>
+    </div>
+</div>
+
+<!-- 左右分栏 -->
+<div class="layout">
+
+    <!-- 左侧菜单（组件化） -->
+    <div id="sidebar-container"></div>
+
+    <!-- 右侧主内容 -->
+    <main class="main">
+
+        <!-- 面包屑导航 -->
+        <div class="breadcrumb-bar">
+            <span class="menu-toggle">☰</span>
+            <span class="home-icon">🏠</span>
+            <a>首页</a>
+            <span class="sep">/</span>
+            <span class="current">采购订单</span>
+        </div>
+
+        <!-- 搜索筛选区 -->
+        <div class="filter-card">
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label>源单据</label>
+                    <input type="text" id="source-filter" placeholder="请输入源单据">
+                </div>
+                <div class="filter-item">
+                    <label>供应商</label>
+                    <input type="text" placeholder="请输入供应商">
+                </div>
+                
+                <div class="filter-item">
+                    <label>收货状态</label>
+                    <select><option>全部</option><option>未收货</option><option>部分收货</option><option>全部收货</option></select>
+                </div>
+                <div class="filter-item">
+                    <label>付款状态</label>
+                    <select><option>全部</option><option>未支付</option></select>
+                </div>
+                <div class="filter-item">
+                    <label>预计到货时间</label>
+                    <input type="date">
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-search">🔍 搜索</button>
+                    <button class="btn">重置</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 表格 -->
+        <div class="table-card">
+            <div class="table-toolbar">
+                <div class="table-title">
+                    采购订单列表
+                    <span class="count">共 23 条</span>
+                </div>
+                <div class="table-toolbar-right">
+                    <button class="btn">📥 导出</button>
+                    <!-- <button class="btn-add">+ 新建采购订单</button> -->
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:32px;"><input type="checkbox"></th>
+                        <th>采购单号</th>
+                        <th>确认日期</th>
+                        <th>供应商</th>
+                        <th>采购员</th>
+                        <th>源单据</th>
+                        <th>金额</th>
+                        <th>收货状态</th>
+                        <th>付款状态</th>
+                        <th>预计到货时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="po-tbody">
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><a class="link" onclick="location.href='采购订单详情.html?order=P000015&status=confirm'">P000015</a></td>
+                        <td>2025年07月19日 14时35分</td>
+                        <td>aqtest海赋（山...</td>
+                        <td></td>
+                        <td>SO000003</td>
+                        <td>¥ 10,500.00</td>
+                        <td><span class="receive-status receive-all">全部收货</span></td>
+                        <td>未支付</td>
+                        <td>2025年07月19日 14时34分</td>
+                        <td>
+                            <a class="link" onclick="location.href='采购订单详情.html?order=P000015&status=done'">查看</a>
+                            <!-- <a class="link">编辑</a> -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><a class="link" onclick="location.href='采购订单详情.html?order=P000016&status=confirm'">P000016</a></td>
+                        <td>2025年07月19日 21时12分</td>
+                        <td>aqtest海赋（山...</td>
+                        <td></td>
+                        <td>SO000005</td>
+                        <td>¥ 30,000.00</td>
+                        <td><span class="receive-status receive-all">全部收货</span></td>
+                        <td>未支付</td>
+                        <td>2025年07月19日 21时11分</td>
+                        <td>
+                            <a class="link" onclick="location.href='采购订单详情.html?order=P000016&status=done'">查看</a>
+                            <!-- <a class="link">编辑</a> -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><a class="link" onclick="location.href='采购订单详情.html?order=P000017&status=confirm'">P000017</a></td>
+                        <td>2025年07月19日 21时17分</td>
+                        <td>aqtest海赋（山...</td>
+                        <td></td>
+                        <td>SO000006</td>
+                        <td>¥ 10,000.00</td>
+                        <td><span class="receive-status receive-all">全部收货</span></td>
+                        <td>未支付</td>
+                        <td>2025年07月19日 21时17分</td>
+                        <td>
+                            <a class="link" onclick="location.href='采购订单详情.html?order=P000017&status=done'">查看</a>
+                            <!-- <a class="link">编辑</a> -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><a class="link" onclick="location.href='采购订单详情.html?order=P000018&status=confirm'">P000018</a></td>
+                        <td>2025年07月19日 21时30分</td>
+                        <td>aqtest海赋（山...</td>
+                        <td></td>
+                        <td>SO000010</td>
+                        <td>¥ 15,000.00</td>
+                        <td><span class="receive-status receive-partial">部分收货</span></td>
+                        <td>未支付</td>
+                        <td>2025年07月19日 21时30分</td>
+                        <td>
+                            <a class="link" onclick="location.href='采购订单详情.html?order=P000018&status=confirm'">查看</a>
+                            <!-- <a class="link">编辑</a> -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><a class="link" onclick="location.href='采购订单详情.html?order=P000019&status=confirm'">P000019</a></td>
+                        <td>2025年07月19日 23时53分</td>
+                        <td>aqtest海赋（山...</td>
+                        <td></td>
+                        <td>SO000011</td>
+                        <td>¥ 15,000.00</td>
+                        <td><span class="receive-status receive-partial">部分收货</span></td>
+                        <td>未支付</td>
+                        <td>2025年07月19日 23时53分</td>
+                        <td>
+                            <a class="link" onclick="location.href='采购订单详情.html?order=P000019&status=confirm'">查看</a>
+                            <!-- <a class="link">编辑</a> -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><a class="link" onclick="location.href='采购订单详情.html?order=P000020&status=confirm'">P000020</a></td>
+                        <td>2025年07月21日 09时26分</td>
+                        <td>aqtest海赋（山...</td>
+                        <td></td>
+                        <td>SO000013</td>
+                        <td>¥ 10,000.00</td>
+                        <td><span class="receive-status receive-none">未收货</span></td>
+                        <td>未支付</td>
+                        <td>2025年07月21日 09时26分</td>
+                        <td>
+                            <a class="link" onclick="location.href='采购订单详情.html?order=P000020&status=confirm'">查看</a>
+                            <!-- <a class="link">编辑</a> -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><a class="link" onclick="location.href='采购订单详情.html?order=P000021&status=confirm'">P000021</a></td>
+                        <td>2025年07月21日 09时51分</td>
+                        <td>aqtest海赋（山...</td>
+                        <td></td>
+                        <td>SO000014</td>
+                        <td>¥ 100,000.00</td>
+                        <td><span class="receive-status receive-none">未收货</span></td>
+                        <td>未支付</td>
+                        <td>2025年07月21日 09时51分</td>
+                        <td>
+                            <a class="link" onclick="location.href='采购订单详情.html?order=P000021&status=confirm'">查看</a>
+                            <!-- <a class="link">编辑</a> -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><a class="link" onclick="location.href='采购订单详情.html?order=P000022&status=confirm'">P000022</a></td>
+                        <td>2025年07月21日 13时56分</td>
+                        <td>aqtest海赋（山...</td>
+                        <td></td>
+                        <td>SO000017</td>
+                        <td>¥ 1,224.00</td>
+                        <td><span class="receive-status receive-none">未收货</span></td>
+                        <td>未支付</td>
+                        <td>2025年07月21日 13时51分</td>
+                        <td>
+                            <a class="link" onclick="location.href='采购订单详情.html?order=P000022&status=confirm'">查看</a>
+                            <!-- <a class="link">编辑</a> -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><a class="link" onclick="location.href='采购订单详情.html?order=P000023&status=confirm'">P000023</a></td>
+                        <td>2025年07月21日 20时21分</td>
+                        <td>aqtest海赋（山...</td>
+                        <td></td>
+                        <td>SO000019</td>
+                        <td>¥ 10,000.00</td>
+                        <td><span class="receive-status receive-none">未收货</span></td>
+                        <td>未支付</td>
+                        <td>2025年07月21日 20时21分</td>
+                        <td>
+                            <a class="link" onclick="location.href='采购订单详情.html?order=P000023&status=confirm'">查看</a>
+                            <!-- <a class="link">编辑</a> -->
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- 分页 -->
+            <div class="pagination">
+                <span class="page-info">共 23 条</span>
+                <button class="page-btn" disabled>‹</button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">›</button>
+                <span class="page-jumper">
+                    前往 <input type="text" value="1"> 页
+                </span>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- 左侧菜单组件 -->
+<script src="sidebar.js"></script>
+
+<script>
+    // 读取 URL 源单据参数
+    function getParam(name) {
+        var reg = new RegExp('[?&]' + name + '=([^&]*)');
+        var m = location.search.match(reg);
+        return m ? decodeURIComponent(m[1]) : '';
+    }
+
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    function fmt(n) {
+        return '¥ ' + n.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function fmtDate(d) {
+        return d.getFullYear() + '年' + pad(d.getMonth() + 1) + '月' + pad(d.getDate()) + '日 ' +
+               pad(d.getHours()) + '时' + pad(d.getMinutes()) + '分';
+    }
+
+    // 展示待采订单和经理审核通过后自动生成的正式采购订单
+    function appendWorkflowOrders() {
+        var source = getParam('source');
+        var tbody = document.getElementById('po-tbody');
+        var staticRows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+        var visibleStatic = 0;
+        var sf = document.getElementById('source-filter');
+        if (source && sf) sf.value = source;
+
+        staticRows.forEach(function(tr) {
+            var sourceCell = tr.querySelector('td:nth-child(6)');
+            var matched = !source || (sourceCell && sourceCell.textContent.trim() === source);
+            tr.style.display = matched ? '' : 'none';
+            if (matched) visibleStatic++;
+        });
+
+        var generatedOrders = [];
+        try { generatedOrders = JSON.parse(localStorage.getItem('generatedPurchaseOrders') || '[]'); } catch (e) {}
+        var now = new Date();
+        var added = 0;
+
+        generatedOrders.forEach(function(order, index) {
+            if (source && order.source !== source) return;
+            var poNo = order.poNo || ('P' + (100000 + 24 + index));
+            var tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td><input type="checkbox"></td>' +
+                '<td><a class="link" onclick="location.href=\'采购订单详情.html?order=' + poNo + '&status=confirm\'">' + poNo + '</a></td>' +
+                '<td>' + fmtDate(now) + '</td><td>' + order.supplier + '</td><td></td><td>' + order.source + '</td>' +
+                '<td>' + fmt(order.amount) + '</td><td><span class="receive-status receive-none">未收货</span></td>' +
+                '<td>未支付</td><td>' + fmtDate(now) + '</td>' +
+                '<td><a class="link" onclick="location.href=\'采购订单详情.html?order=' + poNo + '&status=confirm\'">查看</a></td>';
+            tbody.appendChild(tr); added++;
+        });
+
+        var total = visibleStatic + added;
+        document.querySelector('.table-title .count').textContent = '共 ' + total + ' 条';
+        document.querySelector('.pagination .page-info').textContent = '共 ' + total + ' 条';
+    }
+
+    appendWorkflowOrders();
+</script>
+
+</body>
+</html>

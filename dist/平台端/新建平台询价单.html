@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>新建平台询价单 - 运营管理平台</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;min-width:1180px;background:#f5f7fa;color:#333;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}.top{height:56px;display:flex;align-items:center;padding:0 20px;border-bottom:1px solid #eee;background:#fff}.brand{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600}.logo{display:grid;width:32px;height:32px;place-items:center;border-radius:50%;background:#2BA471;color:#fff}.user{margin-left:auto;color:#666}.layout{display:flex;min-height:calc(100vh - 56px)}.main{flex:1;min-width:0;padding:16px 20px 36px}.crumb{margin:0 0 12px 4px;color:#666;font-size:13px}.crumb a{color:#2BA471;text-decoration:none}.card{margin-bottom:12px;padding:20px;border-radius:4px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.04)}.title{display:flex;align-items:center;margin-bottom:20px}.title b{font-size:17px}.title span{margin-left:10px;color:#999;font-size:12px}.section-title{margin:20px 0 14px;padding-left:9px;border-left:3px solid #2BA471;color:#2BA471;font-weight:600}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 32px}.field{display:flex;align-items:center;gap:12px}.field label{width:104px;flex:0 0 104px;color:#666;text-align:right}.field input{width:100%;height:32px;padding:0 10px;border:1px solid #d9d9d9;border-radius:2px;outline:0}.field input:focus{border-color:#2BA471}.readonly{padding-left:10px;color:#555}.section-head{display:flex;align-items:center;justify-content:space-between;margin:26px 0 14px}.detail-tab{padding:7px 14px;border-radius:4px 4px 0 0;border-bottom:2px solid #2BA471;background:#f0faf5;color:#2BA471;font-weight:600}.table-wrap{overflow-x:auto}.grid{width:100%;min-width:1280px;border-collapse:collapse}.grid th{padding:11px 10px;background:#fafafa;border-bottom:1px solid #eee;color:#555;text-align:center;font-weight:500;white-space:nowrap}.grid td{padding:9px 10px;border-bottom:1px solid #f4f4f4;text-align:center;vertical-align:middle}.grid th:last-child,.grid td:last-child{width:72px;min-width:72px}.cell-edit{min-width:74px;min-height:30px;padding:6px 7px;border-bottom:1px dashed #b7cdbf;border-radius:3px;background:#f8fbf9;color:#25332b;text-align:center;outline:0;cursor:text}.cell-edit:empty:before{content:attr(data-placeholder);color:#a8b5ad}.cell-edit:hover,.cell-edit:focus{border-bottom-color:#2BA471;background:#edf8f1;box-shadow:inset 0 0 0 1px #2BA471}.cell-edit[data-key="qty"]{background:#fffaf0}.row-delete{padding:0;border:0;background:transparent;color:#ff4d4f;white-space:nowrap;cursor:pointer}.link-btn{margin-top:12px;padding:0;border:0;background:transparent;color:#2BA471;cursor:pointer}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}.btn{height:32px;padding:0 14px;border:1px solid #d9d9d9;border-radius:2px;background:#fff;color:#333;cursor:pointer}.btn.primary{border-color:#2BA471;background:#2BA471;color:#fff}.hint{margin:10px 0 0;color:#999;font-size:12px}.modal-mask{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45)}.modal-mask.show{display:flex}.modal{width:560px;max-width:calc(100vw - 32px);overflow:hidden;border-radius:6px;background:#fff;box-shadow:0 14px 40px rgba(0,0,0,.2)}.modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #f0f0f0;font-weight:600}.modal-head button{border:0;background:transparent;color:#999;cursor:pointer;font-size:20px}.modal-body{padding:20px;color:#666;line-height:1.8}.modal-body input{margin-top:12px}.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px;border-top:1px solid #f0f0f0}@media(max-width:1000px){.fields{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header class="top"><div class="brand"><span class="logo">叶</span>运营管理平台</div><div class="user">🔔　Administrator</div></header>
+  <div class="layout"><div id="sidebar-container"></div><main class="main">
+    <div class="crumb"><a href="平台询价单列表.html">平台询价单</a> / 新建询价单</div>
+    <section class="card"><div class="title"><b>新建平台询价单</b><span>创建后先进入“待分配”，由具备分配权限的人员指定处理人。</span></div><div id="quoteHistory" class="hint" style="display:none;padding:10px 12px;border:1px solid #d9eadf;background:#f7fcf9;color:#527566"></div>
+      <div class="section-title">基础信息</div>
+      <div class="fields"><div class="field"><label>创建人</label><span class="readonly">张三（当前操作人）</span></div><div class="field"><label>项目/询价名称</label><input id="project" placeholder="选填"></div><div class="field"><label>报价截止日期</label><input id="deadline" type="datetime-local"></div><div class="field"><label>付款条款</label><input id="payment" placeholder="选填"></div></div>
+      <div class="section-title">客户与收货信息</div>
+      <div class="fields"><div class="field"><label>客户名称</label><input id="customer" placeholder="选填；无客户时默认为平台自营采购"></div><div class="field"><label>联系人</label><input id="contact" placeholder="选填"></div><div class="field"><label>联系电话</label><input id="phone" placeholder="选填"></div><div class="field"><label>收货地址</label><input id="address" placeholder="选填"></div></div>
+      <div class="section-head"><div class="detail-tab">询价明细</div><button class="btn primary" id="importBtn" type="button">产品导入</button></div>
+      <div class="table-wrap"><table class="grid"><thead><tr><th>序号</th><th>产品名称</th><th>品牌</th><th>规格/型号</th><th>单位</th><th>订购数量</th><th>期望交期</th><th>期望税率</th><th>备注</th><th>操作</th></tr></thead><tbody id="items"></tbody></table></div><button class="link-btn" type="button" onclick="addRow()">+ 添加行</button><p class="hint">可按询价明细模板导入；表格单元格点击后直接录入，订购数量仅支持整数，期望税率以百分比填写。</p>
+      <p class="hint" id="formError" style="display:none;color:#cf1322"></p><div class="actions"><button class="btn" type="button" onclick="location.href='平台询价单列表.html'">取消</button><button class="btn primary" type="button" onclick="createInquiry()">创建并进入待分配</button></div>
+    </section>
+  </main></div>
+  <div class="modal-mask" id="importModal"><div class="modal" role="dialog" aria-modal="true"><div class="modal-head">导入产品明细 <button type="button" id="closeImport" aria-label="关闭">×</button></div><div class="modal-body">请选择产品明细文件（支持 .xlsx）<br><input id="importFile" type="file" accept=".xlsx"></div><div class="modal-foot"><button class="btn" type="button" id="cancelImport">取消</button><button class="btn primary" type="button" id="confirmImport">导入</button></div></div></div>
+  <script>
+    var params=new URLSearchParams(location.search),fromQuote=params.get('fromQuote'),rejectedIndexes=(params.get('rejectedLines')||'').split(',').filter(function(value){return value!==''}).map(Number),sourceQuoteLines=[{name:'大蒜',brand:'金乡',spec:'4.0',unit:'吨',qty:'5',delivery:'2026-08-31',tax:'13%',note:'需冷链运输'},{name:'洋葱',brand:'金乡',spec:'3.2',unit:'吨',qty:'8',delivery:'2026-09-02',tax:'5%',note:'—'}],items=fromQuote?sourceQuoteLines.filter(function(row,index){return !rejectedIndexes.length||rejectedIndexes.indexOf(index)>=0}).map(function(row){return Object.assign({},row)}):[{}];if(fromQuote){var history=document.getElementById('quoteHistory');history.style.display='block';history.innerHTML='本次为二次询价，来源平台报价单：<a href="平台报价单详情.html?status=已完成&amp;quote='+encodeURIComponent(fromQuote)+'" style="color:#2BA471;text-decoration:none">'+fromQuote+'（查看原报价）</a>；已带入未接受或已失效的 '+items.length+' 条产品明细。';document.getElementById('project').value='2026年8月农产品采购重新报价';document.getElementById('customer').value='aqtest海赋（山东）数字产业发展有限公司LL';document.getElementById('contact').value='侯振鲁';document.getElementById('phone').value='17505308090';document.getElementById('address').value='山东省菏泽市单县港镇哈伦街1123';document.getElementById('payment').value='立即付款';}function esc(value){return String(value||'').replace(/[&<>"']/g,function(s){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[s]})}function render(){document.getElementById('items').innerHTML=items.map(function(row,index){function cell(key,placeholder){return '<div class="cell-edit" contenteditable="true" role="textbox" data-index="'+index+'" data-key="'+key+'" data-placeholder="'+placeholder+'">'+esc(row[key])+'</div>'}return '<tr><td>'+(index+1)+'</td><td>'+cell('name','请输入产品名称')+'</td><td>'+cell('brand','请输入品牌')+'</td><td>'+cell('spec','请输入规格/型号')+'</td><td>'+cell('unit','请输入单位')+'</td><td>'+cell('qty','请输入订购数量')+'</td><td>'+cell('delivery','请输入期望交期')+'</td><td>'+cell('tax','例如 13%')+'</td><td>'+cell('note','选填')+'</td><td><button class="row-delete" type="button" data-del="'+index+'">删除</button></td></tr>'}).join('');document.querySelectorAll('[data-key]').forEach(function(cell){cell.oninput=function(){items[Number(this.dataset.index)][this.dataset.key]=this.textContent.trim()};cell.onblur=function(){var row=items[Number(this.dataset.index)],key=this.dataset.key,value=this.textContent.trim();if(key==='qty')value=value.replace(/[^0-9]/g,'');if(key==='tax'){value=value.replace(/[^0-9.]/g,'');value=value?value+'%':''}row[key]=value;this.textContent=value}});document.querySelectorAll('[data-del]').forEach(function(btn){btn.onclick=function(){items.splice(Number(this.dataset.del),1);if(!items.length)items.push({});render()}})}function addRow(){items.push({});render()}function closeImport(){document.getElementById('importModal').classList.remove('show')}function createInquiry(){var valid=items.some(function(row){return row.name&&row.unit&&Number(row.qty)>0}),error=document.getElementById('formError');if(!valid){error.textContent='请至少填写一条产品名称、单位和正整数订购数量。';error.style.display='block';return}error.style.display='none';var now=new Date(),no='XJ'+now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+String(now.getTime()).slice(-4),customerValue=document.getElementById('customer').value.trim()||'海赋（山东）数字产业发展有限公司（平台自营）',deadlineValue=document.getElementById('deadline').value,payload={no:no,customer:customerValue,project:document.getElementById('project').value.trim(),contact:document.getElementById('contact').value.trim(),phone:document.getElementById('phone').value.trim(),address:document.getElementById('address').value.trim(),payment:document.getElementById('payment').value.trim(),deadline:deadlineValue,created:now.toLocaleDateString('zh-CN').replaceAll('/','-'),handler:'待分配',items:items.filter(function(row){return row.name&&row.unit&&Number(row.qty)>0})};sessionStorage.setItem('platformNewInquiry',JSON.stringify(payload));location.href='平台询价单详情.html?status='+encodeURIComponent('待分配')+'&inquiry='+encodeURIComponent(no)+'&handler='+encodeURIComponent('待分配')+'&created=1'}document.getElementById('importBtn').onclick=function(){document.getElementById('importModal').classList.add('show')};document.getElementById('closeImport').onclick=closeImport;document.getElementById('cancelImport').onclick=closeImport;document.getElementById('importModal').onclick=function(event){if(event.target===this)closeImport()};document.getElementById('confirmImport').onclick=function(){if(!document.getElementById('importFile').files.length){document.getElementById('formError').textContent='请选择 .xlsx 产品明细文件。';document.getElementById('formError').style.display='block';return}items.push({name:'导入产品示例',brand:'金乡',spec:'4.0',unit:'件',qty:'1',delivery:'',tax:'13%',note:''});closeImport();render()};render();
+  </script><script>
+    /* 保存二次询价来源，供询价完成后生成一张关联原报价单的新平台报价单。 */
+    (function () {
+      var originalCreateInquiry = createInquiry;
+      createInquiry = function () {
+        originalCreateInquiry();
+        var search = new URLSearchParams(location.search);
+        var fromQuote = search.get('fromQuote');
+        if (!fromQuote) return;
+        try {
+          var record = JSON.parse(sessionStorage.getItem('platformNewInquiry') || 'null');
+          if (record) {
+            record.fromQuote = fromQuote;
+            record.sourceInquiry = search.get('sourceInquiry') || '';
+            record.rejectedLines = search.get('rejectedLines') || '';
+            sessionStorage.setItem('platformNewInquiry', JSON.stringify(record));
+          }
+        } catch (error) {}
+      };
+    }());
+  </script><script>
+    /* 二次询价：在原脚本填入报价明细后，补齐原询价基础信息与可追溯入口。 */
+    (function () {
+      var search = new URLSearchParams(location.search);
+      var fromQuote = search.get('fromQuote');
+      if (!fromQuote) return;
+      var sourceInquiry = search.get('sourceInquiry') || (fromQuote === 'BJ20260821018' ? 'XJ2026080058' : 'XJ2026080062');
+      var carriedData = search.get('requoteItems');
+      if (carriedData) {
+        try {
+          var parsedItems = JSON.parse(carriedData);
+          if (Array.isArray(parsedItems) && parsedItems.length) {
+            items = parsedItems;
+            render();
+          }
+        } catch (error) {}
+      }
+      var carriedItems = document.querySelectorAll('#items tr').length;
+      var history = document.getElementById('quoteHistory');
+      history.style.display = 'block';
+      history.innerHTML = '本次为二次询价，已带入原询价单 <a href="平台询价单详情.html?status=已完成&amp;inquiry=' + encodeURIComponent(sourceInquiry) + '" style="color:#2BA471;text-decoration:none">' + sourceInquiry + '（查看原询价）</a> 的基础信息，以及来源平台报价单 <a href="平台报价单详情.html?status=已完成&amp;quote=' + encodeURIComponent(fromQuote) + '&amp;sourceInquiry=' + encodeURIComponent(sourceInquiry) + '" style="color:#2BA471;text-decoration:none">' + fromQuote + '（查看原报价）</a> 中未接受或已失效的 ' + carriedItems + ' 条产品明细。';
+      document.getElementById('project').value = '2026年8月农产品采购重新报价';
+      document.getElementById('deadline').value = '2026-08-26T15:00';
+      document.getElementById('customer').value = 'aqtest海赋（山东）数字产业发展有限公司LL';
+      document.getElementById('contact').value = '侯振鲁';
+      document.getElementById('phone').value = '17505308090';
+      document.getElementById('address').value = '山东省菏泽市单县港镇哈伦街1123';
+      document.getElementById('payment').value = '立即付款';
+    }());
+  </script><script src="sidebar.js"></script>
+</body>
+</html>

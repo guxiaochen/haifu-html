@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>销售订单详情 - 供应商端</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f4f6f9;color:#1f2937;font-size:14px;min-height:100vh}
+
+/* ===== 主区域 ===== */
+.main-area{margin-left:200px;min-height:100vh}
+.top-nav{height:64px;background:#fff;display:flex;align-items:center;padding:0 32px;border-bottom:1px solid #edf0f4;position:sticky;top:0;z-index:10}
+.breadcrumb{display:flex;align-items:center;gap:9px;color:#9aa5b1;font-size:13px}
+.breadcrumb a{color:#667382;text-decoration:none;cursor:pointer}
+.breadcrumb a:hover{color:#1890ff}
+.breadcrumb .current{color:#253142;font-weight:600}
+.breadcrumb .sep{color:#cfd6de}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:22px;color:#778393}
+.notice{font-size:18px;position:relative;cursor:pointer}
+.badge{position:absolute;top:-7px;right:-8px;background:#ff4d4f;border:2px solid #fff;color:#fff;min-width:16px;height:16px;padding:0 4px;border-radius:9px;font-size:10px;display:flex;align-items:center;justify-content:center}
+.user{display:flex;align-items:center;gap:9px;color:#475467;cursor:pointer}
+.avatar{width:30px;height:30px;border-radius:50%;background:#e6f4ff;color:#1890ff;display:flex;align-items:center;justify-content:center;font-weight:600}
+
+.main{padding:26px 32px 40px;max-width:1600px}
+
+/* ===== 页面标题卡片 ===== */
+.title-card{position:relative;background:#fff;padding:14px 20px;border-radius:4px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.04);display:flex;align-items:center;justify-content:space-between}
+.title-card-left{display:flex;align-items:center;gap:12px}
+.title-order-no{font-size:18px;font-weight:600;color:#253142}
+.title-card-right{display:flex;align-items:center;gap:0}
+
+/* ===== 送货单胶囊提醒（嵌入标题卡片右侧、与步骤条垂直居中） ===== */
+.delivery-alert{display:none;align-items:center;gap:6px;padding:5px 12px 5px 8px;background:#f0faf5;color:#2BA471;border:1px solid #b7eb8f;border-radius:16px;font-size:12px;cursor:pointer;transition:all .2s;margin-right:14px}
+.delivery-alert:hover{background:#e6f7ef;border-color:#2BA471}
+.delivery-alert .alert-icon{width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:#2BA471;color:#fff;border-radius:50%;font-size:12px}
+.delivery-alert .alert-text{font-weight:500}
+.delivery-alert .alert-arrow{font-size:14px}
+
+/* ===== 主内容卡片 ===== */
+.content-card{background:#fff;padding:20px 24px;border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.04);margin-bottom:12px}
+
+/* ===== 操作栏 + 步骤条 ===== */
+.action-bar{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid #f5f5f5}
+.action-bar-left{display:flex;align-items:center;gap:8px}
+.action-bar-right{margin-left:auto;display:flex;align-items:center;gap:0}
+
+/* 操作按钮 */
+.btn-action{padding:7px 20px;border:1px solid #d9d9d9;background:#fff;border-radius:2px;cursor:pointer;font-size:13px;color:#666;transition:all .15s}
+.btn-action:hover{color:#1890ff;border-color:#1890ff}
+.btn-action.primary{background:#1890ff;color:#fff;border-color:#1890ff}
+.btn-action.primary:hover{background:#40a9ff;border-color:#40a9ff}
+.btn-action:disabled{color:#ccc;border-color:#eee;background:#fafafa;cursor:not-allowed}
+.btn-action:disabled:hover{color:#ccc;border-color:#eee;background:#fafafa}
+
+/* 斜箭头步骤条 */
+.step-tabs{display:flex;align-items:center;gap:0}
+.step-tab{padding:6px 18px;background:#f5f5f5;color:#666;font-size:13px;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 50%,calc(100% - 8px) 100%,0 100%,8px 50%);margin-right:-8px;transition:all .15s}
+.step-tab:first-child{clip-path:polygon(0 0,calc(100% - 8px) 0,100% 50%,calc(100% - 8px) 100%,0 100%)}
+.step-tab:last-child{clip-path:polygon(0 0,100% 0,100% 100%,0 100%,8px 50%);margin-right:0}
+.step-tab.active{background:#1890ff;color:#fff}
+.step-tab.done{background:#e8e8e8;color:#999}
+
+/* ===== 订单信息区 ===== */
+.info-section{display:grid;grid-template-columns:1fr 1fr;gap:36px 72px;margin-bottom:8px}
+.info-column{display:flex;flex-direction:column;gap:22px;padding:4px 0}
+.info-column-title{font-size:14px;font-weight:600;color:#253142;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.info-column-title::before{content:"";display:inline-block;width:3px;height:14px;background:#1890ff;border-radius:2px}
+.form-item{display:flex;align-items:flex-start;gap:20px;padding:4px 0}
+.form-label{min-width:84px;color:#667382;font-size:13px;text-align:right;flex-shrink:0;padding-top:2px}
+.form-value{color:#253142;font-size:13px;flex:1;line-height:1.6}
+.form-value .link{color:#1890ff;cursor:pointer;text-decoration:none}
+.form-value .link:hover{text-decoration:underline}
+
+/* 红色标注说明 */
+.tag-hint{display:inline-block;margin-left:6px;padding:1px 6px;background:#fff7e6;color:#d48806;border:1px solid #ffd591;font-size:11px;border-radius:2px}
+.tag-hint.red{background:#fff2f0;color:#cf1322;border:1px solid #ffa39e}
+.tag-hint-block{display:block;margin-top:4px;padding:1px 6px;background:#fff2f0;color:#cf1322;border:1px solid #ffa39e;font-size:11px;border-radius:2px}
+
+/* ===== Tab 切换 ===== */
+.tab-bar{display:flex;gap:0;margin-top:28px;border-bottom:1px solid #f0f0f0}
+.tab-btn{padding:10px 20px;cursor:pointer;font-size:14px;color:#666;border-bottom:2px solid transparent;transition:all .15s}
+.tab-btn:hover{color:#1890ff}
+.tab-btn.active{color:#1890ff;border-bottom-color:#1890ff;font-weight:500}
+.tab-content{display:none;padding-top:16px}
+.tab-content.active{display:block}
+
+/* 空内容提示 */
+.empty-tip{text-align:center;padding:40px 20px;color:#999;font-size:13px}
+
+/* ===== 明细表 ===== */
+table.items-table{width:100%;border-collapse:collapse;font-size:13px}
+table.items-table thead{background:#fafafa}
+table.items-table th{padding:10px 12px;text-align:left;color:#555;font-weight:500;border-bottom:1px solid #f0f0f0;white-space:nowrap}
+table.items-table td{padding:12px;color:#333;border-bottom:1px solid #f5f5f5}
+table.items-table tbody tr:hover{background:#fafbff}
+.product-info{display:flex;flex-direction:column;gap:2px}
+.product-code{font-size:12px;color:#999}
+.product-img{width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;background:#f5f7fa;border:1px solid #e5e7eb;border-radius:5px;font-size:22px}
+.tax-tag{display:inline-block;padding:1px 6px;background:#f0f5ff;color:#1890ff;border:1px solid #d6e4ff;border-radius:2px;font-size:11px}
+
+/* 底部金额 */
+.footer-bar{display:flex;align-items:flex-end;justify-content:space-between;margin-top:16px;padding-top:12px}
+.totals{text-align:right}
+.totals .row{display:flex;gap:16px;font-size:13px;margin-bottom:4px}
+.totals .row .label{color:#666;min-width:70px;text-align:right}
+.totals .row .value{color:#333;min-width:100px;text-align:right}
+.totals .row.total .label{font-weight:600}
+.totals .row.total .value{color:#1890ff;font-weight:600;font-size:15px}
+
+/* ===== Toast ===== */
+.toast{position:fixed;top:82px;left:50%;transform:translateX(-50%);padding:11px 20px;border:1px solid #b7dcff;background:#f5fbff;color:#1677d2;border-radius:5px;box-shadow:0 7px 20px rgba(24,144,255,.12);display:none;z-index:50}
+.toast.show{display:block}
+
+/* ===== 确认弹窗 ===== */
+.modal-mask{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
+.modal-mask.show{display:flex}
+.modal{background:#fff;border-radius:6px;width:380px;padding:24px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:8px}
+.modal-desc{font-size:13px;color:#666;margin-bottom:20px;line-height:1.6}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+.modal-actions .btn{padding:7px 18px;border-radius:2px;cursor:pointer;font-size:13px;border:1px solid #d9d9d9;background:#fff;color:#333;transition:all .15s}
+.modal-actions .btn:hover{color:#1890ff;border-color:#1890ff}
+.modal-actions .btn-primary{background:#1890ff;color:#fff;border-color:#1890ff}
+.modal-actions .btn-primary:hover{background:#40a9ff}
+
+/* ===== 重置演示按钮（嵌入标题卡片） ===== */
+.btn-reset{padding:6px 14px;border:1px solid #d9d9d9;background:#fff;border-radius:2px;cursor:pointer;font-size:12px;color:#999;transition:all .15s;margin-left:auto;margin-right:12px;white-space:nowrap}
+.btn-reset:hover{color:#ff4d4f;border-color:#ff4d4f}
+</style>
+</head>
+<body>
+<script src="sidebar.js"></script>
+
+<div class="main-area">
+    <header class="top-nav">
+        <div class="breadcrumb">
+             <a onclick="location.href='销售订单列表.html'">首页</a><span class="sep">/</span>
+            <a onclick="location.href='销售订单列表.html'">销售订单</a><span class="sep">/</span>
+            <span class="current" id="breadcrumb-order">查看销售订单</span>
+        </div>
+        <div class="top-actions"><span class="notice">♧<span class="badge">3</span></span><div class="user"><span class="avatar">管</span><span>超级管理员</span><span style="font-size:11px">⌄</span></div></div>
+    </header>
+
+    <main class="main">
+
+        <!-- 页面标题卡片 -->
+        <div class="title-card">
+            <div class="title-card-left">
+                <span class="title-order-no" id="display-order-no">PO000015</span>
+            </div>
+            <div class="title-card-right">
+                <button class="btn-reset" id="demoResetBtn" onclick="resetDemo()" title="重置演示数据，恢复初始状态">⟲ 重置演示</button>
+                <div class="delivery-alert" id="deliveryAlert" onclick="openShipments()">
+                    <span class="alert-icon">📦</span>
+                    <span class="alert-text" id="deliveryAlertText">送货单 × 1</span>
+                    <span class="alert-arrow">›</span>
+                </div>
+                <div class="step-tabs">
+                    <div class="step-tab active" id="step-0">待确认</div>
+                    <div class="step-tab" id="step-1">已确认</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容卡片 -->
+        <div class="content-card">
+
+            <!-- 操作按钮 -->
+            <div class="action-bar">
+                <div class="action-bar-left">
+                    <button class="btn-action primary" id="btn-confirm" onclick="confirmOrder()">确认销售</button>
+                </div>
+            </div>
+
+            <!-- 订单信息（左右两栏） -->
+            <div class="info-section">
+                <!-- 左栏：销方信息（供应商自身） -->
+                <div class="info-column">
+                    <div class="info-column-title">销方信息</div>
+                    <div class="form-item">
+                        <label class="form-label">供应商</label>
+                        <div class="form-value">aqtest海赋（山东）数字产业发展有限公司HZ</div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">联系人</label>
+                        <div class="form-value">冉海龙<span class="tag-hint red">左侧的联系人、电话、地址都是供应商信息</span></div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">电话</label>
+                        <div class="form-value">17864788088</div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">地址</label>
+                        <div class="form-value">山东省菏泽市牡丹区兰州路66号</div>
+                    </div>
+                </div>
+
+                <!-- 右栏：客户信息 -->
+                <div class="info-column">
+                    <div class="info-column-title">客户信息</div>
+                    <div class="form-item">
+                        <label class="form-label">订单截止日期</label>
+                        <div class="form-value">2025年07月25日</div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">客户名称</label>
+                        <div class="form-value">agtest淘宝（山东）数字产业发展有限公司LL<span class="tag-hint red">联系人和电话根据平台采购订单的选择进行展示</span></div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">联系人</label>
+                        <div class="form-value">侯振鲁</div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">电话</label>
+                        <div class="form-value">17505308090</div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">收货人</label>
+                        <div class="form-value">侯振鲁<span class="tag-hint red">收货人、收货电话、地址是真实客户的收货人信息</span></div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">收货电话</label>
+                        <div class="form-value">17505308090</div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">收货地址</label>
+                        <div class="form-value">兰州路66号</div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">备注</label>
+                        <div class="form-value">请按期交货，包装需符合运输标准</div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- Tab 切换 -->
+            <div class="tab-bar">
+                <div class="tab-btn active">产品清单</div>
+            </div>
+
+            <!-- 产品清单 -->
+            <div class="tab-content active" id="tab-product">
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>商品图片</th>
+                            <th>物料编码</th>
+                            <th>产品名称</th>
+                            <th>规格型号</th>
+                            <th>品牌</th>
+                            <th>数量</th>
+                            <th>单位</th>
+                            <th>单价</th>
+                            <th>税率</th>
+                            <th>含税金额</th>
+                            <th>预计到货时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td><span class="product-img" aria-label="商品图片">📦</span></td>
+                            <td>0000807</td>
+                            <td>
+                                <div class="product-info">
+                                    <div>BAITESI/伯特斯 手动液压堆高车</div>
+                                    <div class="product-code">CTY-1</div>
+                                </div>
+                            </td>
+                            <td>CTY-1 载重1t 货叉...</td>
+                            <td>BAITESI/佰...</td>
+                            <td>1.00</td>
+                            <td>台</td>
+                            <td>3,170.59</td>
+                            <td><span class="tax-tag">13% 进项税</span></td>
+                            <td>¥ 3,170.59</td>
+                            <td>2025-07-25</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td><span class="product-img" aria-label="商品图片">📦</span></td>
+                            <td>0000808</td>
+                            <td>
+                                <div class="product-info">
+                                    <div>BAITESI/伯特斯 电动液压搬运车</div>
+                                    <div class="product-code">CBD-2</div>
+                                </div>
+                            </td>
+                            <td>CBD-2 载重2t...</td>
+                            <td>BAITESI/佰...</td>
+                            <td>1.00</td>
+                            <td>台</td>
+                            <td>5,800.00</td>
+                            <td><span class="tax-tag">13% 进项税</span></td>
+                            <td>¥ 5,800.00</td>
+                            <td>2025-07-25</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td><span class="product-img" aria-label="商品图片">📦</span></td>
+                            <td>00000442</td>
+                            <td>
+                                <div class="product-info">
+                                    <div>世达 工具套装</div>
+                                    <div class="product-code">SATA-09</div>
+                                </div>
+                            </td>
+                            <td>53件套</td>
+                            <td>世达/SATA</td>
+                            <td>5.00</td>
+                            <td>套</td>
+                            <td>198.00</td>
+                            <td><span class="tax-tag">13% 进项税</span></td>
+                            <td>¥ 990.00</td>
+                            <td>2025-07-28</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td><span class="product-img" aria-label="商品图片">📦</span></td>
+                            <td>00000443</td>
+                            <td>
+                                <div class="product-info">
+                                    <div>海尔 智能门锁</div>
+                                    <div class="product-code">HDL-01</div>
+                                </div>
+                            </td>
+                            <td>指纹+密码</td>
+                            <td>海尔</td>
+                            <td>2.00</td>
+                            <td>台</td>
+                            <td>60.00</td>
+                            <td><span class="tax-tag">13% 进项税</span></td>
+                            <td>¥ 120.00</td>
+                            <td>2025-07-28</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="footer-bar">
+                    <div></div>
+                    <div class="totals">
+                        <div class="row"><span class="label">未税金额:</span><span class="value">¥ 8,916.81</span></div>
+                        <div class="row"><span class="label">增值税13%:</span><span class="value">¥ 1,163.78</span></div>
+                        <div class="row total"><span class="label">总计:</span><span class="value">¥ 10,080.59</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+</div>
+
+<!-- 确认弹窗 -->
+<div class="modal-mask" id="confirmModal">
+    <div class="modal">
+        <div class="modal-title" id="modalTitle">确认销售</div>
+        <div class="modal-desc" id="modalDesc">确认后将接受此销售订单，是否继续？</div>
+        <div class="modal-actions">
+            <button class="btn" onclick="closeModal()">取消</button>
+            <button class="btn btn-primary" id="modalConfirmBtn" onclick="doConfirm()">确认</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    // ===== 工具函数 =====
+    function showToast(msg) {
+        var t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(window._toastTimer);
+        window._toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2200);
+    }
+
+    function getParam(name) {
+        var reg = new RegExp('[?&]' + name + '=([^&]*)');
+        var m = location.search.match(reg);
+        return m ? decodeURIComponent(m[1]) : '';
+    }
+
+    // ===== 按销售订单号索引的送货单字典（用于详情页胶囊统计条数） =====
+    var SHIPMENT_DB = {
+        PO000015: [{ sale: "PO000015", delivery: "DS/00001", status: "pending" }],
+        PO000019: [{ sale: "PO000019", delivery: "DS/00001", status: "pending" }],
+        PO000023: [{ sale: "PO000023", delivery: "DS/00001", status: "sent" }],
+        PO000026: [
+            { sale: "PO000026", delivery: "DS/00001", status: "pending" },
+            { sale: "PO000026", delivery: "DS/00002", status: "sent" },
+            { sale: "PO000026", delivery: "DS/00003", status: "received" }
+        ]
+    };
+
+    // ===== 销售订单状态 =====
+    var currentStatus = 0;
+    var shipment = 'unshipped';
+    var pendingAction = null;
+
+    function updateSteps() {
+        for (var i = 0; i < 2; i++) {
+            var el = document.getElementById('step-' + i);
+            el.className = 'step-tab';
+            if (i < currentStatus) el.classList.add('done');
+            else if (i === currentStatus) el.classList.add('active');
+        }
+    }
+
+    function updateActionButtons() {
+        var btn = document.getElementById('btn-confirm');
+        // 只保留「确认销售」：待确认可点，已确认及之后按钮隐藏（发货由送货单驱动）
+        if (currentStatus === 0) { btn.style.display = ''; btn.textContent = '确认销售'; btn.disabled = false; }
+        else { btn.style.display = 'none'; }
+        document.getElementById('deliveryAlert').style.display = currentStatus >= 1 ? 'flex' : 'none';
+        // 按订单号查送货单字典，动态统计送货单条数（部分发货 PO000026 = 3 条，其余 = 1 条）
+        var orderNo = document.getElementById('display-order-no').textContent;
+        var count = (SHIPMENT_DB[orderNo] && SHIPMENT_DB[orderNo].length) || 1;
+        document.getElementById('deliveryAlertText').textContent = '送货单 × ' + count;
+    }
+
+    function openShipments() {
+        var orderNo = document.getElementById('display-order-no').textContent;
+        location.href = '送货单列表.html?order=' + encodeURIComponent(orderNo) + '&shipment=' + encodeURIComponent(shipment);
+    }
+
+    function confirmOrder() {
+        pendingAction = 'confirm';
+        document.getElementById('modalTitle').textContent = '确认销售';
+        document.getElementById('modalDesc').textContent = '确认后将生成 1 条送货单并流转至「已确认」，是否继续？发货操作请在对应送货单中完成。';
+        document.getElementById('modalConfirmBtn').textContent = '确认销售';
+        document.getElementById('confirmModal').classList.add('show');
+    }
+
+    function closeModal() { document.getElementById('confirmModal').classList.remove('show'); pendingAction = null; }
+
+    function doConfirm() {
+        closeModal();
+        currentStatus = 1; updateSteps(); updateActionButtons();
+        showToast('订单已确认，已生成送货单，请到送货单页面操作发货');
+    }
+
+    function init() {
+        var orderNo = getParam('order'); var status = getParam('status'); var ship = getParam('shipment');
+        if (orderNo) { document.getElementById('display-order-no').textContent = orderNo; document.getElementById('breadcrumb-order').textContent = orderNo; document.title = '销售订单详情 ' + orderNo + ' - 供应商端'; }
+        if (ship === 'unshipped' || ship === 'partial' || ship === 'complete') shipment = ship;
+        if (status === 'pending') currentStatus = 0;
+        else if (status === 'confirmed') currentStatus = 1;
+        else if (status === 'shipped') currentStatus = 1;
+        // 订单详情步骤条只展示「待确认→已确认」两级（发货状态由送货单驱动，不在此回显）
+        updateSteps(); updateActionButtons();
+    }
+
+    init();
+
+    // ===== 重置演示：清除所有送货单持久化状态，回到初始「待确认」 =====
+    function resetDemo() {
+        // 清除所有订单/送货单的已发货持久化标记
+        try {
+            Object.keys(SHIPMENT_DB).forEach(function (orderNo) {
+                SHIPMENT_DB[orderNo].forEach(function (r) {
+                    localStorage.removeItem('shipment_sent_' + orderNo + '_' + r.delivery);
+                });
+            });
+        } catch (e) {}
+        var orderNo = document.getElementById('display-order-no').textContent || 'PO000015';
+        // 跳回无状态参数的初始链接，刷新后即为演示初始态
+        location.href = '销售订单详情.html?order=' + encodeURIComponent(orderNo);
+    }
+</script>
+</body>
+</html>

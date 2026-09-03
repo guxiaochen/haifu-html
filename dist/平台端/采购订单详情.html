@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>采购订单详情 P0000138 - 运营管理平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+            background: #f5f7fa; color: #333; font-size: 14px; min-height: 100vh;
+        }
+
+        /* ===== 顶部导航 ===== */
+        .top-nav {
+            height: 56px; background: #fff; color: #333;
+            display: flex; align-items: center; padding: 0 20px;
+            border-bottom: 1px solid #f0f0f0;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .top-nav-left { display: flex; align-items: center; gap: 24px; }
+        .brand { display: flex; align-items: center; gap: 8px; }
+        .brand-logo {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #2BA471 0%, #5BC09F 100%);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px;
+        }
+        .brand-name { font-size: 16px; font-weight: 600; color: #333; }
+
+        .top-nav-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+        .top-nav-icon {
+            cursor: pointer; color: #666; position: relative;
+            font-size: 18px; padding: 6px; border-radius: 4px;
+        }
+        .top-nav-icon:hover { background: #f5f5f5; color: #2BA471; }
+        .top-nav-icon .badge {
+            position: absolute; top: 2px; right: 2px;
+            background: #ff4d4f; color: #fff; font-size: 11px;
+            min-width: 16px; height: 16px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 4px; line-height: 1;
+        }
+        .account {
+            display: flex; align-items: center; gap: 8px;
+            cursor: pointer; padding: 4px 10px; border-radius: 4px;
+            font-size: 13px; color: #333;
+        }
+        .account:hover { background: #f5f5f5; }
+        .account-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: linear-gradient(135deg, #2BA471, #5BC09F);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 500;
+        }
+
+        /* ===== 左右分栏 ===== */
+        .layout { display: flex; min-height: calc(100vh - 56px); }
+
+        /* 右侧主内容 */
+        .main { flex: 1; min-width: 0; padding: 16px 20px; overflow-x: hidden; position: relative; }
+
+        /* 面包屑 */
+        .breadcrumb {
+            font-size: 13px; color: #666; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .breadcrumb a { color: #2BA471; text-decoration: none; cursor: pointer; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb .sep { color: #d9d9d9; }
+        .breadcrumb .current { color: #333; }
+
+        /* 页面标题卡片（含采购单号+金额） */
+        .title-card {
+            background: #fff; padding: 14px 20px;
+            border-radius: 4px; margin-bottom: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .title-card-left { display: flex; align-items: center; gap: 8px; }
+        .title-source-tag {
+            padding: 3px 10px; background: #e6f7ff; color: #1890ff;
+            border: 1px solid #91d5ff; border-radius: 10px;
+            font-size: 12px; font-weight: 500;
+            text-decoration: none; cursor: pointer;
+            transition: all .15s;
+        }
+        .title-source-tag:hover { background: #bae0ff; border-color: #40a9ff; }
+        .title-order-no {
+            font-size: 18px; font-weight: 600; color: #333;
+        }
+        .title-star { cursor: pointer; color: #d9d9d9; font-size: 18px; margin-left: 4px; }
+        .title-star.active { color: #faad14; }
+        .title-card-right { display: flex; align-items: center; gap: 24px; }
+        .title-amount {
+            display: flex; align-items: baseline; gap: 4px;
+            font-size: 14px; color: #333;
+        }
+        .title-amount .currency { color: #999; font-size: 13px; }
+        .title-amount .value { font-size: 18px; font-weight: 600; color: #2BA471; }
+        .title-amount .count { color: #999; font-size: 13px; }
+        .title-pagination {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 13px; color: #666;
+        }
+        .page-arrow-btn {
+            width: 26px; height: 26px; border: 1px solid #d9d9d9;
+            background: #fff; border-radius: 2px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; color: #666;
+        }
+        .page-arrow-btn:hover { color: #2BA471; border-color: #2BA471; }
+        .page-arrow-btn:disabled { color: #ccc; cursor: not-allowed; }
+
+        /* 主内容卡片 */
+        .content-card {
+            background: #fff; padding: 20px 24px;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            margin-bottom: 12px;
+        }
+
+        /* 操作栏 + Tab切换 */
+        .action-bar {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .action-bar-left { display: flex; align-items: center; gap: 8px; }
+        .action-bar-right { margin-left: auto; display: flex; align-items: center; gap: 0; }
+
+        /* 操作按钮 */
+        .btn-action {
+            padding: 7px 20px; border: 1px solid #d9d9d9;
+            background: #fff; border-radius: 2px;
+            cursor: pointer; font-size: 13px; color: #666;
+            transition: all .15s;
+        }
+        .btn-action:hover { color: #2BA471; border-color: #2BA471; }
+        .btn-action.active {
+            background: #2BA471; color: #fff; border-color: #2BA471;
+        }
+        .btn-action.active:hover { background: #229963; }
+
+        /* 右侧Tab步骤条 */
+        .step-tabs {
+            display: flex; align-items: center; gap: 0;
+        }
+        .step-tab {
+            padding: 6px 18px; background: #f5f5f5;
+            color: #666; font-size: 13px;
+            clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%, 8px 50%);
+            margin-right: -8px; cursor: pointer;
+            transition: all .15s;
+        }
+        .step-tab:first-child { clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%); }
+        .step-tab:last-child { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 8px 50%); margin-right: 0; }
+        .step-tab.active { background: #2BA471; color: #fff; }
+        .step-tab.done { background: #e8e8e8; color: #999; }
+
+        /* 订单信息区 */
+        .order-info-section {
+            margin-bottom: 20px;
+        }
+        .section-header {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 14px;
+        }
+        .section-title {
+            font-size: 15px; font-weight: 600; color: #333;
+        }
+        .section-subtitle {
+            font-size: 13px; color: #999;
+        }
+        .star-inline { cursor: pointer; color: #d9d9d9; font-size: 16px; }
+        .star-inline.active { color: #faad14; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px 80px;
+        }
+        .form-item { display: flex; align-items: center; gap: 30px; }
+        .form-item.full { grid-column: span 2; }
+        .form-label {
+            min-width: 80px; color: #666; font-size: 13px;
+            text-align: right; flex-shrink: 0;
+        }
+        .form-value { color: #333; font-size: 13px; }
+        .tag-hint {
+            display: inline-block; margin-left: 6px;
+            padding: 1px 6px; background: #fff7e6;
+            color: #d48806; border: 1px solid #ffd591;
+            font-size: 11px; border-radius: 2px;
+        }
+        .tag-error {
+            display: block; margin-top: 4px;
+            padding: 1px 6px; background: #fff2f0;
+            color: #cf1322; border: 1px solid #ffa39e;
+            font-size: 11px; border-radius: 2px;
+        }
+
+        /* 收货状态 */
+        .receive-status {
+            display: inline-block; padding: 2px 10px;
+            border-radius: 10px; font-size: 12px; font-weight: 500;
+        }
+        .receive-none { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+        .receive-partial { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+        .receive-all { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+
+        /* Radio 组 */
+        .radio-group { display: flex; align-items: center; gap: 16px; }
+        .radio-item {
+            display: flex; align-items: center; gap: 6px;
+            cursor: pointer; font-size: 13px; color: #333;
+        }
+        .radio-item input[type="radio"] { accent-color: #2BA471; }
+
+        /* 平台收货人/电话下拉 */
+        .receiver-select {
+            padding: 5px 10px; border: 1px solid #d9d9d9; border-radius: 2px;
+            font-size: 13px; color: #333; outline: none; min-width: 200px;
+            transition: border-color .2s; background: #fff;
+        }
+        .receiver-select:focus { border-color: #2BA471; }
+
+        /* Tab 切换 */
+        .tab-bar {
+            display: flex; gap: 0; margin-top: 28px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .tab-btn {
+            padding: 10px 20px; cursor: pointer;
+            font-size: 14px; color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all .15s;
+        }
+        .tab-btn:hover { color: #2BA471; }
+        .tab-btn.active { color: #2BA471; border-bottom-color: #2BA471; font-weight: 500; }
+
+        .tab-content { display: none; padding-top: 16px; }
+        .tab-content.active { display: block; }
+
+        /* 空内容提示 */
+        .empty-tip {
+            text-align: center; padding: 40px 20px;
+            color: #999; font-size: 13px;
+        }
+
+        /* 明细表 */
+        table.items-table {
+            width: 100%; border-collapse: collapse; font-size: 13px; table-layout: auto;
+        }
+        table.items-table thead { background: #fafafa; }
+        table.items-table th {
+            padding: 10px 8px; text-align: left; color: #555;
+            font-weight: 500; border-bottom: 1px solid #f0f0f0;
+            white-space: normal; word-break: break-all; overflow-wrap: anywhere;
+        }
+        table.items-table td {
+            padding: 10px 8px; color: #333;
+            border-bottom: 1px solid #f5f5f5;
+            word-break: break-all; overflow-wrap: anywhere; vertical-align: top;
+        }
+        table.items-table tbody tr:hover { background: #fafdfb; }
+        .item-image { width: 42px; min-width: 42px; text-align: center; font-size: 24px; }
+        .supplier-text { display: block; min-width: 0; line-height: 1.5; }
+        .product-info { display: flex; flex-direction: column; gap: 2px; }
+        .product-code { font-size: 12px; color: #999; }
+        .tax-tag {
+            display: inline-block; padding: 1px 6px;
+            background: #f0f5ff; color: #1890ff;
+            border: 1px solid #d6e4ff; border-radius: 2px;
+            font-size: 11px;
+        }
+
+        /* 底部金额 */
+        .footer-bar {
+            display: flex; align-items: flex-end; justify-content: space-between;
+            margin-top: 16px; padding-top: 12px;
+        }
+        .terms-link { font-size: 13px; color: #666; }
+        .terms-link a { color: #2BA471; text-decoration: none; }
+        .totals { text-align: right; }
+        .totals .row { display: flex; gap: 16px; font-size: 13px; margin-bottom: 4px; }
+        .totals .row .label { color: #666; min-width: 70px; text-align: right; }
+        .totals .row .value { color: #333; min-width: 100px; text-align: right; }
+        .totals .row.total .label { font-weight: 600; }
+        .totals .row.total .value { color: #2BA471; font-weight: 600; font-size: 15px; }
+
+        /* 右侧浮动工具栏 */
+        .floating-bar {
+            position: fixed; right: 16px; top: 50%;
+            transform: translateY(-50%);
+            display: flex; flex-direction: column;
+            background: #fff; border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            overflow: hidden;
+            z-index: 50;
+        }
+        .float-btn {
+            width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: #666;
+            border-bottom: 1px solid #f5f5f5;
+            font-size: 16px;
+            transition: all .15s;
+        }
+        .float-btn:last-child { border-bottom: none; }
+        .float-btn:hover { background: #f0faf5; color: #2BA471; }
+    </style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="top-nav">
+    <div class="top-nav-left">
+        <div class="brand">
+            <div class="brand-logo">叶</div>
+            <div class="brand-name">运营管理平台</div>
+        </div>
+    </div>
+    <div class="top-nav-right">
+
+        <div class="top-nav-icon">🔔<span class="badge">13</span></div>
+        <div class="account">
+            <div class="account-avatar">A</div>
+            <div>Administrator</div>
+        </div>
+    </div>
+</div>
+
+<div class="layout">
+
+    <!-- 左侧菜单（组件化） -->
+    <div id="sidebar-container"></div>
+
+    <!-- 右侧主内容 -->
+    <main class="main">
+
+        <!-- 面包屑 -->
+        <div class="breadcrumb">
+            <a onclick="location.href='采购订单列表.html'">采购订单</a>
+            <span class="sep">/</span>
+            <span class="current">查看采购订单</span>
+        </div>
+
+        <!-- 页面标题卡片：平台销售 + 采购单号 + 金额 + 分页 -->
+        <div class="title-card">
+            <div class="title-card-left">
+                <a class="title-source-tag" title="查看销售订单" onclick="location.href='销售订单详情.html?order=SO000205&status=confirm'">平台销售 / S0000205</a>
+                <span class="title-order-no" id="display-po-no">P0000138</span>
+            </div>
+            
+        </div>
+
+        <!-- 主内容卡片 -->
+        <div class="content-card">
+
+            <!-- 操作按钮 + 步骤条Tab -->
+            <div class="action-bar">
+                <div class="action-bar-left">
+                    <button class="btn-action active" id="pending-submit-btn" onclick="submitPendingOrderReview()">提交审核</button>
+                    <button class="btn-action" id="pending-approve-btn" onclick="reviewPendingOrder(true)" style="display:none;">审核通过</button>
+                    <button class="btn-action" id="pending-reject-btn" onclick="reviewPendingOrder(false)" style="display:none;">审核驳回</button>
+                    <span class="audit-status" id="pending-status">待采</span>
+                </div>
+                <div class="action-bar-right">
+                    <div class="step-tabs">
+                        <div class="step-tab active" id="step-1">发起采购</div>
+                        <div class="step-tab" id="step-2">确认采购</div>
+                        <div class="step-tab" id="step-3">货物已签收</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 订单信息 -->
+            <div class="order-info-section">
+               
+
+                <div class="form-grid">
+                    <div class="form-item full">
+                        <label class="form-label">采购单</label>
+                        <span class="form-value">P000015Z</span>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">供应商信息</label>
+                        <span class="form-value">aqtest海赋（山东）数字产业发展有限公司HZ</span>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">客户</label>
+                        <span class="form-value">aqtest海赋（山东）数字产业发展有限公司LL</span>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">联系人</label>
+                        <span class="form-value">冉海龙<span class="tag-hint">这里是供应商的联系人联系电话</span></span>
+                    </div>
+                    
+                    <div class="form-item">
+                        <label class="form-label">交接截止日期</label>
+                        <span class="form-value">2026年08月05日 15时25分13秒</span>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">联系电话</label>
+                        <span class="form-value">17864788088</span>
+                    </div>
+                    
+                    <div class="form-item">
+                        <label class="form-label">地址</label>
+                        <span class="form-value">阿斯分散黄色色阿柯</span>
+                    </div>
+                    
+                    <div class="form-item full">
+                        <label class="form-label">交货方式</label>
+                        <div class="radio-group">
+                            <label class="radio-item"><input type="radio" name="delivery" value="customer" checked onchange="onDeliveryModeChange()"> 客户</label>
+                            <label class="radio-item"><input type="radio" name="delivery" value="platform" onchange="onDeliveryModeChange()"> 平台</label>
+                        </div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">收货人</label>
+                        <div class="form-value" id="receiver-wrap">
+                            <span id="receiver-text">侯振鲁</span>
+                            <select id="receiver-select" class="receiver-select" style="display:none;" onchange="onPlatformReceiverChange()">
+                                <option value="">请选择平台收货人</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">收货电话</label>
+                        <div class="form-value" id="receive-phone-wrap">
+                            <span id="receive-phone-text">17505308090</span>
+                            <select id="receive-phone-select" class="receiver-select" style="display:none;" onchange="onPlatformPhoneChange()">
+                                <option value="">请选择平台收货电话</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">收货地址</label>
+                        <span class="form-value" id="receive-address">兰州路66号</span>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">备注</label>
+                        <span class="form-value">请按期交货，包装需符合运输标准</span>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">订单日期</label>
+                        <span class="form-value">2026年04月01日</span>
+                    </div>
+                    <div class="form-item full">
+                        <label class="form-label">交货状态</label>
+                        <span class="form-value" id="receive-status"><span class="receive-status receive-none">未收货</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 切换 -->
+            <div class="tab-bar">
+                <div class="tab-btn active" onclick="switchTab('product', this)">产品</div>
+                <div class="tab-btn" onclick="switchTab('prepay', this)">预付款</div>
+            </div>
+
+            <!-- 产品明细 -->
+            <div class="tab-content active" id="tab-product">
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>物料编码</th>
+                            <th>产品名称</th>
+                            <th>商品图片</th>
+                            <th>规格型号</th>
+                            <th>品牌</th>
+                            <th>数量</th>
+                            <th>单位</th>
+                            <th>单价</th>
+                            <th>税率</th>
+                            <th>含税金额</th>
+                            <th>预计到货时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>0000807</td>
+                            <td>
+                                <div class="product-info">
+                                    <div>BAITESI/伯特斯 手动液压堆高车</div>
+                                    <div class="product-code">CTY-1</div>
+                                </div>
+                            </td>
+                            <td class="item-image">📦</td>
+                            <td>CTY-1 载重1t 货叉...</td>
+                            <td>BAITESI/佰...</td>
+                            <td>1.00</td>
+                            <td>台</td>
+                            <td>3,170.59</td>
+                            <td><span class="tax-tag">13%</span></td>
+                            <td>¥ 3,170.59</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>0000808</td>
+                            <td>
+                                <div class="product-info">
+                                    <div>BAITESI/伯特斯 电动液压搬运车</div>
+                                    <div class="product-code">CBD-2</div>
+                                </div>
+                            </td>
+                            <td class="item-image">📦</td>
+                            <td>CBD-2 载重2t...</td>
+                            <td>BAITESI/佰...</td>
+                            <td>1.00</td>
+                            <td>台</td>
+                            <td>5,800.00</td>
+                            <td><span class="tax-tag">13%</span></td>
+                            <td>¥ 5,800.00</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="footer-bar">
+                    <div class="terms-link">条款和条件: <a href="http://cs2.haifuyun.cn/terms">http://cs2.haifuyun.cn/terms</a></div>
+                    <div class="totals">
+                        <div class="row"><span class="label">未税金额:</span><span class="value">¥ 7,938.58</span></div>
+                        <div class="row"><span class="label">增值税13%:</span><span class="value">¥ 1,032.01</span></div>
+                        <div class="row total"><span class="label">总计:</span><span class="value">¥ 8,970.59</span></div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 预付款（空） -->
+            <div class="tab-content" id="tab-prepay">
+                <div class="empty-tip">暂无预付款内容，待客户提供</div>
+            </div>
+
+        </div>
+
+    </main>
+</div>
+
+
+<script>
+    // Tab 切换
+    function switchTab(tab, btn) {
+        document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+        document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+        btn.classList.add('active');
+        document.getElementById('tab-' + tab).classList.add('active');
+    }
+
+    // 解析 URL 参数
+    function getParam(name) {
+        var reg = new RegExp('[?&]' + name + '=([^&]*)');
+        var m = location.search.match(reg);
+        return m ? decodeURIComponent(m[1]) : '';
+    }
+
+    // 平台收货联系人（演示数据）
+    var platformReceivers = [
+        { name: '仓储中心-周师傅', phone: '13800000007', address: '海赋科技仓储物流中心' },
+        { name: '济南仓-王经理', phone: '13800000002', address: '济南总公司仓库' },
+        { name: '青岛仓-李经理', phone: '13800000003', address: '青岛分公司仓库' }
+    ];
+
+    function fillPlatformReceiverOptions() {
+        var receiverSelect = document.getElementById('receiver-select');
+        var phoneSelect = document.getElementById('receive-phone-select');
+        platformReceivers.forEach(function(receiver, index) {
+            receiverSelect.insertAdjacentHTML('beforeend', '<option value="' + index + '">' + receiver.name + '</option>');
+            phoneSelect.insertAdjacentHTML('beforeend', '<option value="' + index + '">' + receiver.phone + '</option>');
+        });
+    }
+
+    function showCustomerDeliveryInfo() {
+        document.getElementById('receiver-text').textContent = '侯振鲁';
+        document.getElementById('receive-phone-text').textContent = '17505308090';
+        document.getElementById('receive-address').textContent = '阿斯分散黄色色阿柯';
+        document.getElementById('receiver-text').style.display = 'inline';
+        document.getElementById('receive-phone-text').style.display = 'inline';
+        document.getElementById('receiver-select').style.display = 'none';
+        document.getElementById('receive-phone-select').style.display = 'none';
+    }
+
+    function showPlatformDeliveryInfo() {
+        var receiverSelect = document.getElementById('receiver-select');
+        var phoneSelect = document.getElementById('receive-phone-select');
+        receiverSelect.style.display = 'inline-block';
+        phoneSelect.style.display = 'inline-block';
+        document.getElementById('receiver-text').style.display = 'none';
+        document.getElementById('receive-phone-text').style.display = 'none';
+        if (!receiverSelect.value) {
+            receiverSelect.value = '0';
+            phoneSelect.value = '0';
+        }
+        onPlatformReceiverChange();
+    }
+
+    function onDeliveryModeChange() {
+        var mode = document.querySelector('input[name="delivery"]:checked').value;
+        if (mode === 'platform') showPlatformDeliveryInfo();
+        else showCustomerDeliveryInfo();
+    }
+
+    function onPlatformReceiverChange() {
+        var index = document.getElementById('receiver-select').value;
+        var receiver = platformReceivers[index];
+        if (!receiver) return;
+        document.getElementById('receive-phone-select').value = index;
+        document.getElementById('receive-address').textContent = receiver.address;
+    }
+
+    function onPlatformPhoneChange() {
+        var index = document.getElementById('receive-phone-select').value;
+        var receiver = platformReceivers[index];
+        if (!receiver) return;
+        document.getElementById('receiver-select').value = index;
+        document.getElementById('receive-address').textContent = receiver.address;
+    }
+
+    var pendingOrder;
+    var purchaseOrder = { supplier: 'aqtest海赋（山东）数字产业发展有限公司HZ' };
+
+    function loadPurchaseOrder(orderNo) {
+        var orders = [];
+        try { orders = JSON.parse(localStorage.getItem('generatedPurchaseOrders') || '[]'); } catch (e) {}
+        var matched = orders.find(function(item) { return item.poNo === orderNo; });
+        if (matched && matched.supplier) purchaseOrder = matched;
+        return purchaseOrder;
+    }
+
+    function loadPendingOrder(orderNo) {
+        var orders = [];
+        try { orders = JSON.parse(localStorage.getItem('pendingPurchaseOrders') || '[]'); } catch (e) {}
+        pendingOrder = orders.find(function(item) { return item.id === orderNo || item.source === orderNo; });
+        return pendingOrder;
+    }
+
+    function savePendingOrders() {
+        var orders = [];
+        try { orders = JSON.parse(localStorage.getItem('pendingPurchaseOrders') || '[]'); } catch (e) {}
+        var index = orders.findIndex(function(item) { return item.id === pendingOrder.id; });
+        if (index >= 0) orders[index] = pendingOrder;
+        else orders.push(pendingOrder);
+        localStorage.setItem('pendingPurchaseOrders', JSON.stringify(orders));
+    }
+
+    function savePendingSupplier(select) {
+        if (!pendingOrder || pendingOrder.status === 'review' || pendingOrder.status === 'approved') return;
+        var item = pendingOrder.items[parseInt(select.getAttribute('data-item-index'), 10)];
+        if (!item) return;
+        item.supplier = select.value;
+        pendingOrder.status = pendingOrder.items.every(function(row) { return row.supplier; }) ? 'pending_review' : 'pending_assign';
+        savePendingOrders();
+        applyPendingState();
+    }
+
+    function setSupplierInputsDisabled(disabled) {
+        document.querySelectorAll('.supplier-select').forEach(function(select) { select.disabled = disabled; });
+    }
+
+    function applyPendingState() {
+        if (!pendingOrder) return;
+        var status = pendingOrder.status;
+        var btn = document.getElementById('pending-submit-btn');
+        var label = document.getElementById('pending-status');
+        var steps = [document.getElementById('step-1'), document.getElementById('step-2'), document.getElementById('step-3')];
+        steps.forEach(function(step) { step.classList.remove('active', 'done'); });
+        var approveBtn = document.getElementById('pending-approve-btn');
+        var rejectBtn = document.getElementById('pending-reject-btn');
+        approveBtn.style.display = 'none';
+        rejectBtn.style.display = 'none';
+        if (status === 'review') {
+            label.textContent = '审核中';
+            btn.textContent = '审核中'; btn.disabled = true;
+            approveBtn.style.display = 'inline-block';
+            rejectBtn.style.display = 'inline-block';
+            setSupplierInputsDisabled(true);
+            steps[0].classList.add('done'); steps[1].classList.add('active');
+        } else if (status === 'approved') {
+            label.textContent = '审核通过，已自动拆单';
+            btn.textContent = '已拆分'; btn.disabled = true;
+            setSupplierInputsDisabled(true);
+            steps[0].classList.add('done'); steps[1].classList.add('done'); steps[2].classList.add('active');
+        } else if (status === 'rejected') {
+            label.textContent = '已驳回：' + (pendingOrder.rejectReason || '请修改后重新提交');
+            btn.textContent = '重新提交审核'; btn.disabled = false;
+            setSupplierInputsDisabled(false);
+            steps[0].classList.add('active');
+        } else {
+            label.textContent = status === 'pending_review' ? '待提交审核' : '待采';
+            btn.textContent = '提交审核'; btn.disabled = status !== 'pending_review';
+            setSupplierInputsDisabled(false);
+            steps[0].classList.add('active');
+        }
+    }
+
+    function submitPendingOrderReview() {
+        if (!pendingOrder || pendingOrder.status === 'review' || pendingOrder.status === 'approved') return;
+        if (!pendingOrder.items.every(function(item) { return item.supplier; })) {
+            alert('请先为每条产品明细选择供应商');
+            return;
+        }
+        pendingOrder.status = 'review';
+        savePendingOrders();
+        applyPendingState();
+        alert('待采订单已提交审核，审核期间不可修改');
+    }
+
+    function reviewPendingOrder(pass) {
+        if (!pendingOrder || pendingOrder.status !== 'review') return;
+        if (pass) {
+            pendingOrder.status = 'approved';
+            pendingOrder.rejectReason = '';
+            createGeneratedPurchaseOrders();
+            savePendingOrders();
+            applyPendingState();
+            alert('审核通过，系统已按供应商自动拆分采购订单');
+            return;
+        }
+        var reason = prompt('请输入驳回原因：');
+        if (!reason || !reason.trim()) { alert('驳回必须填写原因'); return; }
+        pendingOrder.status = 'rejected';
+        pendingOrder.rejectReason = reason.trim();
+        savePendingOrders();
+        applyPendingState();
+    }
+
+    function createGeneratedPurchaseOrders() {
+        var generated = [];
+        try { generated = JSON.parse(localStorage.getItem('generatedPurchaseOrders') || '[]'); } catch (e) {}
+        pendingOrder.items.forEach(function(item) {
+            var existing = generated.find(function(order) { return order.source === pendingOrder.source && order.supplier === item.supplier; });
+            if (existing) {
+                existing.amount += item.price * item.qty;
+                existing.items.push(item);
+            } else {
+                generated.push({ source: pendingOrder.source, supplier: item.supplier, amount: item.price * item.qty, items: [item] });
+            }
+        });
+        localStorage.setItem('generatedPurchaseOrders', JSON.stringify(generated));
+    }
+
+    function initByStatus() {
+        var orderNo = getParam('order') || 'P0000138';
+        var status = getParam('status');
+        document.getElementById('display-po-no').textContent = orderNo;
+        document.title = '采购订单详情 ' + orderNo + ' - 运营管理平台';
+        loadPurchaseOrder(orderNo);
+        loadPendingOrder(orderNo);
+        if (pendingOrder) {
+            document.getElementById('pending-submit-btn').style.display = 'inline-block';
+            pendingOrder.items.forEach(function(item, index) {
+                var select = document.querySelector('.supplier-select[data-item-index="' + index + '"]');
+                if (select) select.value = item.supplier || '';
+            });
+            applyPendingState();
+        } else {
+            document.querySelectorAll('.supplier-text').forEach(function(text) {
+                text.textContent = purchaseOrder.supplier || '—';
+            });
+            document.getElementById('pending-submit-btn').style.display = 'none';
+            document.getElementById('pending-status').textContent = '正式采购订单';
+            setSupplierInputsDisabled(true);
+            var steps = [document.getElementById('step-1'), document.getElementById('step-2'), document.getElementById('step-3')];
+            steps[0].classList.add('done');
+            if (status === 'done') { steps[1].classList.add('done'); steps[2].classList.add('active'); }
+            else { steps[1].classList.add('active'); }
+        }
+    }
+
+    fillPlatformReceiverOptions();
+    onDeliveryModeChange();
+    initByStatus();
+</script>
+
+<!-- 左侧菜单组件 -->
+<script src="sidebar.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,99 @@
+/**
+ * 客户端左侧菜单栏组件
+ * 使用方式：
+ *   <div id="sidebar-container"></div>
+ *   <script src="sidebar.js"></script>
+ * 修改菜单只需改此文件一处
+ */
+
+(function() {
+    var baseURL = '';
+    // 自动检测相对路径前缀（根据当前页面所在层级）
+    var path = window.location.pathname;
+    var dir = path.substring(0, path.lastIndexOf('/'));
+    var filename = decodeURIComponent(path.substring(path.lastIndexOf('/') + 1));
+
+    // 菜单配置：key=菜单标识, label=显示名称, icon=图标, url=跳转地址, active=当前页是否激活
+    var menus = [
+        { type: 'standalone', label: '工作台', icon: '📋', url: '#' },
+
+        { type: 'group', label: '商城购物', icon: '🛍️' },
+        { type: 'item', label: '快捷下单', url: '#' },
+        { type: 'item', label: '我的订单', url: '#' },
+        { type: 'item', label: '购物车', url: '#' },
+
+        { type: 'group', label: '采购订单', icon: '📋' },
+        { type: 'item', label: '采购订单列表', url: '采购订单列表.html', activeKeys: ['采购订单列表.html', '采购订单详情.html', '新建采购订单.html'] },
+        { type: 'item', label: '我的产品库', url: '我的产品库.html', activeKeys: ['我的产品库.html'] },
+
+        { type: 'group', label: '竞价管理', icon: '🏆' },
+        { type: 'item', label: '发布竞价', url: '#' },
+        { type: 'item', label: '竞价列表', url: '#' },
+
+        { type: 'group', label: '结算财务', icon: '💰' },
+        { type: 'item', label: '结算与账单', url: '#' },
+        { type: 'item', label: '发票信息', url: '#' },
+        { type: 'item', label: '付款记录', url: '#' },
+    ];
+
+    // 判断当前页面应该激活哪个菜单项
+    var currentFile = filename;
+
+    var html = '';
+
+    menus.forEach(function(menu) {
+        if (menu.type === 'standalone') {
+            html += '<div class="menu-item standalone"' +
+                (menu.url !== '#' ? ' onclick="location.href=\'' + menu.url + '\'"' : '') +
+                '>' + menu.icon + ' ' + menu.label + '</div>';
+        } else if (menu.type === 'group') {
+            html += '<div class="menu-group-title"><span class="menu-group-icon">' + menu.icon + '</span>' + menu.label + '</div>';
+        } else if (menu.type === 'item') {
+            var isActive = menu.activeKeys && menu.activeKeys.indexOf(currentFile) >= 0;
+            var onclick = menu.url && menu.url !== '#' ? ' onclick="location.href=\'' + menu.url + '\'"' : '';
+            html += '<div class="menu-item' + (isActive ? ' active' : '') + '"' + onclick + '>' + menu.label + '</div>';
+        }
+    });
+
+    // 注入到页面
+    var container = document.getElementById('sidebar-container');
+    if (container) {
+        container.className = 'sidebar';
+        container.innerHTML = html;
+    }
+
+    // 注入菜单所需CSS（如果页面未包含则自动注入）
+    if (!document.getElementById('sidebar-component-css')) {
+        var css = document.createElement('style');
+        css.id = 'sidebar-component-css';
+        css.textContent = `
+.sidebar {
+    width: 180px; background: #fff;
+    border-right: 1px solid #f0f0f0;
+    flex-shrink: 0; padding: 12px 0;
+}
+.menu-item {
+    padding: 10px 24px 10px 48px; color: #666; cursor: pointer;
+    font-size: 13px;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+}
+.menu-item:hover { background: #f5f5f5; color: #2BA471; }
+.menu-item.active {
+    color: #2BA471; border-left-color: #2BA471;
+    background: #f0faf5; font-weight: 500;
+}
+.menu-group-title {
+    padding: 10px 20px; color: #333;
+    font-size: 15px; font-weight: 600; margin-top: 8px;
+    display: flex; align-items: center; gap: 8px;
+}
+.menu-group-title:first-of-type { margin-top: 4px; }
+.menu-group-icon { font-size: 16px; width: 20px; text-align: center; }
+.menu-item.standalone {
+    padding-left: 24px; font-size: 15px; font-weight: 600; color: #333;
+}
+`;
+        document.head.appendChild(css);
+    }
+})();

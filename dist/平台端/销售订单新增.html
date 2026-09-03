@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新建销售订单 - 运营管理平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+            background: #f5f7fa; color: #333; font-size: 14px; min-height: 100vh;
+        }
+
+        /* 顶部导航 */
+        .top-nav { height: 56px; background: #fff; color: #333; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+        .top-nav-left { display: flex; align-items: center; gap: 24px; }
+        .brand { display: flex; align-items: center; gap: 8px; }
+        .brand-logo { width: 32px; height: 32px; background: linear-gradient(135deg, #2BA471 0%, #5BC09F 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; }
+        .brand-name { font-size: 16px; font-weight: 600; color: #333; }
+        .top-nav-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+        .top-nav-icon { cursor: pointer; color: #666; position: relative; font-size: 18px; padding: 6px; border-radius: 4px; }
+        .top-nav-icon:hover { background: #f5f5f5; color: #2BA471; }
+        .top-nav-icon .badge { position: absolute; top: 2px; right: 2px; background: #ff4d4f; color: #fff; font-size: 11px; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 0 4px; line-height: 1; }
+        .account { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 10px; border-radius: 4px; font-size: 13px; color: #333; }
+        .account:hover { background: #f5f5f5; }
+        .account-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #2BA471, #5BC09F); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; }
+
+        /* 左右分栏 */
+        .layout { display: flex; min-height: calc(100vh - 56px); }
+        .main { flex: 1; padding: 16px 20px; overflow-x: auto; }
+
+        .breadcrumb-bar { background: #fff; padding: 12px 20px; border-radius: 4px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: #666; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+        .breadcrumb-bar .menu-toggle { font-size: 18px; color: #666; cursor: pointer; margin-right: 8px; }
+        .breadcrumb-bar .home-icon { color: #2BA471; cursor: pointer; }
+        .breadcrumb-bar a { color: #666; text-decoration: none; cursor: pointer; }
+        .breadcrumb-bar a:hover { color: #2BA471; }
+        .breadcrumb-bar .sep { color: #d9d9d9; margin: 0 2px; }
+        .breadcrumb-bar .current { color: #333; font-weight: 500; }
+
+        .title-card { background: #fff; padding: 14px 20px; border-radius: 4px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); display: flex; align-items: center; gap: 12px; }
+        .title-card .page-title { font-size: 18px; font-weight: 600; color: #333; }
+        .title-card .title-actions { margin-left: auto; display: flex; gap: 8px; }
+
+        .btn { padding: 6px 16px; border: 1px solid #d9d9d9; background: #fff; border-radius: 2px; cursor: pointer; font-size: 13px; color: #333; transition: all .2s; }
+        .btn:hover { color: #2BA471; border-color: #2BA471; }
+        .btn-primary { background: #2BA471; color: #fff; border-color: #2BA471; }
+        .btn-primary:hover { background: #229963; border-color: #229963; color: #fff; }
+        .btn-danger { color: #ff4d4f; border-color: #ffa39e; }
+        .btn-danger:hover { background: #fff2f0; color: #ff4d4f; border-color: #ff4d4f; }
+
+        .content-card { background: #fff; padding: 24px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); margin-bottom: 12px; }
+        .card-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 80px; }
+        .form-item { display: flex; align-items: center; gap: 16px; }
+        .form-item.full { grid-column: span 2; }
+        .form-label { min-width: 90px; color: #666; font-size: 13px; text-align: right; flex-shrink: 0; }
+        .form-label .required { color: #ff4d4f; margin-right: 2px; }
+        .form-input, .form-select, .form-textarea { flex: 1; padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 2px; font-size: 13px; outline: none; transition: border-color .2s; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #2BA471; }
+        .form-textarea { min-height: 80px; resize: vertical; font-family: inherit; }
+        .field-error { border-color: #ff4d4f !important; }
+
+        /* 明细表 */
+        table.items-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table.items-table thead { background: #fafafa; }
+        table.items-table th { padding: 10px 12px; text-align: left; color: #555; font-weight: 500; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+        table.items-table td { padding: 8px 10px; color: #333; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+        table.items-table tbody tr:hover { background: #fafdfb; }
+        table.items-table .cell-input { width: 100%; padding: 5px 8px; border: 1px solid #d9d9d9; border-radius: 2px; font-size: 13px; outline: none; }
+        table.items-table .cell-input:focus { border-color: #2BA471; }
+        table.items-table .cell-input.num { text-align: right; }
+        table.items-table .row-del { color: #ff4d4f; cursor: pointer; font-size: 16px; }
+        table.items-table .row-del:hover { color: #ff7875; }
+        .tax-tag { display: inline-block; padding: 1px 6px; background: #f0f5ff; color: #1890ff; border: 1px solid #d6e4ff; border-radius: 2px; font-size: 11px; }
+
+        .add-row-bar { margin-top: 12px; }
+        .footer-bar { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 16px; padding-top: 12px; }
+        .terms-link { font-size: 13px; color: #666; }
+        .terms-link a { color: #2BA471; text-decoration: none; }
+        .totals { text-align: right; }
+        .totals .row { display: flex; gap: 16px; font-size: 13px; margin-bottom: 4px; }
+        .totals .row .label { color: #666; min-width: 70px; text-align: right; }
+        .totals .row .value { color: #333; min-width: 110px; text-align: right; }
+        .totals .row.total .label { font-weight: 600; }
+        .totals .row.total .value { color: #2BA471; font-weight: 600; font-size: 15px; }
+
+        .alert { display: none; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 4px; font-size: 13px; margin-bottom: 12px; }
+        .alert.show { display: flex; }
+        .alert-success { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+    </style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="top-nav">
+    <div class="top-nav-left">
+        <div class="brand"><div class="brand-logo">叶</div><div class="brand-name">运营管理平台</div></div>
+    </div>
+    <div class="top-nav-right">
+
+        <div class="top-nav-icon" title="消息">🔔<span class="badge">13</span></div>
+        <div class="account"><div class="account-avatar">A</div><div>Administrator</div></div>
+    </div>
+</div>
+
+<div class="layout">
+    <div id="sidebar-container"></div>
+    <main class="main">
+        <div class="breadcrumb-bar">
+            <span class="menu-toggle">☰</span>
+            <span class="home-icon">🏠</span>
+            <a onclick="location.href='销售订单列表.html'">首页</a>
+            <span class="sep">/</span>
+            <a onclick="location.href='销售订单列表.html'">销售订单</a>
+            <span class="sep">/</span>
+            <span class="current">新建销售订单</span>
+        </div>
+
+        <div class="title-card">
+            <div class="page-title" id="pageTitle">新建销售订单</div>
+            <div class="title-actions">
+                <button class="btn" onclick="location.href='销售订单列表.html'">取消</button>
+                <button class="btn" onclick="saveDraft()">保存草稿</button>
+                <button class="btn btn-primary" onclick="submitOrder()">提交审核</button>
+            </div>
+        </div>
+
+        <div class="alert alert-success" id="successAlert">
+            <span>✓</span>
+            <span id="successMsg">保存成功，<a class="link" onclick="location.href='销售订单列表.html'">返回列表</a></span>
+        </div>
+
+        <!-- 基本信息 -->
+        <div class="content-card">
+            <div class="card-title">订单信息</div>
+            <div class="form-grid">
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>客户名称</label>
+                    <input type="text" class="form-input" id="f-customer" placeholder="请输入客户名称">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">付款条款</label>
+                    <select class="form-select" id="f-terms">
+                        <option value="immediate">immediate</option>
+                        <option value="15 days">15 days</option>
+                        <option value="30 days">30 days</option>
+                        <option value="60 days">60 days</option>
+                    </select>
+                </div>
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>联系人</label>
+                    <input type="text" class="form-input" id="f-contact" placeholder="请输入联系人">
+                </div>
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>联系电话</label>
+                    <input type="text" class="form-input" id="f-phone" placeholder="请输入联系电话">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">收货人</label>
+                    <input type="text" class="form-input" id="f-receiver" placeholder="请输入收货人">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">收货电话</label>
+                    <input type="text" class="form-input" id="f-receivePhone" placeholder="请输入收货电话">
+                </div>
+                <div class="form-item full">
+                    <label class="form-label"><span class="required">*</span>收货地址</label>
+                    <input type="text" class="form-input" id="f-address" placeholder="请输入收货地址">
+                </div>
+                <div class="form-item full">
+                    <label class="form-label">备注</label>
+                    <textarea class="form-textarea" id="f-remark" placeholder="请输入备注"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- 产品明细 -->
+        <div class="content-card">
+            <div class="card-title">产品明细</div>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th style="width:50px; text-align:center;">序号</th>
+                        <th>产品</th>
+                        <th>规格型号</th>
+                        <th>品牌</th>
+                        <th style="text-align:right;">数量</th>
+                        <th>单位</th>
+                        <th style="text-align:right;">单价</th>
+                        <th style="text-align:right;">税率</th>
+                        <th style="text-align:right;">含税金额</th>
+                        <th>供应商</th>
+                        <th style="width:60px; text-align:center;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="detail-body">
+                    <tr class="empty-row"><td colspan="11" style="text-align:center;color:#999;padding:30px;">暂无产品，请点击「添加产品」从产品库选择</td></tr>
+                </tbody>
+            </table>
+            <div class="item-actions">
+                <a class="item-action-link" onclick="openProductModal()">添加产品</a>
+            </div>
+
+            <div class="footer-bar">
+                <div class="terms-link">条款和条件: <a href="http://cs2.haifuyun.cn/terms">http://cs2.haifuyun.cn/terms</a></div>
+                <div class="totals">
+                    <div class="row"><span class="label">明细行数:</span><span class="value" id="t-count">0</span></div>
+                    <div class="row"><span class="label">未税金额:</span><span class="value" id="t-untax">¥ 0.00</span></div>
+                    <div class="row"><span class="label">增值税:</span><span class="value" id="t-tax">¥ 0.00</span></div>
+                    <div class="row total"><span class="label">总计:</span><span class="value" id="t-total">¥ 0.00</span></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- 产品选择弹窗（从产品库中选择，与客户端-添加产品效果一致） -->
+<div class="modal-overlay" id="productModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">选择产品</div>
+            <button class="modal-close" onclick="closeProductModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="search-bar">
+                <input id="productSearch" placeholder="搜索产品名称 / 编码" oninput="filterProductList()">
+                <button class="btn btn-primary" onclick="filterProductList()">搜索</button>
+            </div>
+            <div class="product-list" id="productList"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default" onclick="closeProductModal()">取消</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.link { color: #2BA471; cursor: pointer; text-decoration: none; }
+.link:hover { text-decoration: underline; }
+/* 与客户端一致的明细操作/弹窗样式 */
+.item-actions { display: flex; gap: 20px; padding: 12px 0; }
+.item-action-link { color: #2BA471; cursor: pointer; font-size: 13px; }
+.item-action-link:hover { text-decoration: underline; }
+.items-table td .amount { text-align: right; color: #333; }
+.delete-link { color: #ff4d4f; cursor: pointer; font-size: 13px; background: none; border: none; padding: 0; }
+.delete-link:hover { text-decoration: underline; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.modal { background: #fff; border-radius: 4px; width: 720px; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; }
+.modal-header { padding: 14px 18px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+.modal-title { font-size: 15px; font-weight: 600; }
+.modal-close { background: none; border: none; font-size: 18px; cursor: pointer; color: #999; padding: 4px 8px; }
+.modal-body { padding: 18px; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 12px 18px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 8px; }
+.search-bar { display: flex; gap: 8px; margin-bottom: 14px; }
+.search-bar input { flex: 1; padding: 7px 12px; border: 1px solid #d9d9d9; border-radius: 2px; font-size: 13px; outline: none; }
+.search-bar input:focus { border-color: #2BA471; }
+.product-list { max-height: 360px; overflow-y: auto; }
+.product-row { display: flex; align-items: center; padding: 10px; border: 1px solid #f0f0f0; border-radius: 4px; margin-bottom: 8px; gap: 12px; }
+.product-row:hover { background: #fafafa; border-color: #2BA471; cursor: pointer; }
+.product-row-info { flex: 1; }
+.product-row-name { font-size: 13px; font-weight: 500; }
+.product-row-meta { font-size: 11px; color: #999; margin-top: 2px; }
+.product-row-price { color: #2BA471; font-weight: 600; }
+.product-row.selected { border-color: #2BA471; background: #f0faf5; }
+</style>
+
+<script>
+    function getParam(name) {
+        var reg = new RegExp('[?&]' + name + '=([^&]*)');
+        var m = location.search.match(reg);
+        return m ? decodeURIComponent(m[1]) : '';
+    }
+
+    var SUPPLIERS = [
+        'aqtest海赋（山东）数字产业发展有限公司HZ',
+        'aqtest海赋（山东）数字产业发展有限公司LL',
+        '青岛海尔智能家电有限公司',
+        '菏泽牡丹食品加工厂'
+    ];
+    var seq = 0;
+
+    // 供应商下拉选项
+    function supplierOptions(selected) {
+        var html = '<option value="">请选择供应商</option>';
+        SUPPLIERS.forEach(function(s) {
+            html += '<option value="' + s + '"' + (selected === s ? ' selected' : '') + '>' + s + '</option>';
+        });
+        return html;
+    }
+
+    // 产品库数据源（取自平台端产品库）
+    var PRODUCT_LIB = [
+        { code: '00000442', name: '卷门遮挡布', spec: '卷门800*250MM', brand: '', unit: '个', price: 225.00, tax: 13 },
+        { code: '00000443', name: '灭火器', spec: '二氯化碳', brand: '', unit: '个', price: 70.00, tax: 13 },
+        { code: '00000111', name: '载手套', spec: '', brand: '君聪', unit: '双', price: 125.00, tax: 13 },
+        { code: '00000151', name: 'HONEYWELL/霍尼韦尔 首罩... 黄色', spec: 'VIS110', brand: 'HONEYWELL', unit: '个', price: 215.39, tax: 13 },
+        { code: '00000020', name: '咬达咬口器', spec: 'SOS', brand: '世达', unit: '个', price: 1.00, tax: 13 },
+        { code: '00000009', name: 'ABB防爆排风扇', spec: 'D171S248BCPF29 DC24V', brand: '国产', unit: '个', price: 1.00, tax: 13 },
+        { code: '00000112', name: '安全带', spec: '全身式', brand: '凯捷', unit: '条', price: 125.00, tax: 13 },
+        { code: '00000828', name: 'YMD/海美博 迷彩防棉服', spec: 'ZW5C0004 L5L 51+58+32cm', brand: 'YMD/海美博', unit: '个', price: 71.48, tax: 13 },
+        { code: '00000057', name: '网卡', spec: '16 寸', brand: 'GB/戴格斯', unit: '件', price: 79.00, tax: 13 },
+        { code: '00000113', name: '围裙', spec: '12G', brand: '三泰', unit: '个', price: 125.00, tax: 13 },
+        { code: '00000264', name: '东成 充电式刷柄割草机', spec: '14V', brand: '东成', unit: '个', price: 607.84, tax: 13 },
+        { code: '00000037', name: '卫生纸', spec: '4X100', brand: '原木', unit: '包', price: 1.00, tax: 13 },
+        { code: '00000019', name: '布手套', spec: '', brand: '', unit: '付', price: 15.00, tax: 13 }
+    ];
+
+    // 追加明细行（data 来自产品库选择或预填）
+    function addRow(data) {
+        data = data || {};
+        var empty = document.querySelector('#detail-body .empty-row');
+        if (empty) empty.remove();
+        seq++;
+        var tr = document.createElement('tr');
+        var code = data.code || '';
+        var name = data.name || '';
+        var spec = data.spec || '';
+        var brand = data.brand || '';
+        var qty = data.qty != null ? data.qty : 1;
+        var unit = data.unit || '个';
+        var price = data.price != null ? data.price : 0;
+        var tax = data.tax != null ? data.tax : 13;
+        tr.innerHTML =
+            '<td class="idx" style="text-align:center;color:#999;">' + seq + '</td>' +
+            '<td><div class="product-info"><div>[' + code + '] ' + name + '</div></div></td>' +
+            '<td>' + spec + '</td>' +
+            '<td>' + brand + '</td>' +
+            '<td style="text-align:right;"><input class="cell-input num" type="number" min="0" step="1" value="' + qty + '" oninput="recalc()" style="width:60px;"></td>' +
+            '<td>' + unit + '</td>' +
+            '<td style="text-align:right;"><input class="cell-input num" type="number" min="0" step="0.01" value="' + price + '" oninput="recalc()" style="width:90px;"></td>' +
+            '<td style="text-align:right;"><input class="cell-input num" type="number" min="0" step="1" value="' + tax + '" oninput="recalc()" style="width:60px;"></td>' +
+            '<td class="amount" style="text-align:right;color:#333;">¥ 0.00</td>' +
+            '<td><select class="cell-input">' + supplierOptions(data.supplier) + '</select></td>' +
+            '<td style="text-align:center;"><button class="delete-link" onclick="delRow(this)">删除</button></td>';
+        document.getElementById('detail-body').appendChild(tr);
+        recalc();
+    }
+
+    // 删除明细行
+    function delRow(el) {
+        el.closest('tr').remove();
+        var rows = document.querySelectorAll('#detail-body tr');
+        rows.forEach(function(r, i) { r.querySelector('.idx').textContent = i + 1; });
+        seq = rows.length;
+        if (rows.length === 0) {
+            document.getElementById('detail-body').innerHTML = '<tr class="empty-row"><td colspan="11" style="text-align:center;color:#999;padding:30px;">暂无产品，请点击「添加产品」从产品库选择</td></tr>';
+        }
+        recalc();
+    }
+
+    // 金额计算
+    function fmt(n) {
+        return '¥ ' + (Number(n)||0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function recalc() {
+        var untax = 0, taxTotal = 0;
+        var rows = document.querySelectorAll('#detail-body tr');
+        rows.forEach(function(r) {
+            var nums = r.querySelectorAll('.cell-input.num');
+            var qty = parseFloat(nums[0].value) || 0;
+            var price = parseFloat(nums[1].value) || 0;
+            var tax = parseFloat(nums[2].value) || 0;
+            var amount = qty * price;
+            var taxAmt = amount * tax / 100;
+            r.querySelector('.amount').textContent = fmt(amount + taxAmt);
+            untax += amount;
+            taxTotal += taxAmt;
+        });
+        document.getElementById('t-count').textContent = rows.length;
+        document.getElementById('t-untax').textContent = fmt(untax);
+        document.getElementById('t-tax').textContent = fmt(taxTotal);
+        document.getElementById('t-total').textContent = fmt(untax + taxTotal);
+    }
+
+    // 产品选择弹窗
+    function openProductModal() { renderProductList(); document.getElementById('productModal').classList.add('active'); }
+    function closeProductModal() { document.getElementById('productModal').classList.remove('active'); }
+
+    function renderProductList(keyword) {
+        keyword = (keyword || '').trim().toLowerCase();
+        var list = PRODUCT_LIB.filter(function(p) {
+            if (!keyword) return true;
+            return (p.code + ' ' + p.name + ' ' + p.spec + ' ' + p.brand).toLowerCase().indexOf(keyword) >= 0;
+        });
+        var box = document.getElementById('productList');
+        if (list.length === 0) {
+            box.innerHTML = '<div style="text-align:center;color:#999;padding:30px;">未找到匹配产品</div>';
+            return;
+        }
+        box.innerHTML = list.map(function(p) {
+            return '<div class="product-row" onclick="selectProduct(\'' + p.code + '\')">' +
+                '<div class="product-row-info">' +
+                    '<div class="product-row-name">[' + p.code + '] ' + p.name + '</div>' +
+                    '<div class="product-row-meta">' + (p.spec || '—') + (p.brand ? ' · ' + p.brand : '') + ' · ' + p.unit + '</div>' +
+                '</div>' +
+                '<div class="product-row-price">¥ ' + p.price.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</div>' +
+            '</div>';
+        }).join('');
+    }
+    function filterProductList() {
+        renderProductList(document.getElementById('productSearch').value);
+    }
+
+    function selectProduct(code) {
+        var p = PRODUCT_LIB.filter(function(x) { return x.code === code; })[0];
+        if (!p) return;
+        addRow(p);
+        closeProductModal();
+    }
+
+    // 校验
+    function validate() {
+        var ok = true;
+        ['f-customer','f-contact','f-phone','f-address'].forEach(function(id) {
+            var el = document.getElementById(id);
+            el.classList.remove('field-error');
+            if (!el.value.trim()) { el.classList.add('field-error'); ok = false; }
+        });
+        var rows = document.querySelectorAll('#detail-body tr');
+        if (rows.length === 0) { alert('请至少添加一条产品明细'); ok = false; return ok; }
+        rows.forEach(function(r) {
+            var qty = r.querySelectorAll('.cell-input.num')[0];
+            if (!(parseFloat(qty.value) > 0)) { qty.classList.add('field-error'); ok = false; }
+        });
+        if (!ok) alert('请完善必填项（标 * 字段、明细数量需大于 0）');
+        return ok;
+    }
+
+    // 收集数据（演示用）
+    function collect() {
+        var rows = [];
+        document.querySelectorAll('#detail-body tr').forEach(function(r) {
+            var nums = r.querySelectorAll('.cell-input.num');
+            rows.push({
+                code: (r.querySelector('.product-info div').textContent.match(/\[(\S+)\]/) || [, ''])[1],
+                name: (r.querySelector('.product-info div').textContent.replace(/^\[\S+\]\s*/, '')),
+                spec: r.children[2].textContent,
+                brand: r.children[3].textContent,
+                qty: nums[0].value, unit: r.children[5].textContent,
+                price: nums[1].value, tax: nums[2].value, supplier: r.querySelector('select').value
+            });
+        });
+        return {
+            customer: document.getElementById('f-customer').value,
+            terms: document.getElementById('f-terms').value,
+            contact: document.getElementById('f-contact').value,
+            phone: document.getElementById('f-phone').value,
+            receiver: document.getElementById('f-receiver').value,
+            receivePhone: document.getElementById('f-receivePhone').value,
+            address: document.getElementById('f-address').value,
+            remark: document.getElementById('f-remark').value,
+            items: rows
+        };
+    }
+
+    function showAlert(msg) {
+        document.getElementById('successMsg').innerHTML = msg + '，<a class="link" onclick="location.href=\'销售订单列表.html\'">返回列表</a>';
+        document.getElementById('successAlert').classList.add('show');
+        window.scrollTo(0, 0);
+    }
+
+    function saveDraft() {
+        if (!document.getElementById('f-customer').value.trim() && !document.querySelectorAll('#detail-body tr').length) {
+            alert('请先填写订单信息或明细'); return;
+        }
+        console.log('保存草稿:', collect());
+        showAlert('草稿保存成功');
+    }
+
+    function submitOrder() {
+        if (!validate()) return;
+        console.log('提交审核:', collect());
+        showAlert('提交成功，已进入审核流程');
+        setTimeout(function() { location.href = '销售订单列表.html'; }, 1500);
+    }
+
+    // 初始化
+    (function init() {
+        var order = getParam('order');
+        var mode = getParam('mode');
+        if (order) {
+            document.getElementById('pageTitle').textContent = (mode === 'edit' ? '编辑销售订单 ' : '新建销售订单 ') + order;
+            document.title = (mode === 'edit' ? '编辑销售订单 ' : '新建销售订单 ') + order + ' - 运营管理平台';
+            // 演示：编辑模式预填示例数据
+            if (mode === 'edit') {
+                document.getElementById('f-customer').value = 'agtest淘宝（山东）数字产业发展有限公司LL';
+                document.getElementById('f-contact').value = '侯振鲁';
+                document.getElementById('f-phone').value = '17505308090';
+                document.getElementById('f-receiver').value = '侯振鲁';
+                document.getElementById('f-receivePhone').value = '17505308090';
+                document.getElementById('f-address').value = '兰州路66号';
+                document.getElementById('f-remark').value = '请按期交货，包装需符合运输标准';
+                addRow({ code: '0000807', name: 'BAITESI/伯特斯 手动液压堆高车', spec: 'CTY-1 载重1t 货叉...', brand: 'BAITESI/佰...', qty: 1, unit: '台', price: 3170.59, tax: 13, supplier: SUPPLIERS[1] });
+                addRow({ code: '0000808', name: 'BAITESI/伯特斯 电动液压搬运车', spec: 'CBD-2 载重2t...', brand: 'BAITESI/佰...', qty: 1, unit: '台', price: 5800.00, tax: 13, supplier: SUPPLIERS[1] });
+                return;
+            }
+        }
+        // 默认新建：不预填明细，由用户从产品库添加
+    })();
+</script>
+
+<script src="sidebar.js"></script>
+
+</body>
+</html>

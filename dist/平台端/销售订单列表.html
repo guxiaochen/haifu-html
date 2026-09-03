@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>销售订单列表 - 运营管理平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+            background: #f5f7fa; color: #333; font-size: 14px; min-height: 100vh;
+        }
+
+        /* ===== 顶部绿色通栏 ===== */
+        .top-nav {
+            height: 56px; background: #fff; color: #333;
+            display: flex; align-items: center; padding: 0 20px;
+            border-bottom: 1px solid #f0f0f0;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .top-nav-left { display: flex; align-items: center; gap: 24px; }
+        .brand { display: flex; align-items: center; gap: 8px; }
+        .brand-logo {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #2BA471 0%, #5BC09F 100%);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px;
+        }
+        .brand-name { font-size: 16px; font-weight: 600; color: #333; }
+
+        .main-menu { display: flex; align-items: center; gap: 4px; margin-left: 12px; }
+        .main-menu-item {
+            padding: 8px 14px; color: #666; cursor: pointer;
+            font-size: 14px; border-radius: 4px;
+            transition: all .15s;
+        }
+        .main-menu-item:hover { color: #2BA471; background: #f0faf5; }
+        .main-menu-item.active { color: #2BA471; font-weight: 500; }
+
+        .top-nav-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+        .top-nav-icon {
+            cursor: pointer; color: #666; position: relative;
+            font-size: 18px; padding: 6px;
+            border-radius: 4px;
+        }
+        .top-nav-icon:hover { background: #f5f5f5; color: #2BA471; }
+        .top-nav-icon .badge {
+            position: absolute; top: 2px; right: 2px;
+            background: #ff4d4f; color: #fff; font-size: 11px;
+            min-width: 16px; height: 16px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 4px; line-height: 1;
+        }
+        .account {
+            display: flex; align-items: center; gap: 8px;
+            cursor: pointer; padding: 4px 10px; border-radius: 4px;
+            font-size: 13px; color: #333;
+        }
+        .account:hover { background: #f5f5f5; }
+        .account-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: linear-gradient(135deg, #2BA471, #5BC09F);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 500;
+        }
+        .account-name { font-size: 13px; }
+
+        /* ===== 左右分栏 ===== */
+        .layout { display: flex; min-height: calc(100vh - 56px); }
+
+        /* 左侧菜单栏 */
+        .sidebar {
+            width: 200px; background: #fff;
+            border-right: 1px solid #f0f0f0;
+            flex-shrink: 0; padding: 12px 0;
+        }
+        .menu-item {
+            padding: 10px 24px 10px 48px; color: #666; cursor: pointer;
+            font-size: 13px;
+            border-left: 3px solid transparent;
+            transition: all 0.15s;
+        }
+        .menu-item:hover { background: #f5f5f5; color: #2BA471; }
+        .menu-item.active {
+            color: #2BA471; border-left-color: #2BA471;
+            background: #f0faf5; font-weight: 500;
+        }
+        .menu-group-title {
+            padding: 10px 20px; color: #333;
+            font-size: 15px; font-weight: 600; margin-top: 8px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .menu-group-title:first-of-type { margin-top: 4px; }
+        .menu-group-icon { font-size: 16px; width: 20px; text-align: center; }
+
+        /* 右侧主内容 */
+        .main { flex: 1; padding: 16px 20px; overflow-x: auto; }
+        .breadcrumb-bar {
+            background: #fff; padding: 12px 20px;
+            border-radius: 4px; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 8px;
+            font-size: 13px; color: #666;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        .breadcrumb-bar .menu-toggle { font-size: 18px; color: #666; cursor: pointer; margin-right: 8px; }
+        .breadcrumb-bar .home-icon { color: #2BA471; cursor: pointer; }
+        .breadcrumb-bar a { color: #666; text-decoration: none; cursor: pointer; }
+        .breadcrumb-bar a:hover { color: #2BA471; }
+        .breadcrumb-bar .sep { color: #d9d9d9; margin: 0 2px; }
+        .breadcrumb-bar .current { color: #333; font-weight: 500; }
+
+        /* 搜索筛选区 */
+        .filter-card {
+            background: #fff; padding: 20px;
+            border-radius: 4px; margin-bottom: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        .filter-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .filter-item { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+        .filter-item label { color: #666; white-space: nowrap; }
+        .filter-item input, .filter-item select {
+            padding: 6px 10px; border: 1px solid #d9d9d9;
+            border-radius: 2px; font-size: 13px;
+            outline: none; min-width: 140px;
+            transition: border-color .2s;
+        }
+        .filter-item input:focus, .filter-item select:focus { border-color: #2BA471; }
+        .filter-actions { margin-left: auto; display: flex; gap: 8px; }
+
+        /* 按钮 */
+        .btn {
+            padding: 6px 16px; border: 1px solid #d9d9d9;
+            background: #fff; border-radius: 2px;
+            cursor: pointer; font-size: 13px; color: #333;
+            transition: all .2s;
+        }
+        .btn:hover { color: #2BA471; border-color: #2BA471; }
+        .btn-primary {
+            background: #2BA471; color: #fff; border-color: #2BA471;
+        }
+        .btn-primary:hover { background: #229963; border-color: #229963; color: #fff; }
+        .btn-search { background: #fff; }
+
+        /* 列表表格 */
+        .table-card {
+            background: #fff; padding: 16px 20px;
+            border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        .table-toolbar {
+            display: flex; align-items: center; margin-bottom: 14px;
+        }
+        .table-title { font-size: 15px; font-weight: 600; color: #333; }
+        .table-title .count {
+            color: #999; font-weight: 400; font-size: 13px; margin-left: 6px;
+        }
+        .table-toolbar-right { margin-left: auto; display: flex; gap: 8px; }
+        .btn-add {
+            background: #2BA471; color: #fff; border: none;
+            padding: 7px 18px; border-radius: 2px; font-size: 13px;
+            cursor: pointer;
+        }
+        .btn-add:hover { background: #229963; }
+
+        table {
+            width: 100%; border-collapse: collapse; font-size: 13px;
+        }
+        table thead {
+            background: #fafafa;
+        }
+        table th {
+            padding: 10px 12px; text-align: left; color: #555;
+            font-weight: 500; border-bottom: 1px solid #f0f0f0;
+            white-space: nowrap;
+        }
+        table td {
+            padding: 12px; color: #333; border-bottom: 1px solid #f5f5f5;
+        }
+        table tbody tr:hover { background: #fafdfb; }
+
+        /* 状态徽标 */
+        .status {
+            display: inline-block; padding: 2px 10px;
+            border-radius: 10px; font-size: 12px; font-weight: 500;
+        }
+        .status-pending { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+        .status-confirmed { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+        .status-shipping { background: #f0faf5; color: #2BA471; border: 1px solid #b7eb8f; }
+        .status-done { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .status-cancel { background: #f5f5f5; color: #999; border: 1px solid #d9d9d9; }
+
+        /* 操作链接 */
+        .link { color: #2BA471; cursor: pointer; text-decoration: none; margin-right: 12px; }
+        .link:hover { text-decoration: underline; }
+        .link-danger { color: #ff4d4f; }
+        .link-danger:hover { color: #ff7875; }
+
+        /* 分页 */
+        .pagination {
+            display: flex; align-items: center; justify-content: flex-end;
+            gap: 8px; margin-top: 16px; font-size: 13px; color: #666;
+        }
+        .pagination .page-info { margin-right: 16px; }
+        .page-btn {
+            min-width: 28px; height: 28px; padding: 0 8px;
+            border: 1px solid #d9d9d9; background: #fff;
+            border-radius: 2px; cursor: pointer; font-size: 13px;
+        }
+        .page-btn:hover { color: #2BA471; border-color: #2BA471; }
+        .page-btn.active { background: #2BA471; color: #fff; border-color: #2BA471; }
+        .page-btn:disabled { color: #ccc; cursor: not-allowed; }
+        .page-jumper input {
+            width: 40px; padding: 4px 6px; border: 1px solid #d9d9d9;
+            border-radius: 2px; margin: 0 4px; text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="top-nav">
+    <div class="top-nav-left">
+        <div class="brand">
+            <div class="brand-logo">叶</div>
+            <div class="brand-name">运营管理平台</div>
+        </div>
+        
+    </div>
+    <div class="top-nav-right">
+
+        <div class="top-nav-icon" title="消息">
+            🔔<span class="badge">13</span>
+        </div>
+        <div class="account">
+            <div class="account-avatar">A</div>
+            <div class="account-name">Administrator</div>
+        </div>
+    </div>
+</div>
+
+<!-- 左右分栏 -->
+<div class="layout">
+
+    <!-- 左侧菜单（组件化） -->
+    <div id="sidebar-container"></div>
+
+    <!-- 右侧主内容 -->
+    <main class="main">
+
+        <!-- 面包屑导航 -->
+        <div class="breadcrumb-bar">
+            <span class="menu-toggle">☰</span>
+            <span class="home-icon">🏠</span>
+            <a>首页</a>
+            <span class="sep">/</span>
+            <span class="current">销售订单</span>
+        </div>
+
+        <!-- 搜索筛选区 -->
+        <div class="filter-card">
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label>订单号</label>
+                    <input type="text" placeholder="请输入订单号">
+                </div>
+                <div class="filter-item">
+                    <label>客户名称</label>
+                    <input type="text" placeholder="请输入客户名称">
+                </div>
+                <div class="filter-item">
+                    <label>订单状态</label>
+                    <select>
+                        <option>全部</option>
+                        <option>待确认</option>
+                        <option>已确认</option>
+                        <option>收货完成</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>交货状态</label>
+                    <select>
+                        <option>全部</option>
+                        <option>未发货</option>
+                        <option>部分发货</option>
+                        <option>全部发货</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>下单日期</label>
+                    <input type="date">
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-search">🔍 搜索</button>
+                    <button class="btn">重置</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 表格 -->
+        <div class="table-card">
+            <div class="table-toolbar">
+                <div class="table-title">
+                    销售订单列表
+                    <span class="count">共 12 条</span>
+                </div>
+                <div class="table-toolbar-right">
+                    <button class="btn">📥 导出</button>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:32px;"><input type="checkbox"></th>
+                        <th>订单号</th>
+                        <th>客户名称</th>
+                        <th>联系人</th>
+                        <th>联系电话</th>
+                        <th>订单金额</th>
+                        <th>付款条款</th>
+                        <th>支付状态</th>
+                        <th>订单状态</th>
+                        <th>交货状态</th>
+                        <th>下单日期</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><a class="link">SO000202</a></td>
+                        <td>济南历下区机械设备有限公司</td>
+                        <td>张建国</td>
+                        <td>13600136000</td>
+                        <td>¥ 32,800.00</td>
+                        <td>60 days</td>
+                        <td><span class="status status-pending">未支付</span></td>
+                        <td><span class="status status-pending">待确认</span></td>
+                        <td><span class="status status-pending">未发货</span></td>
+                        <td>2026-03-22</td>
+                        <td>
+                            <a class="link" onclick="location.href='销售订单详情.html?order=SO000202&status=purchase'">查看</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><a class="link">SO000205</a></td>
+                        <td>agtest淘宝（山东）数字产业发展有限公司LL</td>
+                        <td>侯振鲁</td>
+                        <td>17505308090</td>
+                        <td>¥ 2,805.83</td>
+                        <td>immediate</td>
+                        <td><span class="status status-shipping">部分支付</span></td>
+                        <td><span class="status status-confirmed">已确认</span></td>
+                        <td><span class="status status-pending">未发货</span></td>
+                        <td>2026-04-01</td>
+                        <td>
+                            <a class="link" onclick="location.href='销售订单详情.html?order=SO000205&status=confirm'">查看</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><a class="link">SO000204</a></td>
+                        <td>青岛海尔智能家电有限公司</td>
+                        <td>王晓东</td>
+                        <td>13800138000</td>
+                        <td>¥ 18,500.00</td>
+                        <td>30 days</td>
+                        <td><span class="status status-done">全额支付</span></td>
+                        <td><span class="status status-confirmed">已确认</span></td>
+                        <td><span class="status status-shipping">部分发货</span></td>
+                        <td>2026-03-28</td>
+                        <td>
+                            <a class="link" onclick="location.href='销售订单详情.html?order=SO000204&status=confirm'">查看</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><a class="link">SO000203</a></td>
+                        <td>菏泽牡丹食品加工厂</td>
+                        <td>李梅</td>
+                        <td>13900139000</td>
+                        <td>¥ 6,420.50</td>
+                        <td>immediate</td>
+                        <td><span class="status status-done">全额支付</span></td>
+                        <td><span class="status status-done">收货完成</span></td>
+                        <td><span class="status status-done">全部发货</span></td>
+                        <td>2026-03-25</td>
+                        <td>
+                            <a class="link" onclick="location.href='销售订单详情.html?order=SO000203&status=done'">查看</a>
+                        </td>
+                    </tr>
+                    
+                    
+                    
+                </tbody>
+            </table>
+
+            <!-- 分页 -->
+            <div class="pagination">
+                <span class="page-info">共 12 条</span>
+                <button class="page-btn" disabled>‹</button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">›</button>
+                <span class="page-jumper">
+                    前往 <input type="text" value="1"> 页
+                </span>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- 左侧菜单组件 -->
+<script src="sidebar.js"></script>
+
+</body>
+</html>

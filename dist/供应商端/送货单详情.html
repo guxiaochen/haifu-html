@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>送货单详情 - 供应商端</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+          "Microsoft YaHei", sans-serif;
+        color: #1f2937;
+        background: #f4f6f9;
+        font-size: 13px;
+      }
+      .app-header {
+        display: none;
+      }
+      .page {
+        padding: 26px 32px 40px;
+        max-width: 1600px;
+      }
+      .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #9aa5b1;
+        font-size: 13px;
+        height: 42px;
+        margin-bottom: 4px;
+      }
+      .breadcrumb a {
+        color: #667382;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .breadcrumb a:hover {
+        color: #1890ff;
+      }
+      .breadcrumb .current {
+        color: #253142;
+        font-weight: 600;
+      }
+      .breadcrumb .sep {
+        color: #cfd6de;
+      }
+      .top-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 45px;
+        margin-bottom: 14px;
+      }
+      .page-label {
+        font-size: 16px;
+        font-weight: 600;
+        color: #253142;
+      }
+      .page-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .back-btn,
+      .nav-btn {
+        height: 32px;
+        border: 1px solid #d8dee6;
+        border-radius: 4px;
+        background: #fff;
+        color: #52606f;
+        padding: 0 13px;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 13px;
+      }
+      .nav-btn {
+        width: 32px;
+        padding: 0;
+      }
+      .back-btn:hover,
+      .nav-btn:hover {
+        color: #1890ff;
+        border-color: #1890ff;
+      }
+      .muted {
+        color: #98a2b3;
+        font-size: 12px;
+      }
+      .content {
+        background: #fff;
+        border: 1px solid #edf0f4;
+        border-radius: 8px;
+        padding: 18px 20px;
+        box-shadow: 0 4px 16px rgba(29, 45, 61, 0.03);
+      }
+      .order-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .order-head-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        background: #fff;
+        border: 1px solid #edf0f4;
+        border-radius: 8px;
+        padding: 16px 20px;
+        box-shadow: 0 4px 16px rgba(29, 45, 61, 0.03);
+        margin-bottom: 16px;
+      }
+      .order-head-bar .head-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .star {
+        font-size: 21px;
+        color: #8a969b;
+      }
+      .order-no {
+        font-size: 20px;
+        font-weight: 600;
+        color: #253142;
+      }
+      .type-tag {
+        padding: 4px 10px;
+        border-radius: 10px;
+        color: #1890ff;
+        background: #eaf4ff;
+        font-size: 12px;
+      }
+      .type-tag.owing {
+        color: #d46b08;
+        background: #fff3df;
+      }
+      .status {
+        margin-left: auto;
+        padding: 5px 11px;
+        border-radius: 10px;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #667382;
+        background: #f4f5f7;
+      }
+      .status:before {
+        content: "";
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+      .status.sent {
+        color: #389e0d;
+        background: #f1fae9;
+      }
+      .status.received {
+        color: #389e0d;
+        background: #f1fae9;
+      }
+      .status-flow {
+        flex-shrink: 0;
+      }
+      .step-tabs {
+        display: flex;
+        align-items: center;
+        gap: 0;
+      }
+      .step-tab {
+        padding: 6px 18px;
+        background: #f5f5f5;
+        color: #666;
+        font-size: 13px;
+        clip-path: polygon(
+          0 0,
+          calc(100% - 8px) 0,
+          100% 50%,
+          calc(100% - 8px) 100%,
+          0 100%,
+          8px 50%
+        );
+        margin-right: -8px;
+        transition: all 0.15s;
+      }
+      .step-tab:first-child {
+        clip-path: polygon(
+          0 0,
+          calc(100% - 8px) 0,
+          100% 50%,
+          calc(100% - 8px) 100%,
+          0 100%
+        );
+      }
+      .step-tab:last-child {
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 8px 50%);
+        margin-right: 0;
+      }
+      .step-tab.active {
+        background: #1890ff;
+        color: #fff;
+      }
+      .step-tab.done {
+        background: #e8e8e8;
+        color: #999;
+      }
+      .info-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px 70px;
+        padding: 6px 18px 22px;
+        border-bottom: 1px solid #f0f2f3;
+      }
+      .info-section .buttons {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 4px;
+      }
+      .info-column {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+      .info-title {
+        font-weight: 600;
+        color: #253142;
+        margin-bottom: 2px;
+      }
+      .info-title:before {
+        content: "";
+        display: inline-block;
+        width: 3px;
+        height: 14px;
+        background: #1890ff;
+        border-radius: 2px;
+        vertical-align: -2px;
+        margin-right: 7px;
+      }
+      .info-item {
+        display: flex;
+        gap: 18px;
+        line-height: 1.6;
+      }
+      .label {
+        width: 72px;
+        text-align: right;
+        color: #667382;
+        font-size: 13px;
+        flex-shrink: 0;
+      }
+      .value {
+        color: #344054;
+      }
+      .tabs {
+        display: flex;
+        gap: 0;
+        margin: 18px 0 0;
+        border-bottom: 1px solid #e8edef;
+      }
+      .tab {
+        padding: 10px 22px;
+        border: 1px solid #d8dee6;
+        border-bottom: 0;
+        color: #667382;
+        background: #fff;
+        border-radius: 7px 7px 0 0;
+        cursor: pointer;
+      }
+      .tab.active {
+        border-color: #1890ff;
+        color: #1890ff;
+        background: #f5fbff;
+        border-bottom: 1px solid #f5fbff;
+        margin-bottom: -1px;
+      }
+      .tab-content {
+        padding-top: 16px;
+      }
+      .notice {
+        padding: 10px 14px;
+        margin-bottom: 12px;
+        background: #f5fbff;
+        border: 1px solid #b7dcff;
+        color: #667382;
+        border-radius: 5px;
+      }
+      .notice.owing {
+        background: #fffaf0;
+        border-color: #ffe7ba;
+        color: #a65d00;
+      }
+      .product-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+      .product-table th {
+        height: 42px;
+        text-align: left;
+        color: #667382;
+        font-weight: 600;
+        border-bottom: 1px solid #e9edef;
+        padding: 0 12px;
+        white-space: nowrap;
+      }
+      .product-table td {
+        height: 62px;
+        padding: 0 12px;
+        border-bottom: 1px solid #f0f2f3;
+        color: #344054;
+        white-space: nowrap;
+      }
+      .product-table tr:hover td {
+        background: #fbfdff;
+      }
+      .product-name {
+        font-weight: 500;
+        color: #344054;
+      }
+      .product-img {
+        width: 42px;
+        height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #f5f7fa;
+        border: 1px solid #e5e7eb;
+        border-radius: 5px;
+        font-size: 22px;
+      }
+      .product-code {
+        display: block;
+        color: #98a2b3;
+        font-size: 11px;
+        margin-top: 3px;
+      }
+      .qty-input {
+        width: 76px;
+        height: 30px;
+        border: 1px solid #d8dee6;
+        border-radius: 5px;
+        padding: 0 8px;
+        font-family: inherit;
+        color: #344054;
+      }
+      .qty-input:focus {
+        border-color: #1890ff;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.12);
+      }
+      .qty-input:disabled {
+        background: #f5f6f7;
+        color: #99a4a8;
+      }
+      .tax {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 9px;
+        background: #f0f5ff;
+        color: #1890ff;
+        border: 1px solid #d6e4ff;
+        font-size: 11px;
+      }
+      .bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 18px;
+      }
+      .ship-progress {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        padding: 12px 16px;
+        background: #fafbfd;
+        border: 1px solid #edf0f4;
+        border-radius: 6px;
+        width: 100%;
+      }
+      .ship-progress .sp-item {
+        font-size: 13px;
+        color: #667382;
+      }
+      .ship-progress .sp-item b {
+        color: #253142;
+        font-size: 16px;
+        margin-left: 4px;
+        font-variant-numeric: tabular-nums;
+      }
+      .ship-progress .sp-item b.sp-remain {
+        color: #d46b08;
+      }
+      .ship-progress .sp-item b.sp-done {
+        color: #389e0d;
+      }
+      .hint {
+        color: #98a2b3;
+        font-size: 12px;
+      }
+      .buttons {
+        display: flex;
+        gap: 9px;
+      }
+      .btn {
+        height: 34px;
+        padding: 0 17px;
+        border: 1px solid #d8dee6;
+        border-radius: 5px;
+        background: #fff;
+        color: #52606f;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 13px;
+      }
+      .btn:hover {
+        color: #1890ff;
+        border-color: #1890ff;
+      }
+      .btn-primary {
+        background: #1890ff;
+        color: #fff;
+        border-color: #1890ff;
+      }
+      .btn-primary:hover {
+        background: #096dd9;
+        border-color: #096dd9;
+        color: #fff;
+      }
+      .btn:disabled {
+        color: #cbd2da;
+        background: #f7f8f8;
+        border-color: #edf0f1;
+        cursor: not-allowed;
+      }
+      .toast {
+        position: fixed;
+        top: 76px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: none;
+        padding: 10px 18px;
+        background: #f5fbff;
+        border: 1px solid #b7dcff;
+        color: #1677d2;
+        border-radius: 6px;
+      }
+      .toast.show {
+        display: block;
+      }
+      .modal-mask {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+      }
+      .modal-mask.show {
+        display: flex;
+      }
+      .modal {
+        width: 360px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 12px 40px rgba(15, 23, 42, 0.18);
+        overflow: hidden;
+      }
+      .preview-modal { width: min(960px, calc(100vw - 32px)); max-height: calc(100vh - 32px); }
+      .preview-body { max-height: calc(100vh - 150px); overflow: auto; padding: 24px; background: #f5f6f8; }
+      .print-preview-page { background: #fff; min-height: 620px; padding: 34px 42px; color: #111; box-shadow: 0 2px 12px rgba(0,0,0,.12); }
+      .preview-brand { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #8aa7c8; padding-bottom: 10px; }
+      .preview-brand strong { font-size: 22px; color: #1769aa; }
+      .preview-company { font-size: 16px; font-weight: 600; }
+      .preview-title { text-align: center; font-size: 30px; font-weight: 700; margin: 18px 0; }
+      .preview-info-wrap { position: relative; margin-bottom: 24px; }
+      .preview-info { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 28px; line-height: 1.7; padding-right: 136px; }
+      .preview-qr { position: absolute; top: -50px; right: 0; width: 112px; height: 112px; object-fit: contain; border: 1px solid #e5e7eb; padding: 5px; }
+      .preview-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+      .preview-table th, .preview-table td { border: 1px solid #777; padding: 7px 6px; text-align: left; }
+      .preview-table th { background: #f7f7f7; font-weight: 700; }
+      .preview-footer { display: flex; justify-content: space-between; margin-top: 28px; font-size: 13px; }
+      @media (max-width: 700px) { .preview-info { grid-template-columns: 1fr; } .print-preview-page { padding: 20px; } }
+      .modal-title {
+        padding: 18px 20px 6px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #253142;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .modal-title .warn-icon {
+        color: #faad14;
+        font-size: 18px;
+      }
+      .modal-body {
+        padding: 4px 20px 18px;
+        color: #52606f;
+        line-height: 1.7;
+        font-size: 13px;
+      }
+      .modal-body b {
+        color: #253142;
+      }
+      .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 14px 20px;
+        border-top: 1px solid #f0f2f3;
+        background: #fafbfd;
+      }
+      .main-area {
+        margin-left: 200px;
+        min-height: 100vh;
+      }
+      .top-nav {
+        height: 64px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        padding: 0 32px;
+        border-bottom: 1px solid #edf0f4;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      .top-actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        color: #778393;
+      }
+      .nav-notice {
+        font-size: 18px;
+        position: relative;
+        cursor: pointer;
+      }
+      .nav-badge {
+        position: absolute;
+        top: -7px;
+        right: -8px;
+        background: #ff4d4f;
+        border: 2px solid #fff;
+        color: #fff;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 4px;
+        border-radius: 9px;
+        font-size: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .nav-user {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #475467;
+        cursor: pointer;
+      }
+      .nav-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #e6f4ff;
+        color: #1890ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+      }
+      .main {
+        padding: 26px 32px 40px;
+        max-width: 1600px;
+      }
+      @media (max-width: 900px) {
+        .info-section {
+          grid-template-columns: 1fr;
+        }
+        .product-table {
+          min-width: 0;
+          table-layout: fixed;
+          font-size: 12px;
+        }
+        .product-table th, .product-table td {
+          padding: 8px 5px;
+        }
+        .qty-input {
+          width: 64px;
+        }
+        .content {
+          overflow-x: hidden;
+        }
+      }
+      @media print {
+        .top-nav, .breadcrumb, .page-actions, .tabs, .notice, .bottom, #actionButtons, .modal-mask, .toast {
+          display: none !important;
+        }
+        body { background: #fff; color: #111; }
+        .main-area, .main, .page { margin: 0; padding: 0; max-width: none; }
+        .content, .order-head-bar { border: 0; box-shadow: none; }
+        .product-table { width: 100%; font-size: 11px; }
+        .product-table th, .product-table td { border: 1px solid #999; padding: 6px; }
+        body.print-without-price .print-price { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <script src="sidebar.js"></script>
+    <div class="main-area">
+      <header class="top-nav">
+        <div class="breadcrumb">
+          <a onclick="backOrderList()">销售订单</a><span class="sep">/</span
+          ><a id="breadOrder" onclick="backOrderList()">PO000026</a><span class="sep">/</span
+          ><a onclick="backList()">送货单</a><span class="sep">/</span
+          ><span class="current" id="breadNo">DS/00001</span>
+        </div>
+        <div class="top-actions">
+          <span class="nav-notice">♧<span class="nav-badge">3</span></span>
+          <div class="nav-user"><span class="nav-avatar">管</span><span>超级管理员</span><span style="font-size:11px">⌄</span></div>
+        </div>
+      </header>
+      <main class="page">
+        <div class="order-head-bar">
+          <div class="head-left">
+            <span class="order-no" id="shipmentNo">DS/00001</span
+            ><span class="type-tag" id="typeTag">正常送货单</span>
+          </div>
+          <span class="status-flow"
+            ><span class="step-tabs" id="statusFlow">
+              <span class="step-tab" data-step="pending">待发货</span>
+              <span class="step-tab" data-step="sent">已发货</span>
+              <span class="step-tab" data-step="received">已收货</span>
+            </span></span
+          >
+        </div>
+        <section class="content">
+          <div class="info-section">
+            <div class="buttons" id="actionButtons" style="display:flex;justify-content:flex-start">
+              <button class="btn btn-primary" id="shipBtn" onclick="submitShipment()">申请验收</button>
+              <button class="btn" id="printBtn" onclick="openPrintModal()">打印</button>
+            </div>
+            <div class="info-column">
+              <div class="info-title">送货单信息</div>
+              <div class="info-item">
+                <span class="label">销售单号</span
+                ><span class="value" id="orderNo">PO000015</span>
+              </div>
+              <div class="info-item">
+                <span class="label">订单日期</span
+                ><span class="value">2025年12月18日</span>
+              </div>
+              <div class="info-item">
+                <span class="label">安排日期</span
+                ><span class="value">2025年12月20日</span>
+              </div>
+              <div class="info-item">
+                <span class="label">创建时间</span
+                ><span class="value">2025年12月18日 14:35</span>
+              </div>
+            </div>
+            <div class="info-column">
+              <div class="info-title">客户信息</div>
+              <div class="info-item">
+                <span class="label">客户名称</span
+                ><span class="value">元象（山东）数字产业发展有限公司</span>
+              </div>
+              <div class="info-item">
+                <span class="label">联系人</span
+                ><span class="value">侯振鲁</span>
+              </div>
+              <div class="info-item">
+                <span class="label">电话</span
+                ><span class="value">17505308090</span>
+              </div>
+              <div class="info-item">
+                <span class="label">送货地址</span
+                ><span class="value">274000 山东省菏泽市兰州路66号</span>
+              </div>
+            </div>
+          </div>
+          <div class="tabs">
+            <div class="tab active">产品清单</div>
+            <!-- <div class="tab">其他信息</div> -->
+          </div>
+          <div class="tab-content">
+            <div class="notice" id="notice">
+              发货前可以修改送货数量，点击“申请验收”后送货单将变为已发货且不可修改。
+            </div>
+            <table class="product-table">
+              <thead>
+                <tr>
+                  <th>序号</th>
+                  <th>商品图片</th>
+                  <th>物料编码</th>
+                  <th>产品名称</th>
+                  <th>规格</th>
+                  <th>品牌</th>
+                  <th>订单数量</th>
+                  <th>发货数量</th>
+                  <th>单位</th>
+                  <th>已接收</th>
+                  <th class="print-price">单价</th>
+                  <th>税项</th>
+                  <th class="print-price">不含税金额</th>
+                </tr>
+              </thead>
+              <tbody id="products"></tbody>
+            </table>
+            <div class="bottom" id="footNote">
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div class="toast" id="toast"></div>
+    <div class="modal-mask" id="printModal">
+      <div class="modal">
+        <div class="modal-title">选择打印模板</div>
+        <div class="modal-body">
+          <div class="print-options">
+            <label class="print-option"><input type="radio" name="printTemplate" value="with-price" checked> 显示单价金额</label>
+            <label class="print-option"><input type="radio" name="printTemplate" value="without-price"> 不显示单价金额</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" onclick="closePrintModal()">取消</button>
+          <button class="btn" onclick="previewShipment()">预览</button>
+          <button class="btn btn-primary" onclick="printShipment()">确认打印</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-mask" id="previewModal">
+      <div class="modal preview-modal">
+        <div class="modal-title">打印效果预览</div>
+        <div class="preview-body" id="previewBody"></div>
+        <div class="modal-footer">
+          <button class="btn" onclick="closePreviewModal()">返回修改</button>
+          <button class="btn btn-primary" onclick="printFromPreview()">打印</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-mask" id="shipModal">
+      <div class="modal">
+        <div class="modal-title"><span class="warn-icon">!</span>确认申请验收</div>
+        <div class="modal-body">
+          提交后送货单状态将变为<b>已发货</b>，发货数量将被锁定无法修改。<br />是否确认提交？
+        </div>
+        <div class="modal-footer">
+          <button class="btn" onclick="closeShipModal()">取消</button>
+          <button class="btn btn-primary" onclick="confirmShipment()">确认提交</button>
+        </div>
+    </div>
+    <script>
+      // 与送货单列表一致的送货单字典（按销售订单号索引）
+      var SHIPMENT_DB = {
+        PO000015: [{ delivery: "DS/00001", status: "pending" }],
+        PO000019: [{ delivery: "DS/00001", status: "pending" }],
+        PO000023: [{ delivery: "DS/00001", status: "sent" }],
+        PO000026: [
+          { delivery: "DS/00001", status: "pending" },
+          { delivery: "DS/00002", status: "sent" },
+          { delivery: "DS/00003", status: "received" }
+        ]
+      };
+      // 客户下单产品总量
+      var ORDER_PRODUCTS = {
+        PO000015: [{ code: "00000002", name: "锂电池电钻", unit: "台", required: 15 }, { code: "00000003", name: "接近开关", unit: "个", required: 5 }],
+        PO000019: [{ code: "00000002", name: "锂电池电钻", unit: "台", required: 8 }, { code: "00000003", name: "接近开关", unit: "个", required: 3 }],
+        PO000023: [{ code: "00000002", name: "锂电池电钻", unit: "台", required: 10 }, { code: "00000003", name: "接近开关", unit: "个", required: 4 }],
+        PO000026: [{ code: "00000002", name: "锂电池电钻", unit: "台", required: 15 }, { code: "00000003", name: "接近开关", unit: "个", required: 5 }]
+      };
+      // 每张送货单的发货数量（按产品 code）
+      var SHIP_QTY = {
+        PO000015: { "DS/00001": { "00000002": 0, "00000003": 0 } },
+        PO000019: { "DS/00001": { "00000002": 0, "00000003": 0 } },
+        PO000023: { "DS/00001": { "00000002": 10, "00000003": 4 } },
+        PO000026: {
+          "DS/00001": { "00000002": 6, "00000003": 2 },
+          "DS/00002": { "00000002": 6, "00000003": 2 },
+          "DS/00003": { "00000002": 3, "00000003": 1 }
+        }
+      };
+      var order = getParam("order") || "PO000015",
+        delivery = getParam("shipment") || "DS/00001",
+        // 依据订单号 + 送货单号查询该单自身状态
+        meta = (SHIPMENT_DB[order] || []).filter(function (r) { return r.delivery === delivery; })[0] || { status: "pending" };
+      // 该送货单自身是否已申请验收（按单号持久化，供订单页回读）
+      var accepted = false;
+      try { accepted = localStorage.getItem("shipment_sent_" + order + "_" + delivery) === "1"; } catch (e) {}
+      var initStatus = meta.status;
+      if (accepted && initStatus === "pending") initStatus = "sent";
+      // 已收货那张单标记为欠单展示（DS/00003），其余为正常单
+      isOwing = delivery === "DS/00003",
+        sent = initStatus === "sent" || initStatus === "received";
+      // 本单发货数量（按 code）
+      var shipQtyOfDelivery = (SHIP_QTY[order] && SHIP_QTY[order][delivery]) || {};
+      var products = [
+        {
+          code: "00000002",
+          name: "锂电池电钻",
+          spec: "18V",
+          brand: "博世",
+          required: 15,
+          normal: 6,
+          owing: 9,
+          received: 0,
+          settled: 15,
+          price: "500.00",
+          amount: "¥ 6,637.17",
+          unit: "台",
+        },
+        {
+          code: "00000003",
+          name: "接近开关",
+          spec: "IM18-05BD...",
+          brand: "施克",
+          required: 5,
+          normal: 2,
+          owing: 3,
+          received: 0,
+          settled: 5,
+          price: "500.00",
+          amount: "¥ 2,212.39",
+          unit: "个",
+        },
+      ];
+      function getParam(n) {
+        var m = location.search.match(new RegExp("[?&]" + n + "=([^&]*)"));
+        return m ? decodeURIComponent(m[1]) : "";
+      }
+      function backList() {
+        location.href = "送货单列表.html?order=" + encodeURIComponent(order);
+      }
+      function toast(msg) {
+        var e = document.getElementById("toast");
+        e.textContent = msg;
+        e.classList.add("show");
+        clearTimeout(window.tt);
+        window.tt = setTimeout(function () {
+          e.classList.remove("show");
+        }, 2000);
+      }
+      function render() {
+        document.getElementById("products").innerHTML = products
+          .map(function (p, index) {
+            var qty = isOwing ? p.owing : p.normal;
+            return (
+              '<tr><td class="muted">' +
+              (index + 1) +
+              '</td><td><span class="product-img" aria-label="商品图片">📦</span></td><td class="material-code">' +
+              p.code +
+              '</td><td><span class="product-name">' +
+              p.name +
+              '</span></td><td>' +
+              p.spec +
+              '</td><td>' +
+              p.brand +
+              '</td><td class="muted">' + p.required +
+              '</td><td><input class="qty-input" type="number" min="0" max="' +
+              (isOwing ? p.owing : p.required) +
+              '" value="' +
+              qty.toFixed(2) +
+              '" ' +
+              (sent ? "disabled" : "") +
+              '></td><td>' +
+              p.unit +
+              '</td><td>' +
+              p.received.toFixed(2) +
+              '</td><td class="print-price">' +
+              p.price +
+              '</td><td><span class="tax">13% 进项税</span></td><td class="print-price">' +
+              p.amount +
+              '</td></tr>'
+            );
+          })
+          .join("");
+      }
+      function setFlow(status) {
+        var steps = document.querySelectorAll("#statusFlow .step-tab");
+        var idx = { pending: 0, sent: 1, received: 2 }[status];
+        steps.forEach(function (el, i) {
+          el.classList.remove("active", "done");
+          if (i < idx) el.classList.add("done");
+          else if (i === idx) el.classList.add("active");
+        });
+      }
+      var selectedPrintTemplate = "with-price";
+      function openPrintModal() {
+        document.getElementById("printModal").classList.add("show");
+      }
+      function closePrintModal() {
+        document.getElementById("printModal").classList.remove("show");
+      }
+      function getPrintTemplate() {
+        return document.querySelector('input[name="printTemplate"]:checked').value;
+      }
+      function formatPrintDate(date) {
+        return date.getFullYear() + "年" + String(date.getMonth() + 1).padStart(2, "0") + "月" + String(date.getDate()).padStart(2, "0") + "日";
+      }
+      function buildQrDataUrl() {
+        var size = 33;
+        var cells = [];
+        for (var y = 0; y < size; y++) {
+          cells[y] = [];
+          for (var x = 0; x < size; x++) cells[y][x] = false;
+        }
+        function finder(left, top) {
+          for (var fy = 0; fy < 7; fy++) {
+            for (var fx = 0; fx < 7; fx++) {
+              cells[top + fy][left + fx] = fx === 0 || fx === 6 || fy === 0 || fy === 6 || (fx >= 2 && fx <= 4 && fy >= 2 && fy <= 4);
+            }
+          }
+        }
+        finder(1, 1); finder(size - 8, 1); finder(1, size - 8);
+        for (var row = 0; row < size; row++) {
+          for (var col = 0; col < size; col++) {
+            var reserved = (row < 9 && col < 9) || (row < 9 && col > size - 10) || (row > size - 10 && col < 9);
+            if (!reserved && ((row * 17 + col * 31 + row * col * 7 + 13) % 11 < 5)) cells[row][col] = true;
+          }
+        }
+        var rects = '<rect width="100%" height="100%" fill="white"/>';
+        for (var r = 0; r < size; r++) for (var c = 0; c < size; c++) if (cells[r][c]) rects += '<rect x="' + c + '" y="' + r + '" width="1" height="1"/>';
+        return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + size + ' ' + size + '"><rect width="100%" height="100%" fill="white"/><g fill="black">' + rects.replace('<rect width="100%" height="100%" fill="white"/>', '') + '</g></svg>');
+      }
+      function buildPreview() {
+        var showPrice = selectedPrintTemplate === "with-price";
+        var rows = products.map(function (p, index) {
+          var qty = isOwing ? p.owing : p.normal;
+          return '<tr><td>' + (index + 1) + '</td><td>' + p.code + '</td><td>' + p.name + '</td><td>' + p.spec + '</td><td>' + p.brand + '</td><td>' + p.required + '</td><td>' + qty.toFixed(2) + '</td><td>' + p.unit + '</td><td>' + p.received.toFixed(2) + '</td>' + (showPrice ? '<td>' + p.price + '</td>' : '') + '<td>13% 进项税</td>' + (showPrice ? '<td>' + p.amount + '</td>' : '') + '</tr>';
+        }).join('');
+        return '<div class="print-preview-page"><div class="preview-brand"><strong>元象</strong><span class="preview-company">元象（山东）数字产业发展有限公司</span></div><div class="preview-title">送货单</div><div class="preview-info-wrap"><div class="preview-info"><div><b>编号：</b>' + delivery + '</div><div><b>客户：</b>元象（山东）数字产业发展有限公司</div><div><b>联系人：</b>侯振鲁</div><div><b>收货地址：</b>274000 山东省菏泽市兰州路66号</div></div><img class="preview-qr" alt="收货确认二维码" src="' + buildQrDataUrl() + '" /></div><table class="preview-table"><thead><tr><th>No.</th><th>物料编码</th><th>产品名称</th><th>规格</th><th>品牌</th><th>订单数量</th><th>发货数量</th><th>单位</th><th>已接收</th>' + (showPrice ? '<th>单价</th>' : '') + '<th>税项</th>' + (showPrice ? '<th>不含税金额</th>' : '') + '</tr></thead><tbody>' + rows + '</tbody></table><div class="preview-footer"><span>打印日期：' + formatPrintDate(new Date()) + '</span><span>收货人：侯振鲁</span></div></div>';
+      }
+      function previewShipment() {
+        selectedPrintTemplate = getPrintTemplate();
+        document.getElementById("previewBody").innerHTML = buildPreview();
+        closePrintModal();
+        document.getElementById("previewModal").classList.add("show");
+      }
+      function closePreviewModal() {
+        document.getElementById("previewModal").classList.remove("show");
+        document.getElementById("printModal").classList.add("show");
+      }
+      function printFromPreview() {
+        document.getElementById("previewModal").classList.remove("show");
+        document.body.classList.toggle("print-without-price", selectedPrintTemplate === "without-price");
+        window.print();
+        setTimeout(function () { document.body.classList.remove("print-without-price"); }, 500);
+      }
+      function printShipment() {
+        selectedPrintTemplate = getPrintTemplate();
+        closePrintModal();
+        document.body.classList.toggle("print-without-price", selectedPrintTemplate === "without-price");
+        window.print();
+        setTimeout(function () { document.body.classList.remove("print-without-price"); }, 500);
+      }
+      function submitShipment() {
+        document.getElementById("shipModal").classList.add("show");
+      }
+      function closeShipModal() {
+        document.getElementById("shipModal").classList.remove("show");
+      }
+      function confirmShipment() {
+        closeShipModal();
+        sent = true;
+        // 持久化该送货单已发货状态，供销售订单页回显「已发货」
+        try { localStorage.setItem("shipment_sent_" + order + "_" + delivery, "1"); } catch (e) {}
+        setFlow("sent");
+        document.getElementById("shipBtn").disabled = true;
+        document.getElementById("shipBtn").textContent = "已申请验收";
+        document.getElementById("actionButtons").style.display = "flex";
+        document.getElementById("notice").textContent =
+          "送货单已发货，数量不可修改。客户端已生成对应收货单。";
+        document.getElementById("footNote").textContent = isOwing
+          ? "欠单已补发，等待客户确认欠单收货。"
+          : "正常送货单已发货，等待客户确认收货。";
+        render();
+        toast(isOwing ? "欠单送货单已发货" : "送货单已发货，客户收货单已生成");
+      }
+      function backOrderList() {
+        location.href = "销售订单详情.html?order=" + encodeURIComponent(order);
+      }
+      document.getElementById("orderNo").textContent = order;
+      document.getElementById("shipmentNo").textContent = delivery;
+      document.getElementById("breadOrder").textContent = order;
+      document.getElementById("breadNo").textContent = delivery;
+      if (isOwing) {
+        document.getElementById("typeTag").textContent = "欠单送货单";
+        document.getElementById("typeTag").classList.add("owing");
+        document.getElementById("notice").classList.add("owing");
+        document.getElementById("notice").textContent =
+          "本单仅展示未完成的欠发数量，补发后将生成独立的客户欠单收货单。";
+      }
+      setFlow(initStatus);
+      document.getElementById("actionButtons").style.display = "flex";
+      if (initStatus !== "pending") {
+        document.getElementById("shipBtn").disabled = true;
+        document.getElementById("shipBtn").textContent = "已申请验收";
+      }
+      render();
+    </script>
+  </body>
+</html>

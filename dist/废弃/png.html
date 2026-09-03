@@ -1,0 +1,185 @@
+	<!DOCTYPE html>
+	<html lang="zh-CN">
+	<head>
+	    <meta charset="UTF-8">
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	    <title>一期核心交互流程图 - 导出图片</title>
+	    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+	    <style>
+	        body {
+	            font-family: 'Microsoft YaHei', sans-serif;
+	            padding: 40px;
+	            background-color: #f5f7fa;
+	            color: #333;
+	        }
+	        .chart-container {
+	            background: white;
+	            padding: 30px;
+	            margin-bottom: 50px;
+	            border-radius: 8px;
+	            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+	            text-align: center;
+	        }
+	        h2 {
+	            color: #2c3e50;
+	            border-left: 5px solid #409eff;
+	            padding-left: 15px;
+	            text-align: left;
+	            margin-bottom: 20px;
+	        }
+	        .mermaid {
+	            display: flex;
+	            justify-content: center;
+	            padding: 20px 0;
+	        }
+	        .btn {
+	            background-color: #409eff;
+	            color: white;
+	            border: none;
+	            padding: 10px 24px;
+	            font-size: 16px;
+	            border-radius: 4px;
+	            cursor: pointer;
+	            margin-top: 20px;
+	            transition: background-color 0.3s;
+	        }
+	        .btn:hover {
+	            background-color: #66b1ff;
+	        }
+	    </style>
+	</head>
+	<body>
+	    <div class="chart-container">
+	        <h2>1. 信息认证交互流程（一期强依赖前置流程）</h2>
+	        <div class="mermaid" id="chart1">
+	            sequenceDiagram
+	                autonumber
+	                participant 客户/供应商
+	                participant 平台业务人员
+	                participant 第三方认证(爱签)
+	                客户/供应商->>客户/供应商: 1. 注册账号并填写基础/公司/开票信息
+	                客户/供应商->>平台业务人员: 2. 提交注册信息等待审核
+	                平台业务人员->>平台业务人员: 3. 联系人模块核实信息（通过/驳回）
+	                平台业务人员-->>客户/供应商: 4. 审核通过，发送短信通知
+	                客户/供应商->>客户/供应商: 5. 登录系统，进入联系人信息认证页
+	                客户/供应商->>第三方认证(爱签): 6. 发起法人人脸认证及核身
+	                第三方认证(爱签)-->>客户/供应商: 7. 认证成功，状态变为"人脸认证"
+	                客户/供应商->>第三方认证(爱签): 8. 法人授权签署及添加企业用户
+	                客户/供应商->>第三方认证(爱签): 9. 获取电子印章编号
+	                客户/供应商->>客户/供应商: 10. 维护真实联系人及收货地址
+	        </div>
+	        <button class="btn" onclick="downloadChart('chart1', '1-信息认证交互流程.png')">下载高清图片</button>
+	    </div>
+	    <div class="chart-container">
+	        <h2>2. 询报价业务交互流程</h2>
+	        <div class="mermaid" id="chart2">
+	            sequenceDiagram
+	                autonumber
+	                participant 客户
+	                participant 平台业务人员
+	                participant 供应商
+	                客户->>平台业务人员: 1. 创建并提交询价单(明细导入/手动录入)
+	                平台业务人员->>平台业务人员: 2. 查看询价单详情
+	                alt 询价方式一: 邀请报价
+	                    平台业务人员->>供应商: 3. 选择供应商及询价产品，发起邀请
+	                    供应商->>平台业务人员: 4. 供应商维护价格并提交报价
+	                else 询价方式二: 平台代填
+	                    平台业务人员->>平台业务人员: 3. 平台代填供应商询价及价格并保存
+	                end
+	                平台业务人员->>平台业务人员: 5. 查看供应商询价记录，点击【采用】
+	                平台业务人员->>平台业务人员: 6. 核实信息，点击【询价完成】
+	                平台业务人员->>客户: 7. 系统生成报价单，平台审核后推送
+	                客户->>客户: 8. 查看报价单，全部接受/全部拒绝/按明细接受
+	                客户->>平台业务人员: 9. 接受报价，等待平台发起采购订单
+	        </div>
+	        <button class="btn" onclick="downloadChart('chart2', '2-询报价业务交互流程.png')">下载高清图片</button>
+	    </div>
+	    <div class="chart-container">
+	        <h2>3. 采购订单与发货履约交互流程（一期核心）</h2>
+	        <div class="mermaid" id="chart3">
+	            sequenceDiagram
+	                autonumber
+	                participant 客户
+	                participant 平台业务人员
+	                participant 供应商
+	                客户->>客户: 1. 新建采购订单(商品来源:客户产品库 或 平台产品库)
+	                客户->>平台业务人员: 2. 添加金融票据附件，提交采购订单
+	                平台业务人员->>平台业务人员: 3. 查看销售订单，点击供应链金融票据链接
+	                平台业务人员->>平台业务人员: 4. 审核供应链金融票据
+	                平台业务人员->>平台业务人员: 5. 确认销售订单，生成采购单
+	                平台业务人员->>供应商: 6. 维护供应商信息，提交发起采购，推送至供应商端
+	                供应商->>供应商: 7. 查看销售订单，点击【确认销售】生成送货单
+	                供应商->>供应商: 8. 送货单核对，点击【申请验收】并发货
+	                供应商->>客户: 9. 打印送货单随货发出
+	                客户->>客户: 10. 扫描送货单二维码或点击【确认收货-人脸识别】
+	                客户->>供应商: 11. 线下在送货单上签字
+	                供应商->>平台业务人员: 12. 拍照上传签字后的送货单至销售订单
+	        </div>
+	        <button class="btn" onclick="downloadChart('chart3', '3-采购订单与发货履约交互流程.png')">下载高清图片</button>
+	    </div>
+	    <script>
+	        mermaid.initialize({
+	            startOnLoad: true,
+	            theme: 'default',
+	            sequence: {
+	                showSequenceNumbers: true,
+	                actorMargin: 50,
+	                width: 150,
+	                height: 65,
+	                boxMargin: 10,
+	                boxTextMargin: 5,
+	                noteMargin: 10,
+	                messageMargin: 35,
+	                mirrorActors: true,
+	                bottomMarginAdj: 1,
+	                useMaxWidth: false // 设置为 false 以便获取真实宽高用于导出高清图
+	            }
+	        });
+	        function downloadChart(chartId, filename) {
+	            const container = document.getElementById(chartId);
+	            const svg = container.querySelector('svg');
+	            if (!svg) {
+	                alert('图表尚未加载完成，请稍后再试！');
+	                return;
+	            }
+	            // 克隆 SVG 节点以避免修改原始 DOM
+	            const svgClone = svg.cloneNode(true);
+	            // 获取 SVG 的边界框以设置宽高
+	            const bbox = svg.getBoundingClientRect();
+	            svgClone.setAttribute('width', bbox.width);
+	            svgClone.setAttribute('height', bbox.height);
+	            svgClone.setAttribute('viewBox', `0 0 ${bbox.width} ${bbox.height}`);
+	            // 序列化 SVG 为字符串
+	            const serializer = new XMLSerializer();
+	            const svgString = serializer.serializeToString(svgClone);
+	            // 创建一个包含白色背景的 Canvas
+	            const canvas = document.createElement("canvas");
+	            const scale = 2; // 2倍像素密度，确保高清
+	            canvas.width = bbox.width * scale;
+	            canvas.height = bbox.height * scale;
+	            const ctx = canvas.getContext("2d");
+	            ctx.fillStyle = "#FFFFFF"; // 设置白色背景
+	            ctx.fillRect(0, 0, canvas.width, canvas.height);
+	            ctx.scale(scale, scale);
+	            // 将 SVG 转换为图片
+	            const img = new Image();
+	            const blob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+	            const url = URL.createObjectURL(blob);
+	            img.onload = function() {
+	                ctx.drawImage(img, 0, 0, bbox.width, bbox.height);
+	                URL.revokeObjectURL(url);
+	                // 转换为 PNG 并触发下载
+	                canvas.toBlob(function(blob) {
+	                    const a = document.createElement("a");
+	                    a.href = URL.createObjectURL(blob);
+	                    a.download = filename;
+	                    document.body.appendChild(a);
+	                    a.click();
+	                    document.body.removeChild(a);
+	                }, 'image/png');
+	            };
+	            img.src = url;
+	        }
+	    </script>
+	</body>
+	</html>

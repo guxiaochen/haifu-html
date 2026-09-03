@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多供应商场景状态</title>
+    <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 1800px;
+            box-sizing: border-box;
+        }
+        h1 { text-align: center; color: #333; margin-bottom: 8px; font-size: 24px; }
+        .subtitle { text-align: center; font-size: 13px; color: #999; margin-bottom: 30px; }
+        .legend {
+            display: flex; justify-content: center; gap: 24px; margin-bottom: 30px; font-size: 14px;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-dot { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+        .relation-box {
+            background: #f5f7fa; border: 1px solid #e0e0e0; border-radius: 8px;
+            padding: 20px; margin-bottom: 30px; font-size: 14px; line-height: 1.8;
+        }
+        .relation-box strong { color: #1565c0; }
+        .scenario-section { margin-bottom: 40px; }
+        .scenario-title {
+            font-size: 18px; font-weight: 700; color: #333; margin-bottom: 16px;
+            padding-left: 12px; border-left: 4px solid #007bff;
+        }
+        .table-wrapper { overflow-x: auto; margin-bottom: 12px; }
+        table {
+            width: 100%; border-collapse: collapse; font-size: 12px; min-width: 800px;
+        }
+        th, td {
+            border: 1px solid #e0e0e0; padding: 10px 12px; text-align: center; white-space: nowrap;
+        }
+        thead th {
+            background: #f5f5f5; font-weight: 600; color: #555; position: sticky; top: 0;
+        }
+        .step-col { width: 50px; font-weight: 600; color: #999; }
+        .action-col { text-align: left; min-width: 160px; color: #333; font-weight: 500; }
+        tbody tr:nth-child(even) { background: #fafafa; }
+        tbody tr:hover { background: #f0f7ff; }
+        .status-tag {
+            display: inline-block; padding: 3px 10px; border-radius: 4px;
+            font-size: 11px; font-weight: 600; white-space: nowrap;
+        }
+        .status-supplier { background: #e8f5e9; color: #2e7d32; }
+        .status-platform { background: #e3f2fd; color: #1565c0; }
+        .status-customer { background: #fce4ec; color: #c62828; }
+        .status-pending { background: #fff3e0; color: #e65100; border: 1px dashed #ff9800; }
+        .status-none { color: #ccc; }
+        .status-done { background: #f3e5f5; color: #7b1fa2; }
+        .note {
+            font-size: 12px; color: #888; margin-top: 4px; padding: 6px 12px;
+            background: #fffde7; border-left: 3px solid #fdd835; border-radius: 0 4px 4px 0;
+        }
+        .rules-section { margin-top: 40px; padding-top: 30px; border-top: 3px dashed #e0e0e0; }
+        .rules-section h2 { text-align: center; font-size: 20px; color: #333; margin-bottom: 24px; }
+        .rule-card {
+            border: 2px solid; border-radius: 8px; overflow: hidden; margin-bottom: 20px;
+        }
+        .rule-card.supplier { border-color: #2e7d32; }
+        .rule-card.platform-purchase { border-color: #1565c0; }
+        .rule-card.platform-sale { border-color: #1565c0; }
+        .rule-card.customer { border-color: #c62828; }
+        .rule-card-header {
+            font-size: 15px; font-weight: 700; padding: 10px 16px;
+        }
+        .rule-card.supplier .rule-card-header { background: #e8f5e9; color: #2e7d32; }
+        .rule-card.platform-purchase .rule-card-header { background: #e3f2fd; color: #1565c0; }
+        .rule-card.platform-sale .rule-card-header { background: #e3f2fd; color: #1565c0; }
+        .rule-card.customer .rule-card-header { background: #fce4ec; color: #c62828; }
+        .rule-body { padding: 14px 16px; }
+        .rule-flow {
+            display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-bottom: 6px;
+        }
+        .rule-node {
+            padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;
+        }
+        .rule-node.supplier { background: #e8f5e9; color: #2e7d32; }
+        .rule-node.platform { background: #e3f2fd; color: #1565c0; }
+        .rule-node.customer { background: #fce4ec; color: #c62828; }
+        .rule-node.terminal { background: #fff3e0 !important; color: #e65100 !important; border: 1px dashed #ff9800; }
+        .rule-arrow { color: #bbb; font-size: 16px; font-weight: 700; }
+        .rule-desc { font-size: 12px; color: #666; margin-top: 4px; }
+        .download-btn {
+            display: block; margin: 30px auto 0; padding: 12px 24px;
+            background-color: #007bff; color: white; border: none; border-radius: 4px;
+            font-size: 16px; cursor: pointer; transition: background-color 0.3s;
+        }
+        .download-btn:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="container" id="capture-container">
+        <h1>多供应商场景状态</h1>
+        <div class="subtitle">平台销售订单转采购订单 · 对应多个供应商 · 多条采购记录</div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <span class="legend-dot" style="background:#e8f5e9;border:2px solid #2e7d32;"></span>🟩 供应商端
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background:#e3f2fd;border:2px solid #1565c0;"></span>🟦 平台端
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background:#fce4ec;border:2px solid #c62828;"></span>🟥 客户端
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background:#fff3e0;border:2px solid #ff9800;"></span>🟧 终态
+            </div>
+        </div>
+
+        <!-- 核心关系 -->
+        <div class="relation-box">
+            <strong>核心关系：</strong><br>
+            平台销售订单(1) ──→ 客户采购订单(1)　　← 物流状态对应<br>
+            平台采购订单(1) ──→ 供应商销售订单(N)　← 物流状态对应，1对多拆分<br>
+            供应商销售订单(1) ──→ 送货单(1+欠单N)　← 欠单为独立新建送货单<br>
+            <br>
+            <strong>状态计算规则：</strong><br>
+            • 平台采购订单(1条聚合)：根据所有供应商送货单收货进度汇总，任一未全部收货→部分收货<br>
+            • 平台销售订单(1条)：根据客户收货进度，任一送货单未确认→部分发货<br>
+            • 供应商销售订单(1条/供应商)：根据自身送货单(含欠单)发货进度计算<br>
+            • 客户采购订单(1条)：根据所有送货单确认进度计算
+        </div>
+
+        <!-- 场景一 -->
+        <div class="scenario-section">
+            <div class="scenario-title">场景一：不存在欠单</div>
+
+            <h3 style="margin: 20px 0 12px 12px; color: #555;">1.1 单供应商 · 完整流程</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="step-col">步骤</th>
+                            <th class="action-col">动作</th>
+                            <th>供应商A 销售单</th>
+                            <th>供应商A 送货单</th>
+                            <th>🟦 平台采购订单</th>
+                            <th>🟦 平台销售订单</th>
+                            <th>🟥 客户采购订单</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="step-col">A</td>
+                            <td class="action-col">供应商A发货</td>
+                            <td><span class="status-tag status-supplier">已发货</span></td>
+                            <td><span class="status-tag status-supplier">已发货</span></td>
+                            <td><span class="status-tag status-platform">待收货</span></td>
+                            <td><span class="status-tag status-platform">已发货</span></td>
+                            <td><span class="status-tag status-customer">待收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">B</td>
+                            <td class="action-col">客户收货</td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-supplier">已收货</span></td>
+                            <td><span class="status-tag status-pending">全部收货</span></td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-pending">全部收货</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="note">单供应商无欠单：发货即"已发货"，客户确认后直接到终态"全部发货/全部收货"</div>
+
+            <h3 style="margin: 24px 0 12px 12px; color: #555;">1.2 多供应商 · 逐步发货逐步收货</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="step-col">步骤</th>
+                            <th class="action-col">动作</th>
+                            <th>供应商A</th>
+                            <th>供应商B</th>
+                            <th>🟦 平台采购订单</th>
+                            <th>🟦 平台销售订单</th>
+                            <th>🟥 客户采购订单</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="step-col">A</td>
+                            <td class="action-col">供应商A发货</td>
+                            <td><span class="status-tag status-supplier">已发货</span></td>
+                            <td class="status-none">—</td>
+                            <td><span class="status-tag status-platform">待收货</span></td>
+                            <td><span class="status-tag status-platform">部分发货</span></td>
+                            <td><span class="status-tag status-customer">待收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">B</td>
+                            <td class="action-col">客户收货A</td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td class="status-none">—</td>
+                            <td><span class="status-tag status-platform">部分收货</span></td>
+                            <td><span class="status-tag status-platform">部分发货</span></td>
+                            <td><span class="status-tag status-customer">部分收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">C</td>
+                            <td class="action-col">供应商B发货</td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-supplier">已发货</span></td>
+                            <td><span class="status-tag status-platform">部分收货</span></td>
+                            <td><span class="status-tag status-platform">部分发货</span></td>
+                            <td><span class="status-tag status-customer">部分收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">D</td>
+                            <td class="action-col">客户收货B</td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-pending">全部收货</span></td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-pending">全部收货</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="note">步骤B后A已收货但B未发货→采购订单为"部分收货"；步骤C B发货后仍为"部分收货"（A已收B待收）</div>
+
+            <h3 style="margin: 24px 0 12px 12px; color: #555;">1.3 多供应商 · 全部发货后统一收货</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="step-col">步骤</th>
+                            <th class="action-col">动作</th>
+                            <th>供应商A</th>
+                            <th>供应商B</th>
+                            <th>🟦 平台采购订单</th>
+                            <th>🟦 平台销售订单</th>
+                            <th>🟥 客户采购订单</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="step-col">A</td>
+                            <td class="action-col">供应商A发货</td>
+                            <td><span class="status-tag status-supplier">已发货</span></td>
+                            <td class="status-none">—</td>
+                            <td><span class="status-tag status-platform">待收货</span></td>
+                            <td><span class="status-tag status-platform">部分发货</span></td>
+                            <td><span class="status-tag status-customer">待收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">B</td>
+                            <td class="action-col">供应商B发货</td>
+                            <td><span class="status-tag status-supplier">已发货</span></td>
+                            <td><span class="status-tag status-supplier">已发货</span></td>
+                            <td><span class="status-tag status-platform">待收货</span></td>
+                            <td><span class="status-tag status-platform">部分发货</span></td>
+                            <td><span class="status-tag status-customer">待收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">C</td>
+                            <td class="action-col">客户收货A</td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-supplier">已发货</span></td>
+                            <td><span class="status-tag status-platform">部分收货</span></td>
+                            <td><span class="status-tag status-platform">部分发货</span></td>
+                            <td><span class="status-tag status-customer">部分收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">D</td>
+                            <td class="action-col">客户收货B</td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-pending">全部收货</span></td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-pending">全部收货</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 场景二 -->
+        <div class="scenario-section">
+            <div class="scenario-title">场景二：存在欠单</div>
+
+            <h3 style="margin: 20px 0 12px 12px; color: #555;">2.1 单供应商 · 欠单</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="step-col">步骤</th>
+                            <th class="action-col">动作</th>
+                            <th>供应商A 销售单</th>
+                            <th>送货单1</th>
+                            <th>送货单2(欠单)</th>
+                            <th>🟦 平台采购订单</th>
+                            <th>🟦 平台销售订单</th>
+                            <th>🟥 客户采购订单</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="step-col">A</td>
+                            <td class="action-col">首次发货(欠量)</td>
+                            <td><span class="status-tag status-supplier">部分发货</span></td>
+                            <td><span class="status-tag status-supplier">已发货</span></td>
+                            <td class="status-none">—</td>
+                            <td><span class="status-tag status-platform">待收货</span></td>
+                            <td><span class="status-tag status-platform">部分发货</span></td>
+                            <td><span class="status-tag status-customer">待收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">B</td>
+                            <td class="action-col">客户确认首单</td>
+                            <td><span class="status-tag status-supplier">部分发货</span></td>
+                            <td><span class="status-tag status-supplier">已收货</span></td>
+                            <td class="status-none">—</td>
+                            <td><span class="status-tag status-platform">部分收货</span></td>
+                            <td><span class="status-tag status-platform">部分发货</span></td>
+                            <td><span class="status-tag status-customer">部分收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">C</td>
+                            <td class="action-col">欠单补发(新建送货单)</td>
+                            <td><span class="status-tag status-supplier">部分发货</span></td>
+                            <td><span class="status-tag status-supplier">已收货</span></td>
+                            <td><span class="status-tag status-supplier">已发货</span></td>
+                            <td><span class="status-tag status-platform">部分收货</span></td>
+                            <td><span class="status-tag status-platform">部分发货</span></td>
+                            <td><span class="status-tag status-customer">部分收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">D</td>
+                            <td class="action-col">客户确认补单</td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-supplier">已收货</span></td>
+                            <td><span class="status-tag status-supplier">已收货</span></td>
+                            <td><span class="status-tag status-pending">全部收货</span></td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-pending">全部收货</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="note">欠单为独立新建送货单；供应商状态在欠单全部确认前维持"部分发货"</div>
+
+            <h3 style="margin: 24px 0 12px 12px; color: #555;">2.2 多供应商 · 其中一个供应商欠单</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="step-col">步骤</th>
+                            <th class="action-col">动作</th>
+                            <th>供应商A</th>
+                            <th>供应商B</th>
+                            <th>🟦 平台采购订单</th>
+                            <th>🟦 平台销售订单</th>
+                            <th>🟥 客户采购订单</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="step-col">A</td>
+                            <td class="action-col">A正常发货</td>
+                            <td><span class="status-tag status-supplier">已发货</span></td>
+                            <td class="status-none">—</td>
+                            <td><span class="status-tag status-platform">待收货</span></td>
+                            <td><span class="status-tag status-platform">部分发货</span></td>
+                            <td><span class="status-tag status-customer">待收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">B</td>
+                            <td class="action-col">B欠单发货(量&lt;需求)</td>
+                            <td><span class="status-tag status-supplier">已发货</span></td>
+                            <td><span class="status-tag status-supplier">部分发货</span></td>
+                            <td><span class="status-tag status-platform">待收货</span></td>
+                            <td><span class="status-tag status-platform">部分发货</span></td>
+                            <td><span class="status-tag status-customer">待收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">C</td>
+                            <td class="action-col">客户确认A</td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-supplier">部分发货</span></td>
+                            <td><span class="status-tag status-platform">部分收货</span></td>
+                            <td><span class="status-tag status-platform">部分发货</span></td>
+                            <td><span class="status-tag status-customer">部分收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">D</td>
+                            <td class="action-col">客户确认B首单</td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-supplier">部分发货</span></td>
+                            <td><span class="status-tag status-platform">部分收货</span></td>
+                            <td><span class="status-tag status-platform">部分发货</span></td>
+                            <td><span class="status-tag status-customer">部分收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">E</td>
+                            <td class="action-col">B欠单补发</td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-supplier">部分发货</span></td>
+                            <td><span class="status-tag status-platform">部分收货</span></td>
+                            <td><span class="status-tag status-platform">部分发货</span></td>
+                            <td><span class="status-tag status-customer">部分收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">F</td>
+                            <td class="action-col">客户确认B补单</td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-pending">全部收货</span></td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-pending">全部收货</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="note">步骤E供应商B仍有欠单在途，状态维持"部分发货"直到补单全部确认</div>
+
+            <h3 style="margin: 24px 0 12px 12px; color: #555;">2.3 单供应商 · 多次欠单</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="step-col">步骤</th>
+                            <th class="action-col">动作</th>
+                            <th>供应商A</th>
+                            <th>送货单1</th>
+                            <th>送货单2(欠单)</th>
+                            <th>送货单3(欠单)</th>
+                            <th>🟦 平台采购订单</th>
+                            <th>🟥 客户采购订单</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="step-col">A</td>
+                            <td class="action-col">首发欠量</td>
+                            <td><span class="status-tag status-supplier">部分发货</span></td>
+                            <td><span class="status-tag status-supplier">已发货</span></td>
+                            <td class="status-none">—</td>
+                            <td class="status-none">—</td>
+                            <td><span class="status-tag status-platform">待收货</span></td>
+                            <td><span class="status-tag status-customer">待收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">B</td>
+                            <td class="action-col">客户确认单1</td>
+                            <td><span class="status-tag status-supplier">部分发货</span></td>
+                            <td><span class="status-tag status-supplier">已收货</span></td>
+                            <td class="status-none">—</td>
+                            <td class="status-none">—</td>
+                            <td><span class="status-tag status-platform">部分收货</span></td>
+                            <td><span class="status-tag status-customer">部分收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">C</td>
+                            <td class="action-col">补发仍欠量</td>
+                            <td><span class="status-tag status-supplier">部分发货</span></td>
+                            <td><span class="status-tag status-supplier">已收货</span></td>
+                            <td><span class="status-tag status-supplier">已发货</span></td>
+                            <td class="status-none">—</td>
+                            <td><span class="status-tag status-platform">部分收货</span></td>
+                            <td><span class="status-tag status-customer">部分收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">D</td>
+                            <td class="action-col">客户确认单2</td>
+                            <td><span class="status-tag status-supplier">部分发货</span></td>
+                            <td><span class="status-tag status-supplier">已收货</span></td>
+                            <td><span class="status-tag status-supplier">已收货</span></td>
+                            <td class="status-none">—</td>
+                            <td><span class="status-tag status-platform">部分收货</span></td>
+                            <td><span class="status-tag status-customer">部分收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">E</td>
+                            <td class="action-col">再次补发足量</td>
+                            <td><span class="status-tag status-supplier">部分发货</span></td>
+                            <td><span class="status-tag status-supplier">已收货</span></td>
+                            <td><span class="status-tag status-supplier">已收货</span></td>
+                            <td><span class="status-tag status-supplier">已发货</span></td>
+                            <td><span class="status-tag status-platform">部分收货</span></td>
+                            <td><span class="status-tag status-customer">部分收货</span></td>
+                        </tr>
+                        <tr>
+                            <td class="step-col">F</td>
+                            <td class="action-col">客户确认单3</td>
+                            <td><span class="status-tag status-pending">全部发货</span></td>
+                            <td><span class="status-tag status-supplier">已收货</span></td>
+                            <td><span class="status-tag status-supplier">已收货</span></td>
+                            <td><span class="status-tag status-supplier">已收货</span></td>
+                            <td><span class="status-tag status-pending">全部收货</span></td>
+                            <td><span class="status-tag status-pending">全部收货</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="note">多次欠单场景：每次欠单为独立送货单，供应商状态在所有送货单(含欠单)全部确认前维持"部分发货"</div>
+        </div>
+
+        <!-- 状态流转规则 -->
+        <div class="rules-section">
+            <h2>状态流转规则总结</h2>
+
+            <div class="rule-card supplier">
+                <div class="rule-card-header">🟩 供应商销售订单状态</div>
+                <div class="rule-body">
+                    <div class="rule-flow">
+                        <span class="rule-node supplier">未发货</span>
+                        <span class="rule-arrow">→</span>
+                        <span class="rule-node supplier">部分发货</span>
+                        <span class="rule-arrow">→</span>
+                        <span class="rule-node supplier terminal">全部发货</span>
+                    </div>
+                    <div class="rule-desc">发货量&lt;需求量→部分发货；无欠单一次性发货→已发货；所有送货单(含欠单)全部确认→全部发货</div>
+                    <div class="rule-flow" style="margin-top: 8px;">
+                        <span class="rule-node supplier">未发货</span>
+                        <span class="rule-arrow">→</span>
+                        <span class="rule-node supplier">已发货</span>
+                        <span class="rule-arrow">→</span>
+                        <span class="rule-node supplier terminal">全部发货</span>
+                    </div>
+                    <div class="rule-desc">无欠单场景：发货即"已发货"，客户确认后→全部发货</div>
+                </div>
+            </div>
+
+            <div class="rule-card platform-purchase">
+                <div class="rule-card-header">🟦 平台采购订单状态（1条聚合）</div>
+                <div class="rule-body">
+                    <div class="rule-flow">
+                        <span class="rule-node platform">未发货</span>
+                        <span class="rule-arrow">→</span>
+                        <span class="rule-node platform">待收货</span>
+                        <span class="rule-arrow">→</span>
+                        <span class="rule-node platform">部分收货</span>
+                        <span class="rule-arrow">→</span>
+                        <span class="rule-node platform terminal">全部收货</span>
+                    </div>
+                    <div class="rule-desc">任一供应商已发货→待收货；部分送货单已确认、部分未确认/未发货→部分收货；所有供应商所有送货单全部确认→全部收货</div>
+                </div>
+            </div>
+
+            <div class="rule-card platform-sale">
+                <div class="rule-card-header">🟦 平台销售订单状态（对应客户物流）</div>
+                <div class="rule-body">
+                    <div class="rule-flow">
+                        <span class="rule-node platform">未发货</span>
+                        <span class="rule-arrow">→</span>
+                        <span class="rule-node platform">部分发货</span>
+                        <span class="rule-arrow">→</span>
+                        <span class="rule-node platform terminal">全部发货</span>
+                    </div>
+                    <div class="rule-desc">部分送货单已到客户、部分未到→部分发货；所有送货单客户全部确认收货→全部发货</div>
+                </div>
+            </div>
+
+            <div class="rule-card customer">
+                <div class="rule-card-header">🟥 客户采购订单状态</div>
+                <div class="rule-body">
+                    <div class="rule-flow">
+                        <span class="rule-node customer">未发货</span>
+                        <span class="rule-arrow">→</span>
+                        <span class="rule-node customer">待收货</span>
+                        <span class="rule-arrow">→</span>
+                        <span class="rule-node customer">部分收货</span>
+                        <span class="rule-arrow">→</span>
+                        <span class="rule-node customer terminal">全部收货</span>
+                    </div>
+                    <div class="rule-desc">有送货单在途→待收货；部分送货单已确认→部分收货；所有送货单全部确认→全部收货</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="download-btn" onclick="downloadImage()">下载 PNG 图片</button>
+
+    <script>
+        function downloadImage() {
+            const container = document.getElementById('capture-container');
+            const button = document.querySelector('.download-btn');
+            button.style.display = 'none';
+            htmlToImage.toPng(container, { quality: 0.95, backgroundColor: '#ffffff' })
+                .then(function (dataUrl) {
+                    const link = document.createElement('a');
+                    link.download = '多供应商场景状态.png';
+                    link.href = dataUrl;
+                    link.click();
+                })
+                .catch(function (error) {
+                    console.error('截图生成失败:', error);
+                    alert('抱歉，图片生成失败，请重试。');
+                })
+                .finally(function() {
+                    button.style.display = 'block';
+                });
+        }
+    </script>
+</body>
+</html>

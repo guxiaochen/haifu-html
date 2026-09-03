@@ -1,0 +1,171 @@
+	<!DOCTYPE html>
+	<html lang="zh-CN">
+	<head>
+	    <meta charset="UTF-8">
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	    <title>采购订单与发货履约交互流程（一期核心）- 更新版</title>
+	    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+	    <style>
+	        body {
+	            font-family: 'Microsoft YaHei', sans-serif;
+	            padding: 40px;
+	            background-color: #f5f7fa;
+	            color: #333;
+	        }
+	        .chart-container {
+	            background: white;
+	            padding: 30px;
+	            margin-bottom: 50px;
+	            border-radius: 8px;
+	            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+	            text-align: center;
+	        }
+	        h2 {
+	            color: #2c3e50;
+	            border-left: 5px solid #409eff;
+	            padding-left: 15px;
+	            text-align: left;
+	            margin-bottom: 20px;
+	        }
+	        .mermaid {
+	            display: flex;
+	            justify-content: center;
+	            padding: 20px 0;
+	            overflow-x: auto; /* 允许横向滚动以防图表过宽 */
+	        }
+	        .btn {
+	            background-color: #409eff;
+	            color: white;
+	            border: none;
+	            padding: 10px 24px;
+	            font-size: 16px;
+	            border-radius: 4px;
+	            cursor: pointer;
+	            margin-top: 20px;
+	            transition: background-color 0.3s;
+	        }
+	        .btn:hover {
+	            background-color: #66b1ff;
+	        }
+	    </style>
+	</head>
+	<body>
+	    <div class="chart-container">
+	        <h2>3. 采购订单与发货履约交互流程（一期核心）- 补充细节版</h2>
+	        <div class="mermaid" id="chart3">
+	            sequenceDiagram
+	                autonumber
+	                participant 客户
+	                participant 平台管理端
+	                participant 供应商
+	                %% 阶段一：客户下单与平台确认
+	                rect rgb(240, 248, 255)
+	                Note over 客户,平台管理端: 阶段一：客户下单与平台确认
+	                客户->>客户: 1. 创建采购订单(商品来源:客户产品库 或 平台产品库)
+	                客户->>平台管理端: 2. 发起采购，提交采购订单及金融票据附件
+	                平台管理端->>平台管理端: 3. 销售订单状态:【草稿】
+	                平台管理端->>平台管理端: 4. 审核供应链金融票据
+	                Note right of 平台管理端: 票据状态流转:<br/>草稿 -> 确认 -> 已审核<br/>(已还款为后续阶段)
+	                平台管理端->>平台管理端: 5. 确认销售订单
+	                平台管理端->>平台管理端: 6. 自动生成采购单(状态:【采购订单】)
+	                end
+	                %% 阶段二：平台发起采购与供应商确认
+	                rect rgb(255, 250, 240)
+	                Note over 平台管理端,供应商: 阶段二：平台发起采购与供应商确认
+	                平台管理端->>平台管理端: 7. 维护供应商信息，点击提交
+	                平台管理端->>平台管理端: 8. 采购单状态流转为:【发起采购】
+	                平台管理端->>供应商: 9. 自动生成采购订单并推送至供应商端
+	                供应商->>供应商: 10. 查看销售订单，核对无误
+	                供应商->>供应商: 11. 点击【确认销售】
+	                供应商->>平台管理端: 12. 供应商确认销售后联动平台
+	                平台管理端->>平台管理端: 13. 平台采购单状态流转为:【确认采购】
+	                end
+	                %% 阶段三：发货与送货单流转
+	                rect rgb(240, 255, 240)
+	                Note over 供应商,客户: 阶段三：发货与送货单流转
+	                供应商->>供应商: 14. 确认销售后自动生成送货单(状态:草稿/正在等待)
+	                供应商->>供应商: 15. 进入送货单详情，状态变更为:【就绪】
+	                供应商->>供应商: 16. 点击【申请验收】操作
+	                Note right of 供应商: 注:平台端"申请验收"<br/>暂未看到流转过程
+	                供应商->>供应商: 17. 步骤流转到:【已完成】并发货
+	                供应商->>客户: 18. 打印送货单随货发出
+	                end
+	                %% 阶段四：客户收货与单据回传
+	                rect rgb(253, 245, 230)
+	                Note over 客户,供应商: 阶段四：客户收货与单据回传
+	                客户->>客户: 19. 平台发货后客户端出现收货单
+	                客户->>客户: 20. 人脸识别确认收货 或 确认收货
+	                客户->>平台管理端: 21. 确认收货后联动平台
+	                平台管理端->>平台管理端: 22. 平台采购单状态流转为:【货物已签收】
+	                客户->>供应商: 23. 线下在送货单上签字
+	                供应商->>平台管理端: 24. 拍照上传签字后的送货单至销售订单
+	                end
+	        </div>
+	        <button class="btn" onclick="downloadChart('chart3', '3-采购订单与发货履约交互流程(更新版).png')">下载高清图片</button>
+	    </div>
+	    <script>
+	        mermaid.initialize({
+	            startOnLoad: true,
+	            theme: 'default',
+	            sequence: {
+	                showSequenceNumbers: true,
+	                actorMargin: 50,
+	                width: 150,
+	                height: 65,
+	                boxMargin: 10,
+	                boxTextMargin: 5,
+	                noteMargin: 10,
+	                messageMargin: 35,
+	                mirrorActors: true,
+	                bottomMarginAdj: 1,
+	                useMaxWidth: false 
+	            }
+	        });
+	        function downloadChart(chartId, filename) {
+	            const container = document.getElementById(chartId);
+	            const svg = container.querySelector('svg');
+	            if (!svg) {
+	                alert('图表尚未加载完成，请稍后再试！');
+	                return;
+	            }
+	            // 克隆 SVG 节点以避免修改原始 DOM
+	            const svgClone = svg.cloneNode(true);
+	            // 获取 SVG 的边界框以设置宽高
+	            const bbox = svg.getBoundingClientRect();
+	            svgClone.setAttribute('width', bbox.width);
+	            svgClone.setAttribute('height', bbox.height);
+	            svgClone.setAttribute('viewBox', `0 0 ${bbox.width} ${bbox.height}`);
+	            // 序列化 SVG 为字符串
+	            const serializer = new XMLSerializer();
+	            const svgString = serializer.serializeToString(svgClone);
+	            // 创建一个包含白色背景的 Canvas
+	            const canvas = document.createElement("canvas");
+	            const scale = 2; // 2倍像素密度，确保高清
+	            canvas.width = bbox.width * scale;
+	            canvas.height = bbox.height * scale;
+	            const ctx = canvas.getContext("2d");
+	            ctx.fillStyle = "#FFFFFF"; // 设置白色背景
+	            ctx.fillRect(0, 0, canvas.width, canvas.height);
+	            ctx.scale(scale, scale);
+	            // 将 SVG 转换为图片
+	            const img = new Image();
+	            const blob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+	            const url = URL.createObjectURL(blob);
+	            img.onload = function() {
+	                ctx.drawImage(img, 0, 0, bbox.width, bbox.height);
+	                URL.revokeObjectURL(url);
+	                // 转换为 PNG 并触发下载
+	                canvas.toBlob(function(blob) {
+	                    const a = document.createElement("a");
+	                    a.href = URL.createObjectURL(blob);
+	                    a.download = filename;
+	                    document.body.appendChild(a);
+	                    a.click();
+	                    document.body.removeChild(a);
+	                }, 'image/png');
+	            };
+	            img.src = url;
+	        }
+	    </script>
+	</body>
+	</html>

@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支付流程 · 支付改动版结算流程</title>
+    <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --c-supplier: #2e7d32;
+            --c-supplier-bg: #e8f5e9;
+            --c-supplier-soft: #f1f8e9;
+            --c-platform: #1565c0;
+            --c-platform-bg: #e3f2fd;
+            --c-platform-soft: #e3f2fd;
+            --c-customer: #c62828;
+            --c-customer-bg: #fce4ec;
+            --c-customer-soft: #fff5f7;
+            --c-warn: #e65100;
+            --c-warn-bg: #fff3e0;
+            --c-text: #333;
+            --c-text-soft: #666;
+            --c-line: #e0e0e0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--c-text);
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 1800px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        .version-tag {
+            text-align: center;
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 22px;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin: 36px 0 16px;
+            padding-left: 12px;
+            border-left: 4px solid var(--c-platform);
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+            font-size: 14px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        /* ================== 概述 ================== */
+        .lead {
+            background: #fafafa;
+            border: 1px solid var(--c-line);
+            border-radius: 6px;
+            padding: 16px 20px;
+            font-size: 14px;
+            line-height: 1.85;
+            color: var(--c-text-soft);
+        }
+
+        .lead strong {
+            color: var(--c-text);
+        }
+
+        .overview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+            font-size: 13px;
+        }
+
+        .overview-table th,
+        .overview-table td {
+            border: 1px solid var(--c-line);
+            padding: 10px 12px;
+            text-align: left;
+            vertical-align: top;
+            line-height: 1.7;
+        }
+
+        .overview-table th {
+            background: #fafafa;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .overview-table td {
+            background: #fff;
+        }
+
+        .insight {
+            margin-top: 14px;
+            padding: 12px 16px;
+            background: var(--c-warn-bg);
+            border-left: 4px solid var(--c-warn);
+            border-radius: 0 4px 4px 0;
+            font-size: 13px;
+            line-height: 1.8;
+            color: #6d4c41;
+        }
+
+        .insight strong {
+            color: var(--c-warn);
+        }
+
+        /* ================== 变更标记 ================== */
+        .tag-new {
+            display: inline-block;
+            padding: 1px 7px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 700;
+            background: #fce4ec;
+            color: #c62828;
+        }
+
+        .tag-keep {
+            display: inline-block;
+            padding: 1px 7px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 700;
+            background: #eceff1;
+            color: #607d8b;
+        }
+
+        /* ================== 卡片 ================== */
+        .pair-card {
+            border: 1px solid var(--c-line);
+            border-radius: 8px;
+            margin-bottom: 28px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .pair-header {
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pair-header.pair-sp {
+            background: linear-gradient(90deg, var(--c-supplier-bg) 0%, var(--c-platform-bg) 100%);
+            color: #1b5e20;
+            border-bottom: 2px solid var(--c-supplier);
+        }
+
+        .pair-header.pair-pc {
+            background: linear-gradient(90deg, var(--c-platform-bg) 0%, var(--c-customer-bg) 100%);
+            color: #0d47a1;
+            border-bottom: 2px solid var(--c-platform);
+        }
+
+        .pair-summary {
+            padding: 14px 20px;
+            font-size: 13px;
+            line-height: 1.85;
+            color: var(--c-text-soft);
+            background: #fcfcfc;
+            border-bottom: 1px solid var(--c-line);
+        }
+
+        .pair-summary strong {
+            color: var(--c-text);
+        }
+
+        /* ================== 泳道式流程条 ================== */
+        .swim-wrap {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .phase {
+            border: 1px solid var(--c-line);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .phase-title {
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #455a64;
+            background: #f7f9fb;
+            border-bottom: 1px solid var(--c-line);
+        }
+
+        .chain {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: stretch;
+            gap: 10px;
+            padding: 16px;
+        }
+
+        .node {
+            flex: 1 1 170px;
+            min-width: 170px;
+            max-width: 300px;
+            padding: 12px 14px;
+            border: 1px solid #dfe6ec;
+            border-left-width: 5px;
+            border-radius: 6px;
+            background: #fff;
+        }
+
+        .node.supplier {
+            border-left-color: var(--c-supplier);
+            background: var(--c-supplier-soft);
+        }
+
+        .node.platform {
+            border-left-color: var(--c-platform);
+            background: var(--c-platform-soft);
+        }
+
+        .node.customer {
+            border-left-color: var(--c-customer);
+            background: var(--c-customer-soft);
+        }
+
+        .node .who {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
+
+        .node.supplier .who {
+            background: var(--c-supplier-bg);
+            color: var(--c-supplier);
+        }
+
+        .node.platform .who {
+            background: var(--c-platform-bg);
+            color: var(--c-platform);
+        }
+
+        .node.customer .who {
+            background: var(--c-customer-bg);
+            color: var(--c-customer);
+        }
+
+        .node .act {
+            display: block;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.5;
+            color: var(--c-text);
+        }
+
+        .node .st {
+            display: block;
+            margin-top: 7px;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.65;
+        }
+
+        .chain .arrow {
+            align-self: center;
+            color: #b0bec5;
+            font-size: 22px;
+            font-weight: 700;
+            flex: 0 0 auto;
+        }
+
+        /* ================== 分支 ================== */
+        .branch {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 0 16px 16px 16px;
+        }
+
+        .branch-item {
+            flex: 1 1 340px;
+            border: 1px dashed var(--c-line);
+            border-radius: 6px;
+            padding: 12px 14px;
+            background: #fcfcfc;
+        }
+
+        .branch-item .bt {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 9px;
+        }
+
+        .branch-item.ok {
+            border-color: #a5d6a7;
+            background: var(--c-supplier-soft);
+        }
+
+        .branch-item.ok .bt {
+            color: var(--c-supplier);
+        }
+
+        .branch-item.diff {
+            border-color: #ffcc80;
+            background: #fffdf6;
+        }
+
+        .branch-item.diff .bt {
+            color: var(--c-warn);
+        }
+
+        .branch-item .st {
+            display: block;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #666;
+        }
+
+        /* ================== 表格 ================== */
+        .step-table-wrap {
+            margin: 0 20px 20px 20px;
+            overflow-x: auto;
+        }
+
+        .step-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 860px;
+        }
+
+        .step-table th,
+        .step-table td {
+            border: 1px solid var(--c-line);
+            padding: 9px 11px;
+            text-align: left;
+            vertical-align: top;
+            line-height: 1.65;
+        }
+
+        .step-table th {
+            background: #fafafa;
+            color: #555;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .step-table td.col-sp {
+            background: var(--c-supplier-soft);
+        }
+
+        .step-table td.col-pf {
+            background: var(--c-platform-soft);
+        }
+
+        .step-table td.col-cu {
+            background: var(--c-customer-soft);
+        }
+
+        .step-table th.col-pf {
+            background: var(--c-platform-bg);
+            color: #0d47a1;
+        }
+
+        .step-table th.col-cu {
+            background: var(--c-customer-bg);
+            color: #b71c1c;
+        }
+
+        .step-table th.col-sp {
+            background: var(--c-supplier-bg);
+            color: #1b5e20;
+        }
+
+        .step-table code {
+            background: #f0f2f5;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-weight: 600;
+            font-size: 11px;
+            margin: 0 2px;
+        }
+
+        .pill.supplier {
+            background: var(--c-supplier-bg);
+            color: var(--c-supplier);
+        }
+
+        .pill.platform {
+            background: var(--c-platform-bg);
+            color: var(--c-platform);
+        }
+
+        .pill.customer {
+            background: var(--c-customer-bg);
+            color: var(--c-customer);
+        }
+
+        .pill.gray {
+            background: #eee;
+            color: #777;
+        }
+
+        /* ================== 状态机 ================== */
+        .state-box {
+            margin: 0 20px 20px 20px;
+            border: 1px solid var(--c-line);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .state-title {
+            padding: 9px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #555;
+            background: #fafafa;
+            border-bottom: 1px solid var(--c-line);
+        }
+
+        .state-flow {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 7px;
+            padding: 14px;
+        }
+
+        .state-node {
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .state-node.platform {
+            background: var(--c-platform-bg);
+            color: var(--c-platform);
+        }
+
+        .state-node.customer {
+            background: var(--c-customer-bg);
+            color: var(--c-customer);
+        }
+
+        .state-node.supplier {
+            background: var(--c-supplier-bg);
+            color: var(--c-supplier);
+        }
+
+        .state-node.terminal {
+            background: #fff3e0;
+            color: var(--c-warn);
+            border: 1px dashed #ff9800;
+        }
+
+        .state-arrow {
+            color: #bbb;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .state-branch {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-wrap: wrap;
+            padding: 0 14px 14px 30px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* ================== 提示 ================== */
+        .gap-callout {
+            margin: 0 20px 20px 20px;
+            padding: 12px 16px;
+            background: #fff8e1;
+            border-left: 4px solid #ffb300;
+            border-radius: 0 4px 4px 0;
+            font-size: 13px;
+            line-height: 1.8;
+            color: #6d4c41;
+        }
+
+        .gap-callout strong {
+            color: var(--c-warn);
+        }
+
+        /* ================== 底部 ================== */
+        .footer-note {
+            margin-top: 36px;
+            padding-top: 20px;
+            border-top: 2px dashed var(--c-line);
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            line-height: 1.7;
+        }
+
+        .download-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .download-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" id="capture-container">
+        <h1>支付流程</h1>
+
+        <div class="legend">
+            <div class="legend-item"><span class="legend-dot" style="background:var(--c-supplier-bg);border:2px solid var(--c-supplier);"></span>供应商端</div>
+            <div class="legend-item"><span class="legend-dot" style="background:var(--c-platform-bg);border:2px solid var(--c-platform);"></span>平台端</div>
+            <div class="legend-item"><span class="legend-dot" style="background:var(--c-customer-bg);border:2px solid var(--c-customer);"></span>客户端</div>
+        </div>
+
+
+        <!-- ================= 四、节点 A + 节点 B 合并 ================= -->
+        <section id="sec-node-a">
+            <h2>一、平台 ↔ 客户 · 支付节点对照（预付款 + 尾款）</h2>
+            <article class="pair-card">
+                <div class="pair-header pair-pc">
+                    <span>节点 A · 预付款 + 节点 B · 尾款</span>
+                    <span class="pill customer">客户 → 平台</span>
+                    <span class="pill gray">两次支付 · 预付款可选</span>
+                </div>
+
+                
+
+                <div class="pair-summary">
+                    <strong>客户结算单：</strong><span class="pill gray">草稿</span> → <span class="pill platform">待审核账单</span> → <span class="pill platform">已审核</span> → <span class="pill gray">待付款</span> → <span class="pill platform">已付款</span> → <span class="pill platform">已收款</span>（终态）<br>
+                    <strong>订单级支付状态：</strong><span class="pill gray">待支付</span> → <span class="pill platform">部分支付</span> → <span class="pill platform">全额支付</span> → <span class="pill platform">已收款</span>（终态）<br>
+                </div>
+
+                <div class="step-table-wrap">
+                    <table class="step-table">
+                        <thead>
+                            <tr>
+                                <th style="width:5%;">步</th>
+                                <th style="width:13%;">节点</th>
+                                <th style="width:28%;" class="col-cu">客户侧</th>
+                                <th style="width:29%;" class="col-pf">平台侧</th>
+                                <th style="width:25%;">单据 / 状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td rowspan="6"><strong>节点 A</strong><br>预付款</td>
+                                <td class="col-cu">客户创建并提交采购订单</td>
+                                <td class="col-pf">平台填写<strong>【预收款】</strong>→【选择是否要预付款】→ 填写预付款比例 → <strong>【生成预付款结算单】</strong>（不需要预付款时不生成此单据，直接进入尾款）</td>
+                                <td>
+                                    <strong>平台销售订单状态：</strong><span class="pill platform">待确认</span></br>
+                                    <strong>客户采购订单 / 平台销售订单：</strong><span class="pill platform">待支付</span></br>
+                                    <strong>预付款结算单：</strong><span class="pill gray">草稿</span></br>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td class="col-cu">—（平台内部步骤，客户未介入）</td>
+                                <td class="col-pf">销售 / 会计 核对金额、维护账单日期 → <strong>【推送】</strong>→ 单据进入平台账单池</td>
+                                <td>
+                                    <strong>预付款结算单：</strong><span class="pill gray">草稿</span> → <span class="pill platform">待审核账单</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td class="col-cu">—（平台内部步骤，客户未介入）</td>
+                                <td class="col-pf">会计 账单详情 → <strong>【平台审核】</strong>→ 账单进入「已审核」，可推送付款单</td>
+                                <td>
+                                    <strong>预付款结算单：</strong><span class="pill platform">待审核账单</span> → <span class="pill platform">已审核</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td class="col-cu">采购订单详情页 / 我的账单 → 查看预付款结算单，显示「待付款」</td>
+                                <td class="col-pf"><strong>【推送付款单】</strong>→ 推送给客户</td>
+                                <td>
+                                    <strong>预付款结算单：</strong><span class="pill platform">已审核</span> → <span class="pill gray">待付款</span><br>
+                                    <strong>客户采购订单 / 平台销售订单：</strong><span class="pill gray">待支付</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td class="col-cu">结算单页 <strong>【在线支付（通联）】</strong>支付预付款金额 → 付款完成</td>
+                                <td class="col-pf">等待付款到账</td>
+                                <td>
+                                    <strong>预付款结算单：</strong><span class="pill gray">待付款</span> → <span class="pill platform">已付款</span><br>
+                                    <strong>客户采购订单 / 平台销售订单：</strong><span class="pill gray">待支付</span> → <span class="pill platform">部分支付</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td class="col-cu">结算单显示「已付款」</td>
+                                <td class="col-pf">核对到账（可查看账户余额）→ <strong>【确认收款】</strong>→ 结算单置为已收款</td>
+                                <td>
+                                    <strong>预付款结算单：</strong><span class="pill platform">已收款</span>（客户侧显示“已付款”）<br>
+                                    <strong>客户采购订单 / 平台销售订单：</strong><span class="pill platform">部分支付</span>（预付款已收款、尾款未收款）
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>7</td>
+                                <td rowspan="6"><strong>节点 B</strong><br>尾款</td>
+                                <td class="col-cu">客户全部确认收货后</td>
+                                <td class="col-pf">平台侧出现<strong>【尾款】</strong>按钮 → <strong>【生成尾款结算单】</strong></td>
+                                <td>
+                                    <strong>平台销售订单状态：</strong><span class="pill platform">收货完成</span></br>
+                                    <strong>尾款结算单：</strong><span class="pill gray">草稿</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>8</td>
+                                <td class="col-cu">—（平台内部步骤，客户未介入）</td>
+                                <td class="col-pf">销售 / 会计 核对金额、维护账单日期 → <strong>【推送】</strong>→ 单据进入平台账单池</td>
+                                <td>
+                                    <strong>尾款结算单：</strong><span class="pill gray">草稿</span> → <span class="pill platform">待审核账单</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>9</td>
+                                <td class="col-cu">—（平台内部步骤，客户未介入）</td>
+                                <td class="col-pf">会计 账单详情 → <strong>【平台审核】</strong>→ 账单进入「已审核」，可推送付款单</td>
+                                <td>
+                                    <strong>尾款结算单：</strong><span class="pill platform">待审核账单</span> → <span class="pill platform">已审核</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>10</td>
+                                <td class="col-cu">采购订单详情页 / 我的账单 → 查看尾款结算单，显示「待付款」</td>
+                                <td class="col-pf"><strong>【推送付款单】</strong>→ 推送给客户</td>
+                                <td>
+                                    <strong>尾款结算单：</strong><span class="pill platform">已审核</span> → <span class="pill gray">待付款</span><br>
+                                    <strong>客户采购订单 / 平台销售订单：</strong><span class="pill platform">部分支付</span>（维持，预付款已收款、尾款未收款）
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>11</td>
+                                <td class="col-cu">结算单页 <strong>【在线支付（通联）】</strong>支付尾款：足额 / 少付（少付需填差异原因 + 上传凭证）→ 付款完成</td>
+                                <td class="col-pf">等待付款到账；收到差额 → <strong>【标记差额】</strong></td>
+                                <td>
+                                    <strong>尾款结算单：</strong><span class="pill gray">待付款</span> → <span class="pill platform">已付款</span><br>
+                                    <strong>客户采购订单 / 平台销售订单：</strong><span class="pill platform">部分支付</span> → <span class="pill platform">全额支付</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>12</td>
+                                <td class="col-cu">结算单显示「已付款」</td>
+                                <td class="col-pf">核对到账（可查看账户余额）→ <strong>【确认收款】</strong>→ 采购订单结清</td>
+                                <td>
+                                    <strong>尾款结算单：</strong><span class="pill platform">已收款</span>（客户侧显示“已付款”）<br>
+                                    <strong>客户采购订单 / 平台销售订单：</strong><span class="pill platform">已收款</span>（客户侧显示“已付款”）<br>
+                                    <strong>业务状态：</strong>已结清
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+                </div>
+                
+
+                
+
+                
+            </article>
+        </section>
+
+        <!-- ================= 二、平台 ↔ 供应商 · 支付节点 ================= -->
+        <section id="sec-supplier">
+            <h2>二、平台 ↔ 供应商 · 支付节点对照（平台付款给供应商）</h2>
+            <article class="pair-card">
+                <div class="pair-header pair-sp">
+                    <span>供应商结算与平台审核 ＋ 平台付款与供应商收款</span>
+                    <span class="pill platform">平台 → 供应商</span>
+                </div>
+
+                
+
+                <div class="step-table-wrap">
+                    <table class="step-table">
+                        <thead>
+                            <tr>
+                                <th style="width:5%;">步</th>
+                                <th style="width:13%;">节点</th>
+                                <th style="width:28%;" class="col-sp">供应商侧</th>
+                                <th style="width:29%;" class="col-pf">平台侧</th>
+                                <th style="width:25%;">单据 / 状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td rowspan="6"><strong>节点C </strong><br>结算与审核</td>
+                                <td class="col-sp">客户确认收货后 → 销售订单 → <strong>【创建结算】</strong>→ 生成草稿结算单</td>
+                                <td class="col-pf">—（平台此时未介入）</td>
+                                <td><strong>供应商结算单：</strong><span class="pill gray">草稿</span></td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td class="col-sp">核对金额、维护账单日期 → <strong>【推送到平台】</strong></td>
+                                <td class="col-pf">会计 &gt; 供应商 &gt; 账单 出现待处理记录</td>
+                                <td><strong>供应商结算单：</strong><span class="pill platform">待审核账单</span></td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td class="col-sp">—（供应商不参与开票，只等收款）</td>
+                                <td class="col-pf">会计 账单详情 → <strong>【平台审核】</strong>→ 账单进入「已审核」，可推送付款单</td>
+                                <td><strong>供应商结算单：</strong><span class="pill platform">待审核账单</span> → <span class="pill platform">已审核</span></td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td class="col-sp">等待付款（结算单显示“待收款”）</td>
+                                <td class="col-pf">账单页维护支付人 → <strong>【推送付款单】</strong>→ 推给平台出纳<br><strong>支付节点从这一步开始</strong></td>
+                                <td>
+                                    <strong>供应商结算单：</strong><span class="pill gray">待付款</span>（供应商侧显示“待收款”）<br>
+                                    <strong>平台采购订单支付状态：</strong><span class="pill gray">待支付</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td class="col-sp">等待付款到账</td>
+                                <td class="col-pf"> 【在线支付（通联）】支付 →  <strong>【创建付款】</strong></td>
+                                <td>
+                                    <strong>供应商结算单：</strong><span class="pill platform">已付款</span>（供应商侧显示“已付款”）<br>
+                                    <strong>平台采购订单支付状态：</strong><span class="pill platform">部分支付 / 全额支付</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td class="col-sp">结算单显示“已付款”，可查看支付凭证 / 付款单详情 → <strong>确认收款</strong></td>
+                                <td class="col-pf">与供应商对账 → 结算单置为终态</td>
+                                <td>
+                                    <strong>供应商结算单：</strong><span class="pill supplier">已收款</span>（终态）<br>
+                                    <strong>平台采购订单支付状态：</strong><span class="pill platform">已付款</span>（终态）<br>
+                                    <strong>业务状态：</strong>平台采购订单 / 供应商销售订单 → 已完成
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </article>
+        </section>
+    </div>
+
+    <button class="download-btn" onclick="downloadImage()">下载 PNG 图片</button>
+
+    <script>
+        function downloadImage() {
+            var container = document.getElementById('capture-container');
+            var button = document.querySelector('.download-btn');
+            button.style.display = 'none';
+            htmlToImage.toPng(container, { quality: 0.95, backgroundColor: '#ffffff', pixelRatio: 2 })
+                .then(function (dataUrl) {
+                    var link = document.createElement('a');
+                    link.download = '支付流程-支付改动版结算流程.png';
+                    link.href = dataUrl;
+                    link.click();
+                })
+                .catch(function (error) { console.error(error); alert('抱歉，图片生成失败，请重试。'); })
+                .finally(function () { button.style.display = 'block'; });
+        }
+    </script>
+</body>
+
+</html>

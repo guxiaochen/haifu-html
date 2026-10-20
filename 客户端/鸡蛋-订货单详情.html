@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订货单详情 - 元象农产品买家工作台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif; background-color: #f5f5f5; color: #333; font-size: 14px; min-height: 100vh; }
+        .top-nav { height: 56px; background: #2BA471; color: #fff; display: flex; align-items: center; padding: 0 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .top-nav-left { display: flex; align-items: center; gap: 16px; }
+        .brand-logo { width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+        .brand-name { font-size: 16px; font-weight: 600; }
+        .brand-sub { font-size: 13px; color: rgba(255,255,255,0.85); padding-left: 12px; border-left: 1px solid rgba(255,255,255,0.3); }
+        .top-nav-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+        .back-shop-btn { background: transparent; border: 1px solid rgba(255,255,255,0.6); color: #fff; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        .back-shop-btn:hover { background: rgba(255,255,255,0.1); }
+        .top-nav-icon { cursor: pointer; color: #fff; position: relative; font-size: 18px; padding: 4px 8px; }
+        .top-nav-icon .badge { position: absolute; top: 0; right: 0; background: #ff4d4f; color: #fff; font-size: 11px; min-width: 18px; height: 18px; border-radius: 9px; display: flex; align-items: center; justify-content: center; padding: 0 5px; line-height: 1; }
+        .account-dropdown { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 10px; border-radius: 4px; color: #fff; font-size: 13px; position: relative; }
+        .account-dropdown:hover { background: rgba(255,255,255,0.1); }
+        .account-menu { display: none; position: absolute; top: 100%; right: 0; background: #fff; border: 1px solid #f0f0f0; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); min-width: 140px; z-index: 200; padding: 4px 0; margin-top: 4px; }
+        .account-dropdown:hover .account-menu { display: block; }
+        .account-menu-item { padding: 9px 16px; color: #333; font-size: 13px; cursor: pointer; white-space: nowrap; }
+        .account-menu-item:hover { background: #f5f5f5; color: #2BA471; }
+        .account-menu-divider { height: 1px; background: #f0f0f0; margin: 4px 0; }
+        .layout { display: flex; min-height: calc(100vh - 56px); }
+        .sidebar { width: 180px; background: #fff; border-right: 1px solid #f0f0f0; flex-shrink: 0; padding: 12px 0; }
+        .menu-item { padding: 10px 24px 10px 48px; color: #666; cursor: pointer; font-size: 13px; border-left: 3px solid transparent; transition: all 0.15s; }
+        .menu-item:hover { background: #f5f5f5; color: #2BA471; }
+        .menu-item.active { color: #2BA471; border-left-color: #2BA471; background: #f0faf5; font-weight: 500; }
+        .menu-group-title { padding: 10px 20px; color: #333; font-size: 15px; font-weight: 600; margin-top: 8px; display: flex; align-items: center; gap: 8px; }
+        .menu-group-title:first-of-type { margin-top: 4px; }
+        .menu-group-icon { font-size: 16px; width: 20px; text-align: center; }
+        .menu-item.standalone { padding-left: 24px; font-size: 15px; font-weight: 600; color: #333; }
+        .main { flex: 1; padding: 18px; overflow-x: auto; }
+        .breadcrumb-bar { font-size: 13px; color: #999; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; padding: 0 4px; }
+        .breadcrumb-bar a { color: #2BA471; text-decoration: none; cursor: pointer; }
+        .breadcrumb-bar a:hover { text-decoration: underline; }
+        .breadcrumb-bar .sep { color: #d9d9d9; }
+        .breadcrumb-bar .current { color: #333; }
+        .card { background: #fff; border-radius: 4px; padding: 20px 28px 28px; margin-bottom: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+        .toolbar { display: flex; align-items: center; gap: 8px; padding-bottom: 16px; margin-bottom: 18px; border-bottom: 1px solid #f0f0f0; }
+        .btn { padding: 7px 18px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-primary { background: #2BA471; color: #fff; }
+        .btn-primary:hover { background: #259163; }
+        .btn-default { background: #fff; color: #666; border: 1px solid #d9d9d9; }
+        .btn-default:hover { border-color: #2BA471; color: #2BA471; }
+        .btn-danger { background: #fff; color: #ff4d4f; border: 1px solid #ffccc7; }
+        .btn-danger:hover { background: #fff1f0; }
+        .steps-bar { margin-left: auto; display: flex; align-items: center; }
+        .step { padding: 6px 18px; background: #f5f5f5; color: #666; font-size: 13px; clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%, 8px 50%); margin-right: -8px; }
+        .step:first-child { clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%); }
+        .step:last-child { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 8px 50%); margin-right: 0; }
+        .step.active { background: #2BA471; color: #fff; }
+        .step.done { background: #e8e8e8; color: #999; }
+        .doc-head { display: flex; align-items: center; gap: 14px; padding-bottom: 18px; margin-bottom: 20px; border-bottom: 1px solid #f0f0f0; }
+        .doc-title { font-size: 20px; font-weight: 600; color: #222; letter-spacing: .02em; }
+        .doc-title-input { width: 100%; border: none; border-bottom: 1px solid #d9d9d9; padding: 6px 2px 10px; font-size: 20px; font-weight: 600; color: #222; outline: none; background: transparent; margin-bottom: 22px; }
+        .doc-title-input:focus { border-bottom-color: #2BA471; }
+        .order-status-tag { display: inline-block; padding: 3px 12px; border-radius: 11px; font-size: 12px; font-weight: 500; line-height: 1.5; }
+        .order-status-tag.st-completed { background: #f0faf5; color: #2BA471; }
+        .receipt-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; border-radius: 11px; background: #e6f7ff; color: #1890ff; font-size: 12px; font-weight: 500; }
+        .receipt-pill .pill-count { background: #1890ff; color: #fff; border-radius: 9px; padding: 0 7px; min-width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; line-height: 1; }
+        /* 统一胶囊提醒 */
+        .title-pills { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 12px; }
+        .po-alert-card { display: none; align-items: center; gap: 6px; padding: 5px 12px 5px 8px; background: #f0faf5; color: #2BA471; border: 1px solid #b7eb8f; border-radius: 16px; cursor: pointer; transition: all .2s; white-space: nowrap; flex-shrink: 0; font-size: 12px; }
+        .po-alert-card:hover { background: #e6f7ef; border-color: #2BA471; }
+        .po-alert-card .po-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; background: #2BA471; color: #fff; border-radius: 50%; font-size: 12px; }
+        .po-alert-card .po-text { font-weight: 500; }
+        .po-alert-card .po-arrow { font-size: 14px; line-height: 1; }
+        .doc-head .spacer { margin-left: auto; }
+        .view-title-pills { position: static; left: auto; top: auto; transform: none; margin-left: 10px; }
+        .view-page-title-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 16px 20px; margin: -20px -28px 16px; border-bottom: 1px solid #f0f0f0; }
+        .view-page-title { font-size: 18px; font-weight: 600; color: #222; }
+        .view-title-subbar { display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .view-action-bar { display: flex; align-items: center; justify-content: space-between; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid #f0f0f0; }
+        .view-order-name { display: flex; align-items: center; gap: 12px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 64px; margin-bottom: 8px; }
+        .section-title { font-size: 14px; font-weight: 600; color: #2BA471; margin: 4px 0 16px; padding-left: 10px; border-left: 3px solid #2BA471; }
+        .kv { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+        .kv.top { align-items: flex-start; }
+        .kv .k { min-width: 96px; color: #666; font-size: 13px; flex-shrink: 0; }
+        .kv .k .required { color: #ff4d4f; margin-right: 2px; }
+        .kv .v { flex: 1; color: #333; font-size: 13px; line-height: 1.6; }
+        .kv input { width: 100%; padding: 7px 2px; border: none; border-bottom: 1px solid #e5e7eb; font: inherit; font-size: 13px; color: #333; outline: none; background: transparent; }
+        .kv input:focus { border-bottom-color: #2BA471; }
+        .kv input[readonly] { color: #666; }
+        .file-card { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #fafafa; border: 1px solid #eee; border-radius: 6px; max-width: 360px; }
+        .file-ico { width: 34px; height: 34px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff; flex-shrink: 0; }
+        .file-ico.xls { background: #217346; }
+        .file-ico.img { background: #4aa3df; }
+        .file-ico.pdf { background: #d9534f; }
+        .file-card.stamp-contract { margin-bottom: 8px; }
+        .modal-title .modal-x { margin-left: auto; cursor: pointer; color: #999; font-size: 16px; font-weight: 400; }
+        .modal-title .modal-x:hover { color: #333; }
+        .stamp-rows { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; background: #fafbfd; border: 1px solid #f0f0f0; border-radius: 4px; margin-bottom: 10px; }
+        .stamp-rows .row { display: flex; gap: 10px; font-size: 13px; line-height: 1.6; }
+        .stamp-rows .row .k { color: #888; min-width: 64px; flex-shrink: 0; }
+        .stamp-rows .row .v { color: #333; flex: 1; min-width: 0; word-break: break-all; }
+        .stamp-note { font-size: 12px; color: #999; line-height: 1.7; }
+        .file-meta { flex: 1; min-width: 0; }
+        .file-name { font-size: 13px; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .file-type { font-size: 11px; color: #999; }
+        .file-ops { display: inline-flex; gap: 10px; }
+        .file-ops a { color: #2BA471; cursor: pointer; font-size: 13px; text-decoration: none; }
+        .file-ops a:hover { text-decoration: underline; }
+        .tab-bar { display: flex; gap: 8px; margin: 20px 0 16px; }
+        .tab-btn { padding: 8px 22px; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; color: #555; }
+        .tab-btn.active { background: #2BA471; color: #fff; border-color: #2BA471; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .table-scroll { width: 100%; overflow-x: auto; }
+        .items-table { width: 100%; min-width: 820px; border-collapse: collapse; font-size: 13px; }
+        .items-table th { background: #fafafa; color: #555; font-weight: 500; padding: 12px; text-align: left; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+        .items-table td { padding: 10px 12px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+        .items-table th.col-qty, .items-table td.col-qty { width: 120px; text-align: right; font-variant-numeric: tabular-nums; }
+        .items-table th.col-action, .items-table td.col-action { width: 70px; text-align: center; }
+        .cell-input { width: 100%; padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 4px; font: inherit; outline: none; }
+        .cell-input:focus { border-color: #2BA471; }
+        .cell-input.qty { text-align: right; }
+        .delete-link { color: #ff4d4f; cursor: pointer; font-size: 13px; background: none; border: none; padding: 0; }
+        .delete-link:hover { text-decoration: underline; }
+        .item-actions { display: flex; gap: 20px; padding: 12px 0; }
+        .item-action-link { color: #2BA471; cursor: pointer; font-size: 13px; }
+        .item-action-link:hover { text-decoration: underline; }
+        .footer-bar { display: flex; justify-content: flex-end; margin-top: 12px; padding-top: 16px; border-top: 1px solid #f0f0f0; }
+        .totals { text-align: right; line-height: 2; font-size: 13px; }
+        .totals .row { display: flex; justify-content: flex-end; gap: 24px; }
+        .totals .label { color: #666; min-width: 110px; text-align: left; }
+        .totals .value { color: #333; min-width: 110px; text-align: right; font-variant-numeric: tabular-nums; }
+        .totals .total-amount { color: #2BA471; font-weight: 600; }
+        textarea.remark-input { width: 100%; min-height: 90px; padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 4px; font: inherit; font-size: 13px; line-height: 1.8; color: #333; outline: none; resize: vertical; }
+        textarea.remark-input:focus { border-color: #2BA471; }
+        .remark-box { padding: 14px 16px; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 4px; color: #666; font-size: 13px; line-height: 1.8; }
+        .modal-mask { position: fixed; inset: 0; background: rgba(15,23,42,0.45); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-mask.show { display: flex; }
+        .modal { width: 400px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.18); }
+        .modal-title { padding: 18px 20px 6px; font-size: 16px; font-weight: 600; color: #222; display: flex; align-items: center; gap: 8px; }
+        .modal-title .warn-icon { color: #faad14; font-size: 18px; }
+        .modal-body { padding: 4px 20px 18px; color: #555; line-height: 1.7; font-size: 13px; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid #f0f0f0; background: #fafbfd; }
+        .toast { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); display: none; padding: 10px 18px; background: #f0faf5; border: 1px solid #b7e4cd; color: #1d6b46; border-radius: 6px; font-size: 13px; z-index: 1100; }
+        .toast.show { display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="top-nav">
+        <div class="top-nav-left">
+            <div class="brand-logo">元</div>
+            <div class="brand-name">元象农产品</div>
+            <div class="brand-sub">买家工作台</div>
+        </div>
+        <div class="top-nav-right">
+            <button class="back-shop-btn" onclick="location.href='鸡蛋-订货单列表.html'">← 返回列表</button>
+            <div class="top-nav-icon" title="通知">🔔<span class="badge">6</span></div>
+            <div class="account-dropdown">
+                <span>超级管理员</span><span>▾</span>
+                <div class="account-menu">
+                    <div class="account-menu-item">💼 账户信息</div>
+                    <div class="account-menu-item">📍 收货地址</div>
+                    <div class="account-menu-item">🔒 安全设置</div>
+                    <div class="account-menu-item">🔔 消息中心</div>
+                    <div class="account-menu-divider"></div>
+                    <div class="account-menu-item" style="color:#ff4d4f;">退出登录</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layout">
+        <div id="sidebar-container"></div>
+        <script src="sidebar.js"></script>
+
+        <main class="main">
+            <div class="breadcrumb-bar">
+                <a onclick="location.href='鸡蛋-订货单列表.html'">订货单</a><span class="sep">/</span><span class="current">订货单详情</span>
+            </div>
+
+            <!-- ========== 编辑态（待提交）：与新增订货单展示一致，无编辑按钮 ========== -->
+            <div class="card" id="editCard" style="display:none;">
+                <div class="toolbar">
+                    <button class="btn btn-default" onclick="importExcel()">导入</button>
+                    <button class="btn btn-default" onclick="saveDraft()">保存</button>
+                    <button class="btn btn-primary" onclick="submitOrder()">提交</button>
+                    <button class="btn btn-danger" onclick="location.href='鸡蛋-订货单列表.html'">取消</button>
+                    <button class="btn btn-default" id="stampBtnEdit" onclick="openStampModal('edit')">盖章</button>
+                    <div class="steps-bar">
+                        <div class="step active">待提交</div>
+                        <div class="step">已提交</div>
+                    </div>
+                </div>
+
+                <input class="doc-title-input" id="sheetNo" value="DH20260905002" placeholder="请输入订货单名称/编号">
+
+                <div class="two-col">
+                    <div>
+                        <div class="section-title">基本信息</div>
+                        <div class="kv"><span class="k"><span class="required">*</span>开单日期</span><span class="v"><input type="date" id="billDate" value="2026-09-05"></span></div>
+                        <div class="kv"><span class="k"><span class="required">*</span>采购单位</span><span class="v"><input id="buyer" value="aqtest薄眠（山东）数字产业发展有限公司"></span></div>
+                        <div class="kv"><span class="k"><span class="required">*</span>供货单位</span><span class="v"><input id="supplier" value="焱丰（山东）供应链管理有限公司"></span></div>
+                    </div>
+                    <div>
+                        <div class="section-title">地址信息</div>
+                        <div class="kv"><span class="k">送货地址</span><span class="v"><input id="deliveryAddr" value="山东省济南市历下区经十路9999号"></span></div>
+                        <div class="kv"><span class="k">收货地址</span><span class="v"><input id="recvAddr" value="自提"></span></div>
+                        <div class="kv"><span class="k">发货地址</span><span class="v"><input id="shipAddr" value="山东省德州市平原县鸡蛋产业园 3号仓"></span></div>
+                    </div>
+                </div>
+
+                <div class="section-title">联系人信息</div>
+                <div class="two-col">
+                    <div>
+                        <div class="kv"><span class="k">发货联系人</span><span class="v"><input id="shipContact" value="王志远"></span></div>
+                        <div class="kv"><span class="k">职务</span><span class="v"><input id="shipTitle" value="/"></span></div>
+                        <div class="kv"><span class="k">提货人电话</span><span class="v"><input id="shipPhone" value="13905310001"></span></div>
+                    </div>
+                    <div>
+                        <div class="kv"><span class="k">收货联系人</span><span class="v"><input id="recvContact" value="侯振鲁"></span></div>
+                        <div class="kv"><span class="k">职务</span><span class="v"><input id="recvTitle" value="/"></span></div>
+                        <div class="kv"><span class="k">提货人电话</span><span class="v"><input id="recvPhone" value="17505308090"></span></div>
+                    </div>
+                </div>
+
+                <div class="two-col">
+                    <div>
+                        <div class="section-title">数量信息</div>
+                        <div class="kv"><span class="k">预定数量（箱）</span><span class="v"><input id="planQty" value="800" readonly></span></div>
+                        <div class="kv"><span class="k">总重（斤）</span><span class="v"><input id="totalWeight" value="24,000" readonly></span></div>
+                    </div>
+                    <div>
+                        <div class="section-title">订货单</div>
+                        <div class="kv top"><span class="k">订货单</span><span class="v">
+                            <div class="file-card">
+                                <span class="file-ico xls">X</span>
+                                <span class="file-meta"><span class="file-name" id="excelName">订货单_20260905.xlsx</span><span class="file-type">XLSX</span></span>
+                                <span class="file-ops"><a title="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" onclick="showToast('下载（演示）')">⬇</a></span>
+                            </div>
+                            <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px dashed #d9d9d9;border-radius:6px;cursor:pointer;color:#2BA471;font-size:13px;margin-top:8px;" onclick="showToast('上传订货单（演示）')">⬆ 上传订货单</div>
+                        </span></div>
+                        <div class="kv top"><span class="k">订单合同</span><span class="v">
+                            <div class="file-card" style="margin-bottom:8px;">
+                                <span class="file-ico img">🖼</span>
+                                <span class="file-meta"><span class="file-name">双方订货单合同（盖章）.pdf</span><span class="file-type">PDF</span></span>
+                                <span class="file-ops"><a title="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" onclick="showToast('下载（演示）')">⬇</a></span>
+                            </div>
+                            <div class="file-card" style="margin-bottom:8px;">
+                                <span class="file-ico img">🖼</span>
+                                <span class="file-meta"><span class="file-name">订货单合同_补充协议.pdf</span><span class="file-type">PDF</span></span>
+                                <span class="file-ops"><a title="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" onclick="showToast('下载（演示）')">⬇</a><a title="删除" style="color:#ff4d4f;" onclick="showToast('已删除（演示）')">✕</a></span>
+                            </div>
+                            <div class="file-card stamp-contract" id="stampContractEdit" style="display:none;">
+                                <span class="file-ico pdf">PDF</span>
+                                <span class="file-meta"><span class="file-name" id="stampContractEditName">订单合同_三方已签章.pdf</span><span class="file-type">PDF · 系统生成</span></span>
+                                <span class="file-ops"><a title="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" onclick="showToast('下载（演示）')">⬇</a></span>
+                            </div>
+                            <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px dashed #d9d9d9;border-radius:6px;cursor:pointer;color:#2BA471;font-size:13px;" onclick="showToast('上传订单合同（演示）')">⬆ 上传订单合同</div>
+                        </span></div>
+                    </div>
+                </div>
+
+                <div class="tab-bar">
+                    <div class="tab-btn active" onclick="switchTab('editCard','tab-e-detail',this)">订单明细</div>
+                    <div class="tab-btn" onclick="switchTab('editCard','tab-e-remark',this)">备注</div>
+                </div>
+                <div class="tab-content active" id="tab-e-detail">
+                    <div class="table-scroll">
+                        <table class="items-table">
+                            <thead><tr><th>发货时间</th><th>货品名称</th><th>净重规格</th><th>单位</th><th class="col-qty">数量（箱/天）</th><th class="col-action">操作</th></tr></thead>
+                            <tbody id="itemsTbody"></tbody>
+                        </table>
+                    </div>
+                    <div class="item-actions"><span class="item-action-link" onclick="addRow()">+ 添加行</span></div>
+                    <div class="footer-bar"><div class="totals">
+                        <div class="row"><span class="label">预定数量合计:</span><span class="value" id="sumQty">800 箱</span></div>
+                        <div class="row"><span class="label">总重合计:</span><span class="value total-amount" id="sumWeight">24,000 斤</span></div>
+                    </div></div>
+                </div>
+                <div class="tab-content" id="tab-e-remark">
+                    <textarea class="remark-input">参照实际发货日码单及结算单上的实际结算价格为准，统一精品包装，收货地址以双方约定地址为准。</textarea>
+                </div>
+            </div>
+
+            <!-- ========== 只读态（已完成） ========== -->
+            <div class="card" id="viewCard" style="display:none;">
+                <div class="view-page-title-bar">
+                    <div class="view-page-title">订货单详情</div>
+            <div class="view-title-subbar">
+                <div class="po-alert-card" id="poPill" style="display:flex;" onclick="goPoList()">
+                    <span class="po-icon">📋</span><span class="po-text">采购订单 × 5</span><span class="po-arrow">›</span>
+                </div>
+            </div>
+                </div>
+                <div class="view-action-bar">
+                    <button class="btn btn-default" id="stampBtnView" onclick="openStampModal('view')">盖章</button>
+                    <div class="steps-bar">
+                        <div class="step done">待提交</div>
+                        <div class="step active">已提交</div>
+                    </div>
+                </div>
+                <div class="view-order-name"><span>订货单编号：</span><span class="form-value" id="sheetNoView">DH20260901001</span></div>
+
+                <div class="two-col">
+                    <div>
+                        <div class="section-title">基本信息</div>
+                        <div class="kv top"><span class="k">开单日期</span><span class="v">2026年09月01日</span></div>
+                        <div class="kv top"><span class="k">采购单位</span><span class="v">aqtest薄眠（山东）数字产业发展有限公司</span></div>
+                        <div class="kv top"><span class="k">供货单位</span><span class="v">焱丰（山东）供应链管理有限公司</span></div>
+                    </div>
+                    <div>
+                        <div class="section-title">地址信息</div>
+                        <div class="kv top"><span class="k">送货地址</span><span class="v">山东省济南市历下区经十路9999号</span></div>
+                        <div class="kv top"><span class="k">收货地址</span><span class="v">自提</span></div>
+                        <div class="kv top"><span class="k">发货地址</span><span class="v">山东省德州市平原县鸡蛋产业园 3号仓</span></div>
+                    </div>
+                </div>
+
+                <div class="section-title">联系人信息</div>
+                <div class="two-col">
+                    <div>
+                        <div class="kv top"><span class="k">发货联系人</span><span class="v">王志远</span></div>
+                        <div class="kv top"><span class="k">职务</span><span class="v">/</span></div>
+                        <div class="kv top"><span class="k">提货人电话</span><span class="v">13905310001</span></div>
+                    </div>
+                    <div>
+                        <div class="kv top"><span class="k">收货联系人</span><span class="v">侯振鲁</span></div>
+                        <div class="kv top"><span class="k">职务</span><span class="v">/</span></div>
+                        <div class="kv top"><span class="k">提货人电话</span><span class="v">17505308090</span></div>
+                    </div>
+                </div>
+
+                <div class="two-col">
+                    <div>
+                        <div class="section-title">数量信息</div>
+                        <div class="kv top"><span class="k">预定数量（箱）</span><span class="v">1,200 箱</span></div>
+                        <div class="kv top"><span class="k">总重（斤）</span><span class="v">36,000</span></div>
+                    </div>
+                    <div>
+                        <div class="section-title">订货单</div>
+                        <div class="kv top"><span class="k">订货单</span><span class="v">
+                            <div class="file-card">
+                                <span class="file-ico xls">X</span>
+                                <span class="file-meta"><span class="file-name">订货单_20260901.xlsx</span><span class="file-type">XLSX</span></span>
+                                <span class="file-ops"><a title="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" onclick="showToast('下载（演示）')">⬇</a></span>
+                            </div>
+                            <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px dashed #d9d9d9;border-radius:6px;cursor:pointer;color:#2BA471;font-size:13px;margin-top:8px;" onclick="showToast('上传订货单（演示）')">⬆ 上传订货单</div>
+                        </span></div>
+                        <div class="kv top"><span class="k">订单合同</span><span class="v">
+                            <div class="file-card" style="margin-bottom:8px;">
+                                <span class="file-ico img">🖼</span>
+                                <span class="file-meta"><span class="file-name">双方订货单合同（盖章）.pdf</span><span class="file-type">PDF</span></span>
+                                <span class="file-ops"><a title="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" onclick="showToast('下载（演示）')">⬇</a></span>
+                            </div>
+                            <div class="file-card" style="margin-bottom:8px;">
+                                <span class="file-ico img">🖼</span>
+                                <span class="file-meta"><span class="file-name">订货单合同_补充协议.pdf</span><span class="file-type">PDF</span></span>
+                                <span class="file-ops"><a title="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" onclick="showToast('下载（演示）')">⬇</a><a title="删除" style="color:#ff4d4f;" onclick="showToast('已删除（演示）')">✕</a></span>
+                            </div>
+                            <div class="file-card stamp-contract" id="stampContractView" style="display:none;">
+                                <span class="file-ico pdf">PDF</span>
+                                <span class="file-meta"><span class="file-name" id="stampContractViewName">订单合同_三方已签章.pdf</span><span class="file-type">PDF · 系统生成</span></span>
+                                <span class="file-ops"><a title="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" onclick="showToast('下载（演示）')">⬇</a></span>
+                            </div>
+                            <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px dashed #d9d9d9;border-radius:6px;cursor:pointer;color:#2BA471;font-size:13px;" onclick="showToast('上传订单合同（演示）')">⬆ 上传订单合同</div>
+                        </span></div>
+                    </div>
+                </div>
+
+                <div class="tab-bar">
+                    <div class="tab-btn active" onclick="switchTab('viewCard','tab-v-detail',this)">订单明细</div>
+                    <div class="tab-btn" onclick="switchTab('viewCard','tab-v-remark',this)">备注</div>
+                </div>
+                <div class="tab-content active" id="tab-v-detail">
+                    <div class="table-scroll">
+                        <table class="items-table">
+                            <thead><tr><th>发货时间</th><th>货品名称</th><th>净重规格</th><th>单位</th><th class="col-qty">数量（箱/天）</th></tr></thead>
+                            <tbody>
+                                <tr><td>2026年09月02日</td><td>鲜鸡蛋</td><td>30斤/箱</td><td>箱</td><td class="col-qty">240</td></tr>
+                                <tr><td>2026年09月03日</td><td>鲜鸡蛋</td><td>30斤/箱</td><td>箱</td><td class="col-qty">240</td></tr>
+                                <tr><td>2026年09月04日</td><td>鲜鸡蛋</td><td>30斤/箱</td><td>箱</td><td class="col-qty">240</td></tr>
+                                <tr><td>2026年09月05日</td><td>鲜鸡蛋</td><td>30斤/箱</td><td>箱</td><td class="col-qty">240</td></tr>
+                                <tr><td>2026年09月06日</td><td>鲜鸡蛋</td><td>30斤/箱</td><td>箱</td><td class="col-qty">240</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="footer-bar"><div class="totals">
+                        <div class="row"><span class="label">预定数量合计:</span><span class="value">1,200 箱</span></div>
+                        <div class="row"><span class="label">总重合计:</span><span class="value total-amount">36,000 斤</span></div>
+                    </div></div>
+                </div>
+                <div class="tab-content" id="tab-v-remark">
+                    <div class="remark-box">参照实际发货日码单及结算单上的实际结算价格为准，统一精品包装，收货地址以双方约定地址为准。</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <div class="modal-mask" id="stampModal">
+        <div class="modal">
+            <div class="modal-title"><span class="warn-icon">!</span>无法提交</div>
+            <div class="modal-body">请先盖章或者上传带有您印章的订货单附件！</div>
+            <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('stampModal')">我知道了</button></div>
+        </div>
+    </div>
+
+    <!-- 三方电子签章确认（跳转第三方签章服务，不展示签署流程） -->
+    <div class="modal-mask" id="stampGoModal">
+        <div class="modal" style="width:480px;">
+            <div class="modal-title"><span>三方电子签章</span><span class="modal-x" onclick="closeModal('stampGoModal')">✕</span></div>
+            <div class="modal-body">
+                <div class="stamp-rows">
+                    <div class="row"><span class="k">签章文件</span><span class="v" id="stampFileText">订货单_DH20260901001.pdf</span></div>
+                    <div class="row"><span class="k">签章主体</span><span class="v" id="stampPartyText">采购单位 · 供货单位 · 第三方电子签章平台</span></div>
+                    <div class="row"><span class="k">签章结果</span><span class="v">盖章后的订货单自动生成为「订单合同」</span></div>
+                </div>
+                <div class="stamp-note">确认后将跳转至第三方电子签章平台完成签署，签署结果自动回传并回写至本页「订单合同」。</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="closeModal('stampGoModal')">取消</button>
+                <button class="btn btn-primary" onclick="confirmStamp()">确认并跳转签章</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function goPoList() {
+        var m = location.search.match(/[?&]no=([^&]*)/);
+        var no = m ? decodeURIComponent(m[1]) : '';
+        location.href = '采购订单列表.html?cat=egg' + (no ? '&dh=' + encodeURIComponent(no) : '');
+    }
+
+        var items = [
+            { date: '2026-09-06', name: '鲜鸡蛋', spec: '30斤/箱', unit: '箱', qty: 200 },
+            { date: '2026-09-07', name: '鲜鸡蛋', spec: '30斤/箱', unit: '箱', qty: 200 },
+            { date: '2026-09-08', name: '鲜鸡蛋', spec: '30斤/箱', unit: '箱', qty: 200 },
+            { date: '2026-09-09', name: '鲜鸡蛋', spec: '30斤/箱', unit: '箱', qty: 200 }
+        ];
+        var stamped = false;
+
+        function getQuery(name) { var m = location.search.match(new RegExp('[?&]' + name + '=([^&]*)')); return m ? decodeURIComponent(m[1]) : ''; }
+        function switchTab(cardId, tabId, btn) {
+            var card = document.getElementById(cardId);
+            card.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+            card.querySelectorAll('.tab-content').forEach(function (c) { c.classList.remove('active'); });
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+        function renderItems() {
+            var tb = document.getElementById('itemsTbody');
+            tb.innerHTML = items.map(function (it, i) {
+                return '<tr>' +
+                    '<td><input class="cell-input" type="date" value="' + it.date + '" onchange="upd(' + i + ',\'date\',this.value)"></td>' +
+                    '<td><input class="cell-input" value="' + it.name + '" onchange="upd(' + i + ',\'name\',this.value)"></td>' +
+                    '<td><input class="cell-input" value="' + it.spec + '" onchange="upd(' + i + ',\'spec\',this.value);recalc()"></td>' +
+                    '<td><input class="cell-input" value="' + it.unit + '" onchange="upd(' + i + ',\'unit\',this.value)"></td>' +
+                    '<td class="col-qty"><input class="cell-input qty" type="number" min="0" value="' + it.qty + '" onchange="upd(' + i + ',\'qty\',this.value);recalc()"></td>' +
+                    '<td class="col-action"><button class="delete-link" onclick="delRow(' + i + ')">删除</button></td>' +
+                    '</tr>';
+            }).join('');
+            recalc();
+        }
+        function upd(i, k, v) { items[i][k] = v; }
+        function addRow() { items.push({ date: '', name: '鲜鸡蛋', spec: '30斤/箱', unit: '箱', qty: 0 }); renderItems(); }
+        function delRow(i) { items.splice(i, 1); renderItems(); }
+        function specWeight(spec) { var m = String(spec).match(/(\d+(?:\.\d+)?)\s*斤/); return m ? parseFloat(m[1]) : 0; }
+        function recalc() {
+            var q = 0, w = 0;
+            items.forEach(function (it) { var n = Number(it.qty) || 0; q += n; w += n * specWeight(it.spec); });
+            document.getElementById('sumQty').textContent = q.toLocaleString() + ' 箱';
+            document.getElementById('sumWeight').textContent = w.toLocaleString() + ' 斤';
+            document.getElementById('planQty').value = q.toLocaleString();
+            document.getElementById('totalWeight').value = w.toLocaleString();
+        }
+        function importExcel() { document.getElementById('excelName').textContent = '订货单_20260905.xlsx（已提取）'; renderItems(); showToast('已从表格提取数据，可在页面中编辑'); }
+        // ===== 三方电子签章：跳转第三方签章服务，原型不展示签署流程 =====
+        var stampTarget = 'edit';
+        function curDhNo() {
+            if (stampTarget === 'edit') {
+                var i = document.getElementById('sheetNo');
+                return (i && i.value) || 'DH20260905002';
+            }
+            var v = document.getElementById('sheetNoView');
+            return (v && v.textContent.trim()) || 'DH20260901001';
+        }
+        function openStampModal(target) {
+            stampTarget = target;
+            var f = document.getElementById('stampFileText');
+            if (f) f.textContent = '订货单_' + curDhNo() + '.pdf';
+            var buyer = document.getElementById('buyer');
+            var seller = document.getElementById('supplier');
+            var p = document.getElementById('stampPartyText');
+            if (p) p.textContent = (buyer ? buyer.value : 'aqtest薄眠（山东）数字产业发展有限公司')
+                + ' · ' + (seller ? seller.value : '焱丰（山东）供应链管理有限公司')
+                + ' · 第三方电子签章平台';
+            document.getElementById('stampGoModal').classList.add('show');
+        }
+        function confirmStamp() {
+            closeModal('stampGoModal');
+            stamped = true;   // 编辑态：解除「未盖章不可提交」卡控
+            var no = curDhNo();
+            var isEdit = stampTarget === 'edit';
+            var box = document.getElementById(isEdit ? 'stampContractEdit' : 'stampContractView');
+            if (box) box.style.display = 'flex';
+            var nm = document.getElementById(isEdit ? 'stampContractEditName' : 'stampContractViewName');
+            if (nm) nm.textContent = '订单合同_三方已签章_' + no + '.pdf';
+            var btn = document.getElementById(isEdit ? 'stampBtnEdit' : 'stampBtnView');
+            if (btn) btn.textContent = '已签章，重新盖章';
+            showToast('已跳转第三方电子签章平台，三方签章完成，订单合同已生成');
+        }
+        function saveDraft() {
+            var no = curDhNo();
+            var data = { no: no, items: items, savedAt: new Date().toISOString() };
+            ['billDate','buyer','supplier','deliveryAddr','recvAddr','shipAddr','shipContact','shipTitle','shipPhone','recvContact','recvTitle','recvPhone'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) data[id] = el.value;
+            });
+            localStorage.setItem('clientOrderDraft_' + no, JSON.stringify(data));
+            showToast('已保存，当前订货单仍为未提交');
+        }
+        function submitOrder() {
+            if (!stamped) { document.getElementById('stampModal').classList.add('show'); return; }
+            showToast('提交成功');
+            setTimeout(function () { location.href = '鸡蛋-订货单详情.html?no=' + encodeURIComponent(document.getElementById('sheetNo').value) + '&status=completed'; }, 900);
+        }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+        document.querySelectorAll('.modal-mask').forEach(function (m) { m.addEventListener('click', function (e) { if (e.target === m) m.classList.remove('show'); }); });
+        var toastTimer = null;
+        function showToast(msg) { var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2000); }
+
+        (function init() {
+            var no = getQuery('no') || 'DH20260901001';
+            var status = getQuery('status') || 'completed';
+            var edit = (status === 'draft' || status === 'pending');
+            document.getElementById('editCard').style.display = edit ? 'block' : 'none';
+            document.getElementById('viewCard').style.display = edit ? 'none' : 'block';
+            if (edit) {
+                document.getElementById('sheetNo').value = no;
+                try {
+                    var draft = JSON.parse(localStorage.getItem('clientOrderDraft_' + no) || 'null');
+                    if (draft) {
+                        ['billDate','buyer','supplier','deliveryAddr','recvAddr','shipAddr','shipContact','shipTitle','shipPhone','recvContact','recvTitle','recvPhone'].forEach(function (id) {
+                            var el = document.getElementById(id);
+                            if (el && draft[id] !== undefined) el.value = draft[id];
+                        });
+                        if (Array.isArray(draft.items)) items = draft.items;
+                    }
+                } catch (e) {}
+                renderItems();
+            } else {
+                document.getElementById('sheetNoView').textContent = no;
+            }
+        })();
+    </script>
+</body>
+</html>

@@ -186,6 +186,55 @@
       .value {
         font-size: 13px;
       }
+      .delivery-field {
+        width: 100%;
+        min-width: 0;
+        height: 26px;
+        padding: 2px 0 4px;
+        border: 0;
+        border-bottom: 1px solid #d9d9d9;
+        border-radius: 0;
+        outline: none;
+        background: transparent;
+        color: #333;
+        font: inherit;
+        line-height: 1.4;
+      }
+      .delivery-field:focus {
+        border-bottom-color: #2ba471;
+        box-shadow: 0 1px 0 #2ba471;
+      }
+      .delivery-field:disabled {
+        border-bottom-color: transparent;
+        background: transparent;
+        color: #333;
+        opacity: 1;
+        cursor: default;
+      }
+      .delivery-select {
+        width: 100%;
+        min-width: 0;
+        height: 26px;
+        padding: 2px 22px 4px 0;
+        border: 0;
+        border-bottom: 1px solid #d9d9d9;
+        border-radius: 0;
+        outline: none;
+        background: transparent;
+        color: #333;
+        font: inherit;
+        line-height: 1.4;
+      }
+      .delivery-select:focus {
+        border-bottom-color: #2ba471;
+        box-shadow: 0 1px 0 #2ba471;
+      }
+      .delivery-select:disabled {
+        border-bottom-color: transparent;
+        opacity: 1;
+        color: #333;
+        cursor: default;
+      }
       .tabs {
         display: flex;
         border-bottom: 1px solid #eee;
@@ -335,6 +384,110 @@
         color: #999;
         padding: 36px;
       }
+      .delivery-card {
+        border-left: 3px solid #1890ff;
+      }
+      .delivery-mode-row {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        min-height: 26px;
+        flex-wrap: wrap;
+        color: #333;
+        font-size: 13px;
+      }
+      .delivery-mode-row label {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+      }
+      .delivery-field {
+        width: 100%;
+        min-width: 0;
+        height: 26px;
+        padding: 2px 0 4px;
+        border: 0;
+        border-bottom: 1px solid #d9d9d9;
+        border-radius: 0;
+        outline: none;
+        background: transparent;
+        color: #333;
+        font: inherit;
+        line-height: 1.4;
+      }
+      .delivery-field:focus {
+        border-bottom-color: #2ba471;
+        box-shadow: 0 1px 0 #2ba471;
+      }
+      .delivery-field:disabled {
+        border-bottom-color: transparent;
+        background: transparent;
+        color: #333;
+        opacity: 1;
+        cursor: default;
+      }
+      .delivery-select {
+        width: 100%;
+        min-width: 0;
+        height: 26px;
+        padding: 2px 22px 4px 0;
+        border: 0;
+        border-bottom: 1px solid #d9d9d9;
+        border-radius: 0;
+        outline: none;
+        background: transparent;
+        color: #333;
+        font: inherit;
+        line-height: 1.4;
+      }
+      .delivery-select:focus {
+        border-bottom-color: #2ba471;
+        box-shadow: 0 1px 0 #2ba471;
+      }
+      .delivery-select:disabled {
+        border-bottom-color: transparent;
+        color: #333;
+        opacity: 1;
+        cursor: default;
+        appearance: none;
+        -webkit-appearance: none;
+      }
+      .delivery-hint {
+        color: #888;
+        font-size: 12px;
+      }
+      .fulfillment-card {
+        margin-top: 16px;
+      }
+      .fulfillment-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+      .fulfillment-title { font-size: 16px; font-weight: 600; color: #333; }
+      .fulfillment-path {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+        color: #666;
+        font-size: 13px;
+      }
+      .fulfillment-node {
+        padding: 6px 10px;
+        border-radius: 4px;
+        background: #f5f5f5;
+      }
+      .fulfillment-node.active { background: #e6f7ff; color: #1890ff; }
+      .fulfillment-arrow { color: #aaa; }
+      .fulfillment-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+      .fulfillment-status { color: #888; font-size: 13px; }
+      .fulfillment-status strong { color: #1890ff; }
       .modal-mask {
         display: none;
         position: fixed;
@@ -451,19 +604,29 @@
               <span class="label">联系人</span><span class="value">侯振鲁</span>
             </div>
             <div class="item">
-              <span class="label">收货人</span><span class="value">侯振鲁</span>
-            </div>
-            <div class="item">
               <span class="label">联系电话</span
               ><span class="value">17505308090</span>
             </div>
+            <div class="item full delivery-card">
+              <span class="label">交货方式</span>
+              <div class="delivery-mode-row">
+                <label><input type="radio" name="delivery-mode" value="customer" onchange="changeDeliveryMode(this.value)"> 客户</label>
+                <label><input type="radio" name="delivery-mode" value="platform" onchange="changeDeliveryMode(this.value)"> 平台</label>
+                <span class="delivery-hint" id="delivery-mode-hint"></span>
+              </div>
+            </div>
+            <div class="item">
+              <span class="label">收货人</span><input class="value delivery-field" id="receiver-name" value="侯振鲁" onchange="saveDeliveryInfo()" />
+              <select class="value delivery-select" id="platform-receiver-select" style="display:none" onchange="changePlatformReceiver(this.value)"></select>
+            </div>
+            
             <div class="item">
               <span class="label">收货电话</span
-              ><span class="value">17505308090</span>
+              ><input class="value delivery-field" id="receiver-phone" value="17505308090" onchange="saveDeliveryInfo()" />
             </div>
             <div class="item">
               <span class="label">收货地址</span
-              ><span class="value">兰州路66号</span>
+              ><input class="value delivery-field" id="receiver-address" value="兰州路66号" onchange="saveDeliveryInfo()" />
             </div>
             <div class="item full">
               <span class="label">备注</span
@@ -569,6 +732,8 @@
       var state = "",
         rejectReason = "",
         selectedItems = {},
+        deliveryMode = "customer",
+        fulfillmentState = "created",
         // 待采订单发起询价的演示流程本轮暂不开放，保留代码供后续二次询价方案确认后再启用。
         PENDING_INQUIRY_DEMO_ENABLED = false,
         demoMode = "pending",
@@ -626,12 +791,108 @@
         btn.classList.add("active");
         document.getElementById("tab-" + name).classList.add("active");
       }
+      var platformReceivers = [
+        { name: "仓储中心-周师傅", phone: "13800000007", address: "海赋科技仓储物流中心" },
+        { name: "济南仓-王经理", phone: "13800000002", address: "济南总公司仓库" },
+        { name: "青岛仓-李经理", phone: "13800000003", address: "青岛分公司仓库" }
+      ];
+      var deliveryDefaults = {
+        customer: { name: "侯振鲁", phone: "17505308090", address: "兰州路66号" },
+        platform: platformReceivers[0]
+      };
+
+      function deliveryEditable() {
+        return ["", "rejected"].indexOf(state) !== -1;
+      }
+
+      function applyDeliveryReadonly() {
+        var editable = deliveryEditable();
+        document.querySelectorAll("input[name='delivery-mode'], .delivery-field, .delivery-select").forEach(function (el) { el.disabled = !editable; });
+      }
+
+      function saveDeliveryInfo() {
+        if (!deliveryEditable()) return;
+        var source = document.getElementById("source-order").textContent;
+        var delivery = { mode: deliveryMode, name: document.getElementById("receiver-name").value, phone: document.getElementById("receiver-phone").value, address: document.getElementById("receiver-address").value };
+        localStorage.setItem("deliveryInfo_" + source, JSON.stringify(delivery));
+      }
+
+      function renderPlatformReceiverOptions(selectedName) {
+        var select = document.getElementById("platform-receiver-select");
+        select.innerHTML = platformReceivers.map(function (receiver, index) {
+          return '<option value="' + index + '">' + receiver.name + '</option>';
+        }).join("");
+        var index = platformReceivers.findIndex(function (receiver) { return receiver.name === selectedName; });
+        select.value = String(index >= 0 ? index : 0);
+      }
+
+      function changePlatformReceiver(index) {
+        if (!deliveryEditable()) return;
+        var receiver = platformReceivers[Number(index)];
+        if (!receiver) return;
+        document.getElementById("receiver-name").value = receiver.name;
+        document.getElementById("receiver-phone").value = receiver.phone;
+        document.getElementById("receiver-address").value = receiver.address;
+        saveDeliveryInfo();
+      }
+
+      function renderDeliveryInfo() {
+        var info = deliveryDefaults[deliveryMode];
+        var source = document.getElementById("source-order").textContent;
+        try {
+          var saved = JSON.parse(localStorage.getItem("deliveryInfo_" + source) || "null");
+          if (saved && saved.mode === deliveryMode) info = saved;
+        } catch (e) {}
+        document.getElementById("receiver-name").value = info.name;
+        document.getElementById("receiver-phone").value = info.phone;
+        document.getElementById("receiver-address").value = info.address;
+        document.querySelectorAll("input[name='delivery-mode']").forEach(function (el) { el.checked = el.value === deliveryMode; });
+        var isPlatform = deliveryMode === "platform";
+        document.getElementById("receiver-name").style.display = isPlatform ? "none" : "";
+        document.getElementById("platform-receiver-select").style.display = isPlatform ? "" : "none";
+        if (isPlatform) renderPlatformReceiverOptions(info.name);
+        var hint = isPlatform
+          ? "供应商送到平台；平台在入库单确认收货后生成出库单，再点击【申请验收】"
+          : "供应商直接向客户发货；平台入库单/出库单为镜像记录，仅查看";
+        document.getElementById("delivery-mode-hint").textContent = hint;
+        applyDeliveryReadonly();
+      }
+
+      function changeDeliveryMode(mode) {
+        if (!deliveryEditable()) return;
+        deliveryMode = mode;
+        fulfillmentState = "created";
+        renderDeliveryInfo();
+        saveDeliveryInfo();
+        renderFulfillment();
+      }
+
+      function confirmPlatformReceipt() {
+        if (deliveryMode !== "platform") return;
+        fulfillmentState = "received";
+        renderFulfillment();
+      }
+
+      function applyPlatformAcceptance() {
+        if (deliveryMode !== "platform" || fulfillmentState !== "received") return;
+        fulfillmentState = "accepted";
+        renderFulfillment();
+      }
+
+      function renderFulfillment() {
+        // 平台履约单据已从待采订单详情移除，交货方式仅在基础信息中展示。
+      }
+
       function init() {
         var p = new URLSearchParams(location.search),
           order = p.get("order") || "",
           source = p.get("source") || order.replace(/^待采-/, "") || "SO000205",
           urlStatus = p.get("status") || "";
         state = urlStatus || "";
+        var savedMode = localStorage.getItem("deliveryMode_" + source);
+        deliveryMode = savedMode === "platform" ? "platform" : "customer";
+        renderDeliveryInfo();
+        renderFulfillment();
         if (source === "SO000203") {
           items.forEach(function (item) {
             item.supplier = "aqtest海赋（山东）数字产业发展有限公司LL";
@@ -643,6 +904,8 @@
         document.getElementById("order-title").textContent = " 待采-" + source;
         document.getElementById("order-no").textContent = "待采-" + source;
         render();
+        renderDeliveryInfo();
+        renderFulfillment();
         var demoFromQuery = p.get("demo");
         if (PENDING_INQUIRY_DEMO_ENABLED && ["pending", "processing", "completed"].indexOf(demoFromQuery) >= 0) {
           setDemoMode(demoFromQuery);

@@ -9,7 +9,7 @@
   target.innerHTML = [
     '<div class="q-group">📋 <span>订单管理</span></div>',
     item('销售订单', '销售订单列表.html'),
-    item('平台询价单', '平台询价单列表.html'),
+    item('询价单', '平台询价单列表.html'),
     item('报价单', '报价单列表.html'),
     item('待采订单', '销售订单审核.html'),
     item('采购订单', '采购订单列表.html'),

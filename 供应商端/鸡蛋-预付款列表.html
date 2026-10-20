@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>结算单列表 - 供应商端</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#1890ff;--blue-dark:#096dd9;--ink:#1f2937;--muted:#8c98a8;--line:#edf0f4;--surface:#fff;--page:#f4f6f9}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--page);color:var(--ink);font-size:14px;min-height:100vh}
+.main-area{margin-left:200px;min-height:100vh}
+.top-nav{height:64px;background:#fff;display:flex;align-items:center;padding:0 32px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.breadcrumb{display:flex;align-items:center;gap:9px;color:#9aa5b1;font-size:13px}
+.breadcrumb a{color:#667382;text-decoration:none;cursor:pointer}
+.breadcrumb a:hover{color:var(--blue)}
+.breadcrumb .current{color:#253142;font-weight:600}
+.sep{color:#cfd6de}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:22px;color:#778393}
+.notice{font-size:18px;position:relative;cursor:pointer}
+.badge{position:absolute;top:-7px;right:-8px;background:#ff4d4f;border:2px solid #fff;color:#fff;min-width:16px;height:16px;padding:0 4px;border-radius:9px;font-size:10px;display:flex;align-items:center;justify-content:center}
+.user{display:flex;align-items:center;gap:9px;color:#475467;cursor:pointer}
+.avatar{width:30px;height:30px;border-radius:50%;background:#e6f4ff;color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:600}
+.main{padding:26px 32px 40px;max-width:1600px}
+.page-banner{font-size:20px;color:#253142;font-weight:600;margin-bottom:16px}
+.filter-card,.table-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 16px rgba(29,45,61,.03)}
+.filter-card{padding:18px 20px;margin-bottom:16px}
+.filter-row{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.filter-item{display:flex;align-items:center;gap:8px}
+.filter-label{font-size:12px;color:#667382;white-space:nowrap}
+.filter-input,.filter-select{height:34px;border:1px solid #d8dee6;border-radius:4px;padding:0 10px;outline:none;color:#344054;background:#fff;font-family:inherit;font-size:13px;min-width:180px}
+.filter-input:focus,.filter-select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(24,144,255,.12)}
+.filter-actions{display:flex;gap:8px;margin-left:auto}
+.btn{height:34px;padding:0 17px;border-radius:4px;font-family:inherit;font-size:13px;cursor:pointer;transition:all .2s}
+.btn-primary{border:1px solid var(--blue);color:#fff;background:var(--blue)}
+.btn-primary:hover{background:var(--blue-dark);border-color:var(--blue-dark)}
+.btn-default{border:1px solid #d8dee6;color:#52606f;background:#fff}
+.btn-default:hover{border-color:var(--blue);color:var(--blue)}
+.table-head{height:58px;display:flex;align-items:center;padding:0 20px;border-bottom:1px solid var(--line)}
+.table-title{font-size:15px;font-weight:600;color:#253142}
+.table-title span{font-size:12px;color:#98a2b3;font-weight:400;margin-left:6px}
+.table-title .hint{margin-left:10px;font-size:12px;color:#98a2b3;font-weight:400}
+.table-wrap{overflow-x:auto}
+.data-table{width:100%;min-width:980px;border-collapse:collapse;font-size:13px}
+.data-table th{height:44px;background:#fafbfd;color:#667382;font-weight:600;text-align:left;padding:0 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+.data-table td{height:64px;padding:0 14px;border-bottom:1px solid #f2f4f7;color:#344054;white-space:nowrap}
+.data-table tbody tr:hover{background:#fbfdff}
+.link{color:var(--blue);font-weight:600;cursor:pointer}
+.link:hover{text-decoration:underline}
+.muted{color:#8b96a3}
+.money{font-variant-numeric:tabular-nums;font-weight:600;color:#253142}
+.status{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:4px;font-size:12px}
+.status::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.status-pending{color:#667382;background:#f4f5f7}
+.status-review{color:#d46b08;background:#fff7e6}
+.status-paid{color:#389e0d;background:#f1fae9}
+.voucher-cell{display:inline-flex;align-items:center;gap:8px}
+.voucher-cell .ops{display:inline-flex;gap:8px}
+.voucher-cell .ops a{color:var(--blue);cursor:pointer;font-size:13px;text-decoration:none}
+.voucher-cell .ops a:hover{text-decoration:underline}
+.empty{text-align:center;color:#98a2b3;padding:48px 0 !important;height:auto !important}
+.pagination{height:64px;display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:0 20px;color:#98a2b3;font-size:12px}
+.page-btn{min-width:28px;height:28px;border:1px solid #d8dee6;background:#fff;color:#667382;border-radius:4px;cursor:pointer}
+.page-btn:hover,.page-btn.active{border-color:var(--blue);color:var(--blue)}
+.page-btn.active{background:var(--blue);color:#fff}
+.page-btn:disabled{color:#cbd2da;cursor:not-allowed}
+.toast{position:fixed;top:82px;left:50%;transform:translateX(-50%);padding:11px 20px;border:1px solid #b7dcff;background:#f7faff;color:#1677d2;border-radius:5px;box-shadow:0 7px 20px rgba(24,144,255,.12);display:none;z-index:60}
+.toast.show{display:block}
+@media(max-width:1000px){.sidebar{width:180px}.main-area{margin-left:180px}.top-nav,.main{padding-left:20px;padding-right:20px}.filter-actions{margin-left:0}}
+</style>
+</head>
+  <body>
+<script src="sidebar.js"></script>
+<div class="main-area">
+  <header class="top-nav">
+    <div class="breadcrumb"><a href="#">首页</a><span class="sep">/</span><span class="current">结算单</span></div>
+    <div class="top-actions"><span class="notice">♧<span class="badge">3</span></span><div class="user"><span class="avatar">管</span><span>超级管理员</span><span style="font-size:11px">⌄</span></div></div>
+  </header>
+  <main class="main">
+    <div class="page-banner">结算单</div>
+
+    <section class="filter-card">
+      <div class="filter-row">
+        <div class="filter-item"><label class="filter-label">结算单号</label><input class="filter-input" id="keyword" placeholder="请输入结算单号" /></div>
+        <div class="filter-item"><label class="filter-label">销售订单号</label><input class="filter-input" id="soKeyword" placeholder="请输入销售订单号" /></div>
+        <div class="filter-item"><label class="filter-label">付款日期</label><input class="filter-input" type="date" /></div>
+        <div class="filter-actions"><button class="btn btn-primary" onclick="applyFilter()">查询</button><button class="btn btn-default" onclick="resetFilter()">重置</button></div>
+      </div>
+    </section>
+
+    <section class="table-card">
+      <div class="table-head">
+        <div class="table-title">结算单<span id="tableCount">共 2 条</span></div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th style="width:56px;">序号</th>
+            <th>结算单号</th>
+            <th>销售订单号</th>
+            <th style="text-align:right;">付款金额</th>
+            <th>付款方式</th>
+            <th>付款日期</th>
+          </tr></thead>
+          <tbody id="body">
+            <tr style="cursor:pointer" data-no="EGG-PP-20260906001" data-so="EGG-SO-20260901002" onclick="location.href='鸡蛋-预付款详情.html?no=EGG-PP-20260906001&status=paid'">
+              <td>1</td>
+              <td>EGG-PP-20260906001</td>
+              <td>EGG-SO-20260901002</td>
+              <td class="money" style="text-align:right;">¥ 50,000.00</td>
+              <td>银行转账</td>
+              <td>2026年09月06日</td>
+            </tr>
+            <tr style="cursor:pointer" data-no="EGG-PP-20260909004" data-so="EGG-SO-20260828003" onclick="location.href='鸡蛋-预付款详情.html?no=EGG-PP-20260909004&status=paid'">
+              <td>2</td>
+              <td>EGG-PP-20260909004</td>
+              <td>EGG-SO-20260828003</td>
+              <td class="money" style="text-align:right;">¥ 60,000.00</td>
+              <td>银行转账</td>
+              <td>2026年09月09日</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination"><span style="margin-right:10px">共 <b id="totalRows">2</b> 条</span><button class="page-btn" disabled>‹</button><button class="page-btn active">1</button><button class="page-btn" disabled>›</button></div>
+    </section>
+
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 鸡蛋结算单列表（供应商只读视图）：仅平台已确认付款的单据可见 =====
+function applyFilter(){
+  var kw = document.getElementById('keyword').value.trim().toLowerCase();
+  var so = document.getElementById('soKeyword').value.trim().toLowerCase();
+  var visible = 0;
+  Array.prototype.forEach.call(document.querySelectorAll('#body tr'), function(tr){
+    var no = (tr.getAttribute('data-no') || '').toLowerCase();
+    var order = (tr.getAttribute('data-so') || '').toLowerCase();
+    var hit = (!kw || no.indexOf(kw) >= 0) && (!so || order.indexOf(so) >= 0);
+    tr.style.display = hit ? '' : 'none';
+    if(hit) visible++;
+  });
+  document.getElementById('tableCount').textContent = '共 ' + visible + ' 条';
+  document.getElementById('totalRows').textContent = visible;
+  showToast('已按条件筛选，共 ' + visible + ' 条结算单');
+}
+
+function resetFilter(){
+  document.getElementById('keyword').value = '';
+  document.getElementById('soKeyword').value = '';
+  Array.prototype.forEach.call(document.querySelectorAll('#body tr'), function(tr){ tr.style.display = ''; });
+  document.getElementById('tableCount').textContent = '共 2 条';
+  document.getElementById('totalRows').textContent = '2';
+  showToast('筛选条件已重置');
+}
+
+function showToast(msg){
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(window.tt);
+  window.tt = setTimeout(function(){ el.classList.remove('show'); }, 2600);
+}
+</script>
+
+<script>
+    // __drill_fill__ 胶囊下钻：把来源单号回填到「soKeyword」并执行筛选
+    (function () {
+        var params = ['so'];
+        var v = '';
+        for (var i = 0; i < params.length; i++) {
+            var m = location.search.match(new RegExp('[?&]' + params[i] + '=([^&]*)'));
+            if (m) { v = decodeURIComponent(m[1]); break; }
+        }
+        var el = document.getElementById('soKeyword');
+        if (!v || !el) return;
+        el.value = v;
+        window.addEventListener('load', function () {
+            if (typeof applyFilter === 'function') applyFilter();
+        });
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鸡蛋业务全流程（当前统一版）</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 20px; background: #f5f7fa; color: #333; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", Arial, sans-serif; }
+        .page { width: 100%; max-width: 2200px; margin: 0 auto; padding: 42px; background: #fff; border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+        h1 { margin: 0; text-align: center; font-size: 32px; }
+        .subtitle { margin: 10px 0 28px; text-align: center; color: #777; font-size: 16px; }
+        .legend { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-bottom: 26px; font-size: 16px; }
+        .legend-item { display: flex; align-items: center; gap: 7px; }
+        .dot { width: 14px; height: 14px; border-radius: 3px; }
+        .dot.client { background: #fce4ec; border: 2px solid #c62828; }
+        .dot.platform { background: #e3f2fd; border: 2px solid #1565c0; }
+        .dot.supplier { background: #e8f5e9; border: 2px solid #2e7d32; }
+        .dot.money { background: #fff3e0; border: 2px solid #ef6c00; }
+        .notice { margin-bottom: 22px; padding: 15px 20px; color: #444; background: #f0faf5; border-left: 5px solid #2BA471; border-radius: 0 4px 4px 0; font-size: 16px; line-height: 1.8; }
+        .section-title { margin: 34px 0 18px; padding-left: 12px; border-left: 5px solid #2BA471; font-size: 23px; font-weight: 700; }
+        .diagram-box { overflow: auto; padding: 26px; background: #fafafa; border: 1px solid #eee; border-radius: 8px; }
+        .mermaid { display: flex; justify-content: center; }
+        .topic-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        .topic { overflow: hidden; border: 1px solid #e8e8e8; border-radius: 7px; }
+        .topic-head { padding: 10px 14px; font-weight: 700; font-size: 14px; }
+        .topic.client .topic-head { color: #c62828; background: #fce4ec; }
+        .topic.platform .topic-head { color: #1565c0; background: #e3f2fd; }
+        .topic.supplier .topic-head { color: #2e7d32; background: #e8f5e9; }
+        .topic-body { padding: 12px 14px; }
+        .topic-row { padding: 8px 0; border-bottom: 1px solid #f1f1f1; font-size: 12px; line-height: 1.65; }
+        .topic-row:last-child { border-bottom: 0; }
+        .topic-row strong { display: block; color: #444; font-size: 13px; }
+        .mapping { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 18px; background: #fafafa; border: 1px solid #eee; border-radius: 8px; }
+        .doc { min-width: 155px; padding: 12px 10px; text-align: center; border-radius: 6px; font-size: 13px; font-weight: 700; }
+        .doc small { display: block; margin-top: 5px; color: #666; font-weight: 400; line-height: 1.5; }
+        .doc.client { background: #fce4ec; border: 1px solid #ef9a9a; }
+        .doc.platform { background: #e3f2fd; border: 1px solid #90caf9; }
+        .doc.supplier { background: #e8f5e9; border: 1px solid #a5d6a7; }
+        .arrow { color: #aaa; font-size: 20px; font-weight: 700; }
+        .rule-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .rule-table th, .rule-table td { padding: 11px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid #eee; line-height: 1.65; }
+        .rule-table th { background: #fafafa; color: #555; white-space: nowrap; }
+        .rule-table td:first-child { width: 190px; font-weight: 700; color: #2BA471; }
+        .download { display: block; margin: 28px auto 0; padding: 11px 24px; border: 0; border-radius: 4px; background: #2BA471; color: #fff; font-size: 15px; cursor: pointer; }
+        @media (max-width: 1050px) { .topic-grid { grid-template-columns: 1fr; } .page { padding: 20px; } }
+    </style>
+</head>
+<body>
+<div class="page" id="capture">
+    <h1>鸡蛋业务全流程</h1>
+    <div class="subtitle">当前统一版（2026-10-19）· 客户订货、平台采购、供应商履约、收货确认、预付款与发票</div>
+    <div class="legend">
+        <div class="legend-item"><span class="dot client"></span>客户端</div>
+        <div class="legend-item"><span class="dot platform"></span>平台端</div>
+        <div class="legend-item"><span class="dot supplier"></span>供应商端</div>
+        <div class="legend-item"><span class="dot money"></span>资金与发票</div>
+    </div>
+    <div class="notice"><strong>关键规则：</strong>订货单的订单合同盖章文件未上传会阻断后续流程；发货单、收货单盖章文件不阻断流程，且上传节点不受限制。收货确认原则为客户先确认、平台再确认；一方完成确认后状态同步，另一方无需重复确认，但仍需上传对应发货单、收货单盖章文件。</div>
+
+    <div class="section-title">一、三端业务主流程</div>
+    <div class="diagram-box">
+        <div class="mermaid" id="main-flow">
+sequenceDiagram
+    autonumber
+    participant 客户端
+    participant 平台端
+    participant 供应商端
+
+    rect rgb(237, 246, 255)
+    Note over 客户端,供应商端: 阶段一 · 客户订货与销售订单生成
+    客户端->>客户端: 导入客户订货单文件并保存为待提交
+    Note right of 客户端: 待提交状态可继续修改<br/>或重新上传订货单文件
+    客户端->>客户端: 上传或调用电子签章生成订单合同盖章文件
+    Note over 客户端: 校验不通过：缺少订单合同盖章文件，阻断提交
+    客户端->>平台端: 提交客户订货单
+    客户端->>客户端: 按日期拆分并生成多条客户端采购订单
+    平台端->>平台端: 生成一条与客户端对应的平台客户订货单
+    平台端->>平台端: 上传或调用电子签章生成订单合同盖章文件
+    Note over 平台端: 校验不通过：缺少订单合同盖章文件，阻断后续流程
+    平台端->>平台端: 由客户订货单生成多条平台销售订单
+    end
+
+    rect rgb(242, 240, 255)
+    Note over 客户端,供应商端: 阶段二 · 销售确认与待采审核
+    平台端->>平台端: 单条或批量确认销售订单，自动转为待采订单
+    平台端->>平台端: 待采订单单条或批量提交审核
+    alt 经理单条或批量审核驳回
+        平台端->>平台端: 填写驳回原因，退回后修改并重新提交
+    else 经理单条或批量审核通过
+        平台端->>平台端: 自动生成已确认采购订单
+    end
+    平台端->>平台端: 同时选择订货单号和供应商并执行查询
+    平台端->>平台端: 自动纳入当前筛选结果中的全部可生成采购订单
+    Note right of 平台端: 无需人工勾选<br/>任一筛选条件变化后必须重新查询<br/>查询结果为空时不可批量生成
+    平台端->>平台端: 批量生成平台供应商订货单
+    平台端->>平台端: 上传或调用电子签章生成订单合同盖章文件
+    Note over 平台端: 校验不通过：缺少订单合同盖章文件，阻断提交供应商
+    平台端->>供应商端: 提交供应商订货单
+    end
+
+    rect rgb(235, 249, 239)
+    Note over 客户端,供应商端: 阶段三 · 供应商订货、发货、收货与结算
+    供应商端->>供应商端: 校验供应商订货单的订单合同盖章文件
+    供应商端->>供应商端: 供应商订货单生成多条供应商销售订单
+    供应商端->>供应商端: 确认销售订单，生成供应商发货单
+    供应商端->>供应商端: 上传发货单文件，自动回填发货详情、结算及附件
+    供应商端->>平台端: 点击发货
+    Note right of 供应商端: 回填供应商销售订单、订货单金额<br/>金额以本次实际发货数据为准
+    平台端->>平台端: 生成平台收货单与供应商发货单
+    Note right of 平台端: 平台收货单与供应商端收货信息一致<br/>回填采购订单、供应商订货单金额
+    平台端->>平台端: 按配置加价公式计算客户销售价
+    平台端-->>客户端: 同步客户端采购订单销售价
+    平台端->>平台端: 生成面向客户的平台发货单与客户收货单
+    Note right of 平台端: 客户发货单、收货单金额均按加价公式计算
+    平台端-->>客户端: 同步客户发货单与收货单
+    par 客户端处理收货与附件
+        客户端->>客户端: 修改实收数量、更新收货单文件并确认收货
+        客户端->>客户端: 上传发货单、收货单盖章文件
+        客户端-->>平台端: 同步收货单内容与确认结果
+        客户端->>客户端: 发货单页面上传发货单、收货单盖章文件
+    and 平台端处理收货与附件
+        平台端->>平台端: 修改实收数量、更新收货单文件并确认收货
+        平台端->>平台端: 上传发货单、收货单盖章文件
+    end
+    Note over 客户端,平台端: 原则为客户先确认、平台再确认；也可存在平台等待客户确认<br/>任一方确认后状态同步，另一方无需重复确认<br/>发货单、收货单盖章文件不阻断流程，上传节点不受限制
+
+    par 平台发起预付款
+        平台端->>平台端: 从采购订单详情或预付款页面创建预付款
+        平台端->>平台端: 提交预付款审核
+        alt 审核驳回
+            平台端->>平台端: 填写原因，修改后重新提交
+        else 审核通过
+            平台端->>平台端: 预付款状态变为待确认
+            平台端->>平台端: 出纳上传支付凭证并确认付款
+            平台端-->>供应商端: 同步已支付结算记录
+        end
+    and 供应商上传发票
+        供应商端->>供应商端: 从销售订单详情或发票页面上传发票
+        供应商端-->>平台端: 同步发票及附件
+        平台端->>平台端: 采购订单发票页签只读查看
+    end
+    Note over 平台端,供应商端: 预付款与发票独立并行，付款与开票不校验先后顺序
+    end
+        </div>
+    </div>
+
+</div>
+<button class="download" type="button" onclick="downloadImage()">下载 PNG 图片</button>
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        sequence: { useMaxWidth: true, wrap: true, diagramMarginX: 40, actorMargin: 130, messageMargin: 48, noteMargin: 16 },
+        themeVariables: { fontFamily: 'PingFang SC, Microsoft YaHei, sans-serif', fontSize: '18px', primaryTextColor: '#222' }
+    });
+    function downloadImage() {
+        var target = document.getElementById('capture');
+        var button = document.querySelector('.download');
+        button.style.display = 'none';
+        htmlToImage.toPng(target, { quality: .98, backgroundColor: '#ffffff', pixelRatio: 2 })
+            .then(function(data) {
+                var link = document.createElement('a');
+                link.download = '鸡蛋业务流程-当前统一版.png';
+                link.href = data;
+                link.click();
+            })
+            .catch(function(error) { console.error(error); alert('图片生成失败，请重试'); })
+            .finally(function() { button.style.display = 'block'; });
+    }
+</script>
+</body>
+</html>

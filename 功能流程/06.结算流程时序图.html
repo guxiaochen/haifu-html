@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>结算流程 · 时序图</title>
+    <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --c-supplier: #2e7d32;
+            --c-supplier-bg: #e8f5e9;
+            --c-supplier-soft: #f1f8e9;
+            --c-platform: #1565c0;
+            --c-platform-bg: #e3f2fd;
+            --c-platform-soft: #e3f2fd;
+            --c-customer: #c62828;
+            --c-customer-bg: #fce4ec;
+            --c-customer-soft: #fff5f7;
+            --c-bank: #6a1b9a;
+            --c-bank-bg: #f3e5f5;
+            --c-warn: #e65100;
+            --c-warn-bg: #fff3e0;
+            --c-text: #333;
+            --c-text-soft: #666;
+            --c-line: #e0e0e0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding: 18px 20px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--c-text);
+        }
+
+        /* ================== 页间切换 ================== */
+        .nav-bar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+
+        .nav-bar a {
+            font-size: 13px;
+            text-decoration: none;
+            color: #546e7a;
+            background: #fff;
+            border: 1px solid var(--c-line);
+            border-radius: 18px;
+            padding: 6px 16px;
+        }
+
+        .nav-bar a.on {
+            background: var(--c-platform-bg);
+            color: var(--c-platform);
+            border-color: #90caf9;
+            font-weight: 700;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px 34px 36px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 1440px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        .version-tag {
+            text-align: center;
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 18px;
+            line-height: 1.75;
+        }
+
+        h2 {
+            font-size: 19px;
+            margin: 34px 0 14px;
+            padding-left: 12px;
+            border-left: 4px solid var(--c-platform);
+        }
+
+        h3 {
+            font-size: 14px;
+            margin: 0 0 10px;
+            color: #455a64;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 22px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .legend-line {
+            width: 26px;
+            height: 0;
+            border-top: 2px solid #90a4ae;
+            display: inline-block;
+        }
+
+        .legend-line.dashed {
+            border-top: 2px dashed #b0bec5;
+        }
+
+        .lead {
+            background: #fafafa;
+            border: 1px solid var(--c-line);
+            border-radius: 6px;
+            padding: 14px 18px;
+            font-size: 13px;
+            line-height: 1.9;
+            color: var(--c-text-soft);
+            margin-top: 8px;
+        }
+
+        .lead strong { color: var(--c-text); }
+
+        /* ================== 表格 ================== */
+        .table-wrap { overflow-x: auto; margin-top: 14px; }
+
+        table.info-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+            min-width: 720px;
+        }
+
+        table.info-table th,
+        table.info-table td {
+            border: 1px solid var(--c-line);
+            padding: 9px 11px;
+            text-align: left;
+            vertical-align: top;
+            line-height: 1.7;
+        }
+
+        table.info-table th {
+            background: #fafafa;
+            color: #555;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        table.info-table td.col-sp { background: var(--c-supplier-soft); }
+        table.info-table td.col-pf { background: var(--c-platform-soft); }
+        table.info-table td.col-cu { background: var(--c-customer-soft); }
+
+        .pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-weight: 600;
+            font-size: 11px;
+            margin: 0 2px;
+            white-space: nowrap;
+        }
+
+        .pill.supplier { background: var(--c-supplier-bg); color: var(--c-supplier); }
+        .pill.platform { background: var(--c-platform-bg); color: var(--c-platform); }
+        .pill.customer { background: var(--c-customer-bg); color: var(--c-customer); }
+        .pill.bank { background: var(--c-bank-bg); color: var(--c-bank); }
+        .pill.gray { background: #eee; color: #777; }
+        .pill.warn { background: var(--c-warn-bg); color: var(--c-warn); }
+
+        /* ================== 时序图 ================== */
+        .seq {
+            border: 1px solid var(--c-line);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+            margin-bottom: 26px;
+        }
+
+        .seq-scroll { overflow-x: auto; }
+
+        .seq-title {
+            padding: 12px 18px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #37474f;
+            background: #f7f9fb;
+            border-bottom: 1px solid var(--c-line);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .seq-title .sub {
+            font-size: 12px;
+            font-weight: 400;
+            color: #78909c;
+        }
+
+        .seq-head {
+            display: flex;
+            padding: 14px 18px 8px 60px;
+        }
+
+        .lane-head {
+            flex: 1;
+            margin: 0 6px;
+            padding: 8px 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            border: 1px solid transparent;
+        }
+
+        .lane-head .r {
+            display: block;
+            font-size: 11px;
+            font-weight: 400;
+            opacity: .75;
+            margin-top: 2px;
+        }
+
+        .lane-head.supplier { background: var(--c-supplier-bg); color: var(--c-supplier); border-color: #c8e6c9; }
+        .lane-head.platform { background: var(--c-platform-bg); color: var(--c-platform); border-color: #bbdefb; }
+        .lane-head.customer { background: var(--c-customer-bg); color: var(--c-customer); border-color: #f8bbd0; }
+        .lane-head.bank { background: var(--c-bank-bg); color: var(--c-bank); border-color: #e1bee7; }
+
+        .lane-head.off {
+            background: #f7f7f7;
+            color: #b0b0b0;
+            border-color: #efefef;
+        }
+
+        .track { position: relative; padding: 0 18px 18px 60px; }
+
+        .lifelines {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 60px;
+            right: 18px;
+            display: flex;
+            pointer-events: none;
+        }
+
+        .lifelines i {
+            flex: 1;
+            position: relative;
+        }
+
+        .lifelines i::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            border-left: 1px dashed #d7dee5;
+        }
+
+        .lifelines i.off::before { border-left-color: #f0f0f0; }
+
+        .rows { position: relative; z-index: 1; }
+
+        .row {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            align-items: center;
+            padding: 3px 0;
+        }
+
+        .seq.n3 .row { grid-template-columns: repeat(3, 1fr); }
+        .seq.n4 .row { grid-template-columns: repeat(4, 1fr); }
+
+        .row > .no {
+            position: absolute;
+            left: -44px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #90a4ae;
+        }
+
+        .msg {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            min-width: 0;
+        }
+
+        .msg .ln {
+            position: absolute;
+            top: 50%;
+            height: 2px;
+            margin-top: -1px;
+            left: var(--s);
+            right: calc(100% - var(--e));
+            background: var(--lc);
+            border-radius: 2px;
+        }
+
+        .msg .ln::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -1px;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 8px solid var(--lc);
+        }
+
+        .msg.rev .ln::after {
+            left: -1px;
+            right: auto;
+            border-left: none;
+            border-right: 8px solid var(--lc);
+        }
+
+        .msg .chip {
+            position: relative;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            max-width: 100%;
+            padding: 5px 12px;
+            border-radius: 14px;
+            background: #fff;
+            border: 1px solid #cfd8dc;
+            font-size: 12.5px;
+            line-height: 1.5;
+            color: #37474f;
+            overflow-wrap: anywhere;
+        }
+
+        .msg.self .chip {
+            border-style: dashed;
+            border-color: #b0bec5;
+        }
+
+        .msg .chip .role {
+            font-style: normal;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+
+        .msg.lane-supplier .chip .role { background: var(--c-supplier-bg); color: var(--c-supplier); }
+        .msg.lane-platform .chip .role { background: var(--c-platform-bg); color: var(--c-platform); }
+        .msg.lane-customer .chip .role { background: var(--c-customer-bg); color: var(--c-customer); }
+        .msg.lane-bank .chip .role { background: var(--c-bank-bg); color: var(--c-bank); }
+
+        .row.note { display: block; }
+
+        .note-box {
+            margin: 4px 0 6px;
+            padding: 7px 12px;
+            border: 1px dashed #ffd54f;
+            border-radius: 6px;
+            background: #fffdf5;
+            font-size: 12px;
+            line-height: 1.7;
+            color: #8a6d3b;
+        }
+
+        .note-box.phase {
+            border-style: solid;
+            border-color: #90caf9;
+            background: var(--c-platform-bg);
+            color: #0d47a1;
+            font-weight: 700;
+        }
+
+        .note-box.warn {
+            border-color: #ffb74d;
+            background: var(--c-warn-bg);
+            color: #8a4b00;
+        }
+
+        /* ================== 说明区 ================== */
+        .info-card {
+            border: 1px solid var(--c-line);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 18px;
+            background: #fff;
+        }
+
+        .info-card > h3 {
+            margin: 0;
+            padding: 10px 16px;
+            font-size: 13.5px;
+            color: #455a64;
+            background: #f7f9fb;
+            border-bottom: 1px solid var(--c-line);
+        }
+
+        .info-card .body {
+            padding: 14px 16px;
+            font-size: 13px;
+            line-height: 1.95;
+            color: var(--c-text-soft);
+        }
+
+        .info-card .body strong { color: var(--c-text); }
+
+        .info-card .body ul { padding-left: 20px; }
+        .info-card .body li { margin-bottom: 5px; }
+
+        .state-flow {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .state-node {
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .state-node.platform { background: var(--c-platform-bg); color: var(--c-platform); }
+        .state-node.customer { background: var(--c-customer-bg); color: var(--c-customer); }
+        .state-node.supplier { background: var(--c-supplier-bg); color: var(--c-supplier); }
+        .state-node.gray { background: #eee; color: #777; }
+
+        .state-node.terminal {
+            background: var(--c-warn-bg);
+            color: var(--c-warn);
+            border: 1px dashed #ff9800;
+        }
+
+        .state-arrow {
+            color: #bbb;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .gap-callout {
+            padding: 12px 16px;
+            background: #fff8e1;
+            border-left: 4px solid #ffb300;
+            border-radius: 0 4px 4px 0;
+            font-size: 13px;
+            line-height: 1.9;
+            color: #6d4c41;
+        }
+
+        .gap-callout strong { color: var(--c-warn); }
+
+        .footer-note {
+            margin-top: 34px;
+            padding-top: 18px;
+            border-top: 2px dashed var(--c-line);
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            line-height: 1.75;
+        }
+
+        .download-btn {
+            display: block;
+            margin: 26px auto 0;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .download-btn:hover { background-color: #0056b3; }
+
+        @media (max-width: 1100px) {
+            .seq-inner { min-width: 980px; }
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="nav-bar">
+        <a href="06.结算流程时序图.html" class="on">结算流程 · 时序图</a>
+        <a href="07.支付流程时序图.html">支付流程 · 时序图</a>
+    </div>
+
+    <div class="container" id="capture-container">
+        <h1>结算流程 · 时序图</h1>
+        <div class="version-tag">三段账 → 三张时序图｜主干动作按时间从上到下排列，箭头表示由谁发起、作用于谁</div>
+
+        <div class="legend">
+            <div class="legend-item"><span class="legend-dot" style="background:var(--c-supplier-bg);border:2px solid var(--c-supplier);"></span>供应商端</div>
+            <div class="legend-item"><span class="legend-dot" style="background:var(--c-platform-bg);border:2px solid var(--c-platform);"></span>平台端</div>
+            <div class="legend-item"><span class="legend-dot" style="background:var(--c-customer-bg);border:2px solid var(--c-customer);"></span>客户端</div>
+            <div class="legend-item"><span class="legend-line"></span>跨端动作（谁发给谁）</div>
+            <div class="legend-item"><span class="legend-line dashed"></span>同一端内部动作</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#f7f7f7;border:2px solid #e0e0e0;"></span>本图未参与的端</div>
+        </div>
+
+
+        <section id="sec-overview">
+            <h2>一、总览：所谓「结算」实际是三段账</h2>
+            <div class="lead">
+                客户在采购订单里感受到的「结算」并不是一次付款动作，而是三段前后衔接的账务。下面三张时序图各对应一段，
+                <strong>主图只保留主干动作</strong>，字段口径与状态流转见第四节说明。
+            </div>
+            <div class="table-wrap">
+                <table class="info-table">
+                    <thead>
+                        <tr>
+                            <th style="width:16%;">段</th>
+                            <th style="width:18%;">资金方向</th>
+                            <th style="width:18%;">单据数量</th>
+                            <th style="width:26%;">谁是主动方</th>
+                            <th>收尾标志</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="pill supplier">段一</span> 供应商结算</td>
+                            <td>平台 → 供应商</td>
+                            <td><strong>N</strong> 张（每个供应商 1 张）</td>
+                            <td><span class="pill supplier">供应商</span> 在自家销售订单上主动【创建结算】</td>
+                            <td>供应商账单 <span class="pill supplier">已支</span>，可查看付款单</td>
+                        </tr>
+                        <tr>
+                            <td><span class="pill platform">段二</span> 客户结算</td>
+                            <td>客户 → 平台</td>
+                            <td><strong>1</strong> 张（对应客户采购订单）</td>
+                            <td><span class="pill platform">平台</span> 在会计模块发起（创建动作文档未述）</td>
+                            <td>客户账单 <span class="pill platform">已支</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="pill customer">段三</span> 票据还款</td>
+                            <td>客户 → 银行 → 平台</td>
+                            <td>按票据张数</td>
+                            <td><span class="pill customer">客户</span> 在票据到期时上传银行还款凭证</td>
+                            <td>供应链金融票据 <span class="pill customer">已还款</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <h2>二、时序图</h2>
+
+        <section class="seq n4">
+            <div class="seq-title"><span>图 1 · 段一 供应商结算</span><span class="pill supplier">平台 → 供应商</span><span class="pill gray">11 步压缩为 8 步</span><span class="sub">前置：客户确认收货后，由供应商主动开账｜一张平台采购单 = 一张供应商账单 = 一张供应商销售订单</span></div>
+            <div class="seq-scroll">
+                <div class="seq-inner">
+                    <div class="seq-head"><div class="lane-head supplier">供应商端<span class="r">供货方 / 开票方</span></div><div class="lane-head platform">平台端<span class="r">销售 / 会计 / 出纳</span></div><div class="lane-head customer off">客户端<span class="r">采购方</span></div><div class="lane-head bank off">银行<span class="r">供应链金融票据</span></div></div>
+                    <div class="track">
+                        <div class="lifelines"><i class=""></i><i class=""></i><i class="off"></i><i class="off"></i></div>
+                        <div class="rows"><div class="row"><span class="no">1</span><div class="msg self lane-supplier" style="grid-column:1 / 2;--s:22%;--e:78%;--lc:#2e7d32"><span class="ln"></span><span class="chip"><em class="role">供应商</em>销售订单 →【创建结算】→ 生成草稿账单</span></div></div><div class="row"><span class="no">2</span><div class="msg fwd lane-supplier" style="grid-column:1 / 3;--s:25.0%;--e:75.0%;--lc:#2e7d32"><span class="ln"></span><span class="chip"><em class="role">供应商</em>【推送到平台】→ 平台出现待处理账单</span></div></div><div class="row"><span class="no">3</span><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台·会计</em>会计【平台审核】→ 账单已审核</span></div></div><div class="row"><span class="no">4</span><div class="msg self lane-supplier" style="grid-column:1 / 2;--s:22%;--e:78%;--lc:#2e7d32"><span class="ln"></span><span class="chip"><em class="role">供应商</em>【添加税票】→【确认并推送平台】</span></div></div><div class="row"><span class="no">5</span><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台·财务</em>税票【平台确认】+【财务确认】→ 税票有效</span></div></div><div class="row"><span class="no">6</span><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台·会计</em>维护支付人 →【推送付款单】→ 推给出纳</span></div></div><div class="row"><span class="no">7</span><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台·出纳</em>出纳【拆分票据】→【支付】→【创建付款】</span></div></div><div class="row"><span class="no">8</span><div class="msg rev lane-platform" style="grid-column:1 / 3;--s:25.0%;--e:75.0%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台·出纳</em>付款到账 → 账单已支，可查看付款单</span></div></div><div class="row note"><div class="note-box">收尾：供应商账单进入终态「已收款」，段一结束</div></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="seq n4">
+            <div class="seq-title"><span>图 2 · 段二 客户结算</span><span class="pill platform">平台 → 客户</span><span class="pill gray">7 步压缩为 6 步</span><span class="sub">开票由平台完成、确认由客户完成，实际付款发生在段三</span></div>
+            <div class="seq-scroll">
+                <div class="seq-inner">
+                    <div class="seq-head"><div class="lane-head supplier off">供应商端<span class="r">供货方 / 开票方</span></div><div class="lane-head platform">平台端<span class="r">销售 / 会计 / 出纳</span></div><div class="lane-head customer">客户端<span class="r">采购方</span></div><div class="lane-head bank off">银行<span class="r">供应链金融票据</span></div></div>
+                    <div class="track">
+                        <div class="lifelines"><i class="off"></i><i class=""></i><i class=""></i><i class="off"></i></div>
+                        <div class="rows"><div class="row"><span class="no">1</span><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台·会计</em>客户账单生成（创建 / 推送动作文档未述）</span></div></div><div class="row"><span class="no">2</span><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台·会计</em>【添加税票】→ 销售发票已开票</span></div></div><div class="row"><span class="no">3</span><div class="msg fwd lane-platform" style="grid-column:2 / 4;--s:25.0%;--e:75.0%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台·会计</em>【审核并推送给客户】</span></div></div><div class="row"><span class="no">4</span><div class="msg self lane-customer" style="grid-column:3 / 4;--s:22%;--e:78%;--lc:#c62828"><span class="ln"></span><span class="chip"><em class="role">客户</em>采购订单 →【结算单】→ 只读查看</span></div></div><div class="row"><span class="no">5</span><div class="msg self lane-customer" style="grid-column:3 / 4;--s:22%;--e:78%;--lc:#c62828"><span class="ln"></span><span class="chip"><em class="role">客户</em>税票详情 →【确认】→ 进项票已审核</span></div></div><div class="row"><span class="no">6</span><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台·会计</em>客户账单 → 已支（终态）</span></div></div><div class="row note"><div class="note-box">客户侧全程没有「审核账单」和「付款」按钮，只有查看结算单、确认税票、票据到期还款三件事</div></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="seq n4">
+            <div class="seq-title"><span>图 3 · 段三 票据还款</span><span class="pill customer">客户 → 银行 → 平台</span><span class="pill gray">与段二在时间上分离</span><span class="sub">票据到期后由客户向银行还款并上传凭证，平台侧票据置为已还款</span></div>
+            <div class="seq-scroll">
+                <div class="seq-inner">
+                    <div class="seq-head"><div class="lane-head supplier off">供应商端<span class="r">供货方 / 开票方</span></div><div class="lane-head platform">平台端<span class="r">销售 / 会计 / 出纳</span></div><div class="lane-head customer">客户端<span class="r">采购方</span></div><div class="lane-head bank">银行<span class="r">供应链金融票据</span></div></div>
+                    <div class="track">
+                        <div class="lifelines"><i class="off"></i><i class=""></i><i class=""></i><i class=""></i></div>
+                        <div class="rows"><div class="row"><span class="no">1</span><div class="msg rev lane-bank" style="grid-column:3 / 5;--s:25.0%;--e:75.0%;--lc:#6a1b9a"><span class="ln"></span><span class="chip"><em class="role">银行</em>票据到期</span></div></div><div class="row"><span class="no">2</span><div class="msg self lane-customer" style="grid-column:3 / 4;--s:22%;--e:78%;--lc:#c62828"><span class="ln"></span><span class="chip"><em class="role">客户</em>应还款票据 → 上传还款附件 →【还款】</span></div></div><div class="row"><span class="no">3</span><div class="msg rev lane-customer" style="grid-column:2 / 4;--s:25.0%;--e:75.0%;--lc:#c62828"><span class="ln"></span><span class="chip"><em class="role">客户</em>还款完成 → 票据已还款（终态）</span></div></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <h2>三、说明（图外补充）</h2>
+
+        <div class="info-card">
+            <h3>3.1 单据与术语口径</h3>
+            <div class="body">
+                <ul>
+                    <li><strong>单据对应关系：</strong>一张平台采购单 = 一张供应商账单 = 一张供应商销售订单（段一）；客户账单 1 张，对应客户采购订单（段二）。</li>
+                    <li><strong>同一终态两种叫法：</strong>平台手册称 <span class="pill platform">已支</span>，供应商手册称 <span class="pill supplier">已收款</span>。</li>
+                    <li><strong>同一步骤两种叫法：</strong>平台手册称 <span class="pill platform">已审核</span>，供应商手册称「待过账」。</li>
+                    <li><strong>票据说明：</strong>供应链金融票据在采购订单阶段已确认取消（段三的还款是对已开票据的收尾）。</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h3>3.2 三端各自能做什么</h3>
+            <div class="body">
+                <ul>
+                    <li><span class="pill supplier">供应商端</span>【创建结算】、【推送到平台】、【添加税票】并【确认并推送平台】、查看付款单。</li>
+                    <li><span class="pill platform">平台端</span>会计：【平台审核】、【添加税票】、【平台确认】、【财务确认】、【推送付款单】；出纳：【拆分票据】、【支付】、【创建付款】。</li>
+                    <li><span class="pill customer">客户端</span>只有三件事：查看结算单（只读）、确认税票、票据到期还款。</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>四、⚠ 流程问题（待确认）</h2>
+        <div class="gap-callout">
+            <strong>⚠ 流程问题：</strong><br>
+            ① 客户账单的「创建」动作在平台手册中完全没有描述（既没有「创建客户账单」，也没有「推送客户账单」步骤）；<br>
+            ② 客户侧没有「审核账单」动作（文档无）；<br>
+            ③ 客户侧没有「付款」按钮，实际付款由段三票据到期还款实现。
+        </div>
+
+        <div class="footer-note">
+            时序图仅保留主干动作，字段口径、按钮明细与状态流转放在下方说明区<br>
+            依据《海赋数字化产业互联网平台系统操作手册》及已确认的支付改动方案梳理
+        </div>
+    </div>
+
+    <button class="download-btn" onclick="downloadImage()">下载 PNG 图片</button>
+
+    <script>
+        function downloadImage() {
+            var container = document.getElementById('capture-container');
+            var button = document.querySelector('.download-btn');
+            button.style.display = 'none';
+            htmlToImage.toPng(container, { quality: 0.95, backgroundColor: '#ffffff', pixelRatio: 2 })
+                .then(function (dataUrl) {
+                    var link = document.createElement('a');
+                    link.download = '结算流程-时序图.png';
+                    link.href = dataUrl;
+                    link.click();
+                })
+                .catch(function (error) { console.error(error); alert('抱歉，图片生成失败，请重试。'); })
+                .finally(function () { button.style.display = 'block'; });
+        }
+    </script>
+</body>
+
+</html>

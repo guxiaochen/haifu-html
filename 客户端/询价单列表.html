@@ -16,14 +16,15 @@
         .table-wrap { overflow-x: auto; }
         .table { min-width: 820px; }
         .table th, .table td { white-space: nowrap; }
-        .status-draft { background: #f5f5f5; color: #999; }
+        .status-draft { background: #f5f5f5; color: #8c8c8c; }
         .status-submitted { background: #e6f7ff; color: #1890ff; }
-        .status-pending { background: #fff7e6; color: #d46b08; }
         .status-done { background: #f0faf5; color: #2BA471; }
-        .status-cancel { background: #fff1f0; color: #ff4d4f; }
         .empty { padding: 44px; text-align: center; color: #999; }
         .action-link { color: #2BA471; text-decoration: none; margin-right: 12px; cursor: pointer; }
         .action-link:hover { text-decoration: underline; }
+        .action-link.delete { color: #ff4d4f; }
+        .modal-mask { position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.45); }
+        .modal-mask.show { display: flex; }.modal { width: 420px; overflow: hidden; border-radius: 6px; background: #fff; box-shadow: 0 12px 32px rgba(0,0,0,.2); }.modal-head { display:flex; align-items:center; padding:14px 18px; border-bottom:1px solid #f0f0f0; font-weight:600; }.modal-head button { margin-left:auto; border:0; background:transparent; color:#999; cursor:pointer; font-size:20px; }.modal-body { padding:20px 18px; color:#666; line-height:1.8; }.modal-foot { display:flex; justify-content:flex-end; gap:8px; padding:12px 18px; border-top:1px solid #f0f0f0; }
     </style>
 </head>
 <body>
@@ -54,10 +55,9 @@
                 <label for="status">状态</label>
                 <select id="status">
                     <option value="">全部状态</option>
+                    <option value="draft">草稿</option>
                     <option value="submitted">已提交</option>
-                    <option value="pending">待确认</option>
-                    <option value="completed">完成</option>
-                    <option value="cancelled">已取消</option>
+                    <option value="completed">已完成</option>
                 </select>
                 <label for="createdDate">创建日期</label>
                 <input id="createdDate" type="date">
@@ -93,21 +93,20 @@
             </div>
         </main>
     </div>
+    <div class="modal-mask" id="deleteModal"><div class="modal"><div class="modal-head">删除询价单 <button type="button" onclick="closeDelete()">×</button></div><div class="modal-body" id="deleteText"></div><div class="modal-foot"><button class="btn default" type="button" onclick="closeDelete()">取消</button><button class="btn primary" type="button" onclick="confirmDelete()">确认删除</button></div></div></div>
 
     <script src="sidebar.js"></script>
     <script>
         var data = [
-            { no: 'XJ2025090045', project: '2026年8月农产品采购询价', status: 'pending', deadline: '2026-08-31', salesman: '侯慧鲁', date: '2026-08-24' },
+            { no: 'XJ2025090076', project: '9月食堂蔬菜补货询价', status: 'draft', deadline: '2026-09-18', salesman: '徐白雪', date: '2026-09-11' },
             { no: 'XJ2025080060', project: '食堂蔬菜补货询价', status: 'submitted', deadline: '2026-08-29', salesman: '徐白雪', date: '2026-08-22' },
-            { no: 'XJ2025080021', project: '冷链农产品采购询价', status: 'completed', deadline: '2026-08-25', salesman: '侯慧鲁', date: '2026-08-18' },
-            { no: 'XJ2025070018', project: '仓储耗材采购询价', status: 'cancelled', deadline: '2026-08-10', salesman: '李钦彤', date: '2026-08-01' }
+            { no: 'XJ2025080021', project: '冷链农产品采购询价', status: 'completed', deadline: '2026-08-25', salesman: '侯慧鲁', date: '2026-08-18' }
         ];
 
         var labels = {
+            draft: ['status-draft', '草稿'],
             submitted: ['status-submitted', '已提交'],
-            pending: ['status-pending', '待确认'],
-            completed: ['status-done', '完成'],
-            cancelled: ['status-cancel', '已取消']
+            completed: ['status-done', '已完成']
         };
 
         function render() {
@@ -126,6 +125,7 @@
             document.getElementById('body').innerHTML = list.length ? list.map(function (item) {
                 var label = labels[item.status];
                 var detailUrl = '询价单详情.html?no=' + encodeURIComponent(item.no) + '&status=' + encodeURIComponent(item.status);
+                var operations='<a class="action-link" href="'+detailUrl+'">查看</a>'+(item.status==='draft'?'<a class="action-link delete" href="javascript:void(0)" onclick="openDelete(\''+item.no+'\')">删除</a>':'');
                 return '<tr>' +
                     '<td><a class="action-link" href="' + detailUrl + '">' + item.no + '</a></td>' +
                     '<td>' + item.project + '</td>' +
@@ -133,7 +133,7 @@
                     '<td>' + item.deadline + '</td>' +
                     '<td>' + item.date + '</td>' +
                     '<td><span class="tag ' + label[0] + '">' + label[1] + '</span></td>' +
-                    '<td><a class="action-link" href="' + detailUrl + '">查看</a></td>' +
+                    '<td>'+operations+'</td>' +
                     '</tr>';
             }).join('') : '<tr><td class="empty" colspan="7">暂无询价单</td></tr>';
         }
@@ -145,6 +145,12 @@
             document.getElementById('deadlineDate').value = '';
             render();
         }
+
+        var pendingDeleteNo = '';
+        function openDelete(no) { pendingDeleteNo = no; document.getElementById('deleteText').textContent = '确认删除草稿询价单“' + no + '”吗？删除后不可恢复。'; document.getElementById('deleteModal').classList.add('show'); }
+        function closeDelete() { pendingDeleteNo = ''; document.getElementById('deleteModal').classList.remove('show'); }
+        function confirmDelete() { if (!pendingDeleteNo) return; data = data.filter(function (item) { return item.no !== pendingDeleteNo; }); closeDelete(); render(); }
+        document.getElementById('deleteModal').addEventListener('click', function (event) { if (event.target === this) closeDelete(); });
 
         render();
     </script>

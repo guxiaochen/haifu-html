@@ -177,6 +177,143 @@
         }
         .cargo-status-tag.shipped { background: #fff7e6; color: #d46b08; border-color: #ffd591; }
         .cargo-status-tag.received { background: #f0faf5; color: #2BA471; border-color: #b7e4cd; }
+        .detail-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 14px;
+            border-bottom: 1px solid #e8edef;
+        }
+        .detail-tab {
+            padding: 9px 22px;
+            border: 1px solid #d9d9d9;
+            border-bottom: 0;
+            border-radius: 6px 6px 0 0;
+            background: #fff;
+            color: #666;
+            cursor: pointer;
+        }
+        .detail-tab.active {
+            border-color: #2BA471;
+            background: #f0faf5;
+            color: #2BA471;
+            font-weight: 500;
+            margin-bottom: -1px;
+        }
+        .detail-panel[hidden] { display: none; }
+        .logistics-section { margin-top: 0; }
+        .logistics-section-title {
+            display: inline-block;
+            padding: 7px 18px;
+            margin-bottom: 14px;
+            background: #2BA471;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .logistics-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .logistics-card {
+            padding: 16px;
+            border: 1px solid #e7edf3;
+            border-radius: 6px;
+            background: #fbfefc;
+        }
+        .logistics-card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .logistics-card-title {
+            color: #2BA471;
+            font-weight: 600;
+        }
+        .logistics-card-meta {
+            color: #999;
+            font-size: 12px;
+        }
+        .logistics-info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px 22px;
+        }
+        .logistics-info-item label {
+            color: #888;
+            margin-right: 8px;
+        }
+        .logistics-info-item span {
+            color: #333;
+        }
+        .logistics-files {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .logistics-file {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 9px;
+            border: 1px solid #d8eee2;
+            border-radius: 4px;
+            background: #f0faf5;
+            color: #2BA471;
+            font-size: 12px;
+        }
+        .logistics-file button {
+            border: 0;
+            background: transparent;
+            color: #2BA471;
+            cursor: pointer;
+        }
+        .file-preview-mask {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(15, 23, 42, .55);
+        }
+        .file-preview-mask.show { display: flex; }
+        .file-preview-modal {
+            width: min(860px, 100%);
+            max-height: calc(100vh - 48px);
+            overflow: hidden;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 18px 60px rgba(15, 23, 42, .25);
+        }
+        .file-preview-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 18px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+            font-weight: 600;
+        }
+        .file-preview-close { border: 0; background: transparent; color: #666; font-size: 22px; cursor: pointer; }
+        .file-preview-body { max-height: calc(100vh - 130px); overflow: auto; padding: 22px; background: #f5f5f5; text-align: center; }
+        .file-preview-body img, .file-preview-body video { max-width: 100%; max-height: 64vh; border-radius: 5px; background: #111; }
+        .preview-sheet { width: 100%; border-collapse: collapse; background: #fff; text-align: left; font-size: 13px; }
+        .preview-sheet th, .preview-sheet td { padding: 10px 12px; border: 1px solid #e5e7eb; }
+        .preview-sheet th { background: #f0faf5; color: #2BA471; }
+        .preview-empty { padding: 42px 0; color: #666; }
+        .logistics-empty {
+            padding: 34px 0;
+            border: 1px dashed #d9d9d9;
+            color: #999;
+            text-align: center;
+        }
         .product-img { width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;background:#f5f7fa;border:1px solid #e5e7eb;border-radius:5px;font-size:22px; }
         .receive-qty { width:86px;padding:6px 8px;border:1px solid #d9d9d9;border-radius:4px;text-align:right; }
         .receive-qty:disabled { background:#f5f5f5;color:#999; }
@@ -289,13 +426,7 @@
         <main class="main">
 
             <!-- 面包屑导航 -->
-            <div class="breadcrumb-bar">
-                <a onclick="location.href='采购订单列表.html'">采购订单</a>
-                <span class="sep">/</span>
-                <a id="breadReceiptList">收货单</a>
-                <span class="sep">/</span>
-                <span class="current" id="breadNo">DS00082</span>
-            </div>
+            <div class="breadcrumb-bar" id="breadcrumb"></div>
 
             <!-- 头部栏 -->
             <div class="order-head-bar">
@@ -365,9 +496,15 @@
                 </div>
             </div>
 
-            <!-- 产品清单卡片 -->
-            <div class="card">
-                <span class="product-tab">产品</span>
+            <!-- 产品与物流 Tab -->
+            <div class="detail-tabs">
+                <button class="detail-tab active" type="button" data-panel="productPanel" onclick="switchDetailTab('productPanel')">产品信息</button>
+                <button class="detail-tab" type="button" data-panel="logisticsPanel" onclick="switchDetailTab('logisticsPanel')">物流信息</button>
+            </div>
+
+            <!-- 产品清单面板 -->
+            <div class="card detail-panel" id="productPanel">
+                <!-- <span class="product-tab">产品</span> -->
                 <table class="product-table">
                     <thead>
                         <tr>
@@ -385,10 +522,22 @@
                     <tbody id="products"></tbody>
                 </table>
             </div>
+
+            <!-- 物流信息面板 -->
+            <div class="card detail-panel logistics-section" id="logisticsPanel" hidden>
+                <!-- <span class="logistics-section-title">物流信息</span> -->
+                <div class="logistics-list" id="logisticsList"></div>
+            </div>
         </main>
     </div>
 
     <div class="toast" id="toast"></div>
+    <div class="file-preview-mask" id="filePreviewMask" onclick="closeFilePreview(event)">
+        <div class="file-preview-modal">
+            <div class="file-preview-head"><span id="filePreviewTitle">文件预览</span><button class="file-preview-close" type="button" onclick="closeFilePreview()">×</button></div>
+            <div class="file-preview-body" id="filePreviewBody"></div>
+        </div>
+    </div>
 
     <!-- 确认收货弹窗 -->
     <div class="modal-mask" id="confirmModal">
@@ -538,7 +687,29 @@
         }
 
         var receiptNo = getParam("receipt") || "DS00082";
-        var data = RECEIPT_DB[receiptNo] || RECEIPT_DB["DS00082"];
+        function getRealtimeReceipt(no) {
+            var list = [];
+            try { list = JSON.parse(localStorage.getItem('haifu_customer_incoming_receipts') || '[]') || []; } catch (e) { list = []; }
+            var receipt = list.filter(function (row) { return row && row.no === no; })[0];
+            if (!receipt) return null;
+            var first = (receipt.lines || [])[0] || {};
+            return {
+                order: first.order || '—',
+                status: receipt.status === 'received' ? 'received' : 'pending',
+                cargoStatus: receipt.status === 'received' ? 'received' : 'shipped',
+                shipper: receipt.supplier || '海赋科技（山东）数字产业发展有限公司',
+                contact: '平台发货专员', phone: '0531-88888888',
+                shipDate: receipt.date || '—', deadline: '—',
+                receiver: '侯振鲁', receiverPhone: '17505308090', receiverAddr: receipt.address || '兰州路66号',
+                sourceKey: receipt.sourceKey, logistics: receipt.logistics || [],
+                products: (receipt.lines || []).map(function (line) {
+                    return { code: line.code || '—', name: line.product || line.name || '—', spec: line.spec || '—', required: Number(line.ordered || line.shipped || 0), shipped: Number(line.shipped || 0), received: receipt.status === 'received' ? Number(line.received || 0) : null, unit: line.unit || '' };
+                })
+            };
+        }
+        var realtimeReceipt = getRealtimeReceipt(receiptNo);
+        var data = realtimeReceipt || RECEIPT_DB[receiptNo] || RECEIPT_DB["DS00082"];
+        var entrySource = getParam("source") || "order";
         var OWING_STORAGE_KEY = "customerOwingReceipts";
 
         function saveOwingReceipt(items) {
@@ -563,6 +734,77 @@
         var orderNo = getParam("order") || data.order;
         var orderInfo = ORDER_DB[orderNo] || { orderStatus: "confirmed", recvStatus: "pending" };
         var received = data.status === "received";
+        var shipmentNo = getParam("shipment") || "DS/00001";
+        var logisticsKey = "shipmentLogistics_" + orderNo + "_" + shipmentNo;
+        var logisticsRecords = data.logistics ? data.logistics.slice() : [];
+        try { logisticsRecords = JSON.parse(localStorage.getItem(logisticsKey) || "[]"); } catch (e) { logisticsRecords = []; }
+        if (!logisticsRecords.length && receiptNo === "DS00082") {
+            logisticsRecords = [
+                { id: "demo-1", plate: "鲁A·8K520", driver: "王师傅", phone: "13805310088", headPhoto: [{ name: "车头照片.jpg" }], tailPhoto: [{ name: "车尾照片.jpg" }], video: [{ name: "装车视频.mp4" }], excel: [{ name: "运输明细.xlsx" }] },
+                { id: "demo-2", plate: "鲁B·6M219", driver: "李师傅", phone: "13905312266", headPhoto: [{ name: "车辆正面.png" }], tailPhoto: [{ name: "车辆尾部.png" }], video: [{ name: "运输过程.mp4" }], excel: [{ name: "第二车次运输明细.xlsx" }] },
+                { id: "demo-3", plate: "鲁C·3P708", driver: "赵师傅", phone: "13705314588", headPhoto: [], tailPhoto: [], video: [], excel: [{ name: "散装货物清单.xlsx" }] }
+            ];
+        }
+
+        function renderBreadcrumb() {
+            var root = document.getElementById("breadcrumb");
+            if (entrySource === "receipt-menu") {
+                root.innerHTML = '<a onclick="location.href=\'收货单列表（全部）.html\'">收货单</a>' +
+                    '<span class="sep">/</span><span class="current">' + receiptNo + '</span>';
+                return;
+            }
+            root.innerHTML = '<a onclick="location.href=\'采购订单列表.html\'">采购订单</a>' +
+                '<span class="sep">/</span><a onclick="location.href=\'收货单列表.html?source=order&amp;order=' + encodeURIComponent(orderNo) + '\'">收货单</a>' +
+                '<span class="sep">/</span><span class="current">' + receiptNo + '</span>';
+        }
+
+        function previewFile(file) {
+            var title = document.getElementById("filePreviewTitle");
+            var body = document.getElementById("filePreviewBody");
+            title.textContent = "在线预览 · " + file.name;
+            var ext = file.name.toLowerCase().slice(file.name.lastIndexOf("."));
+            if (file.url && [".jpg", ".jpeg", ".png"].indexOf(ext) !== -1) {
+                body.innerHTML = '<img src="' + file.url + '" alt="' + file.name + '">';
+            } else if (file.url && [".mp4", ".mov"].indexOf(ext) !== -1) {
+                body.innerHTML = '<video controls autoplay src="' + file.url + '"></video>';
+            } else if ([".xls", ".xlsx"].indexOf(ext) !== -1) {
+                body.innerHTML = '<table class="preview-sheet"><thead><tr><th>文件名</th><th>工作表</th><th>预览说明</th></tr></thead><tbody><tr><td>' + file.name + '</td><td>运输明细</td><td>原型预览：Excel 文件可在线查看，完整内容以下载文件为准</td></tr></tbody></table>';
+            } else {
+                body.innerHTML = '<div class="preview-empty">当前文件暂无在线预览内容</div>';
+            }
+            document.getElementById("filePreviewMask").classList.add("show");
+        }
+
+        function closeFilePreview(event) {
+            if (event && event.target && event.target.id !== "filePreviewMask") return;
+            var video = document.querySelector("#filePreviewBody video");
+            if (video) video.pause();
+            document.getElementById("filePreviewMask").classList.remove("show");
+        }
+
+        function switchDetailTab(panelId) {
+            document.querySelectorAll(".detail-tab").forEach(function (tab) {
+                tab.classList.toggle("active", tab.getAttribute("data-panel") === panelId);
+            });
+            document.querySelectorAll(".detail-panel").forEach(function (panel) {
+                panel.hidden = panel.id !== panelId;
+            });
+            if (panelId === "logisticsPanel") renderLogistics();
+        }
+
+        function renderLogistics() {
+            var root = document.getElementById("logisticsList");
+            if (!logisticsRecords.length) {
+                root.innerHTML = '<div class="logistics-empty">暂无物流信息</div>';
+                return;
+            }
+            root.innerHTML = logisticsRecords.map(function (item, index) {
+                var files = [].concat(item.headPhoto || [], item.tailPhoto || [], item.video || [], item.excel || []);
+                return '<article class="logistics-card"><div class="logistics-card-head"><span class="logistics-card-title">物流信息 ' + (index + 1) + '</span></div>' +
+                    '<div class="logistics-info-grid"><div class="logistics-info-item"><label>车牌号</label><span>' + (item.plate || "—") + '</span></div><div class="logistics-info-item"><label>司机姓名</label><span>' + (item.driver || "—") + '</span></div><div class="logistics-info-item"><label>司机手机号</label><span>' + (item.phone || "—") + '</span></div></div>' +
+                    '<div class="logistics-files">' + (files.length ? files.map(function (file) { return '<span class="logistics-file"><button type="button" onclick="previewFile(' + JSON.stringify(file).replace(/"/g, '&quot;') + ')">预览 · ' + file.name + '</button></span>'; }).join("") : '<span class="logistics-card-meta">暂无附件</span>') + '</div></article>';
+            }).join("");
+        }
 
         function toast(msg) {
             var e = document.getElementById("toast");
@@ -573,13 +815,10 @@
         }
 
         function render() {
-            // 面包屑"收货单"跳回来源订单列表（带 order 参数，回到跳转前的列表）
-            var breadList = document.getElementById("breadReceiptList");
-            if (breadList) breadList.setAttribute("onclick", "location.href='收货单列表.html?order=" + encodeURIComponent(orderNo) + "'");
+            renderBreadcrumb();
 
             // 头部
             document.getElementById("receiptNo").textContent = receiptNo;
-            document.getElementById("breadNo").textContent = receiptNo;
 
             // 步骤条：根据订单聚合收货状态（pending/partial -> 待收货高亮；all/received -> 已收货高亮）
             var allReceived = (orderInfo.recvStatus === "all") || received;
@@ -598,7 +837,11 @@
             document.getElementById("receiverPhone").textContent = data.receiverPhone || "-";
             document.getElementById("receiverAddr").textContent = data.receiverAddr || "-";
             var stParam = orderInfo.orderStatus === "completed" ? "completed" : "confirmed";
-            document.getElementById("sourceOrder").innerHTML = '<a href="采购订单详情.html?status=' + stParam + '" style="color:#2BA471;text-decoration:none;">' + (data.order || "-") + '</a>';
+            var sourceOrderHref = '采购订单详情.html?status=' + stParam + '&order=' + encodeURIComponent(data.order || orderNo);
+            if (entrySource === "receipt-menu") {
+                sourceOrderHref += '&source=receipt-menu&receipt=' + encodeURIComponent(receiptNo);
+            }
+            document.getElementById("sourceOrder").innerHTML = '<a href="' + sourceOrderHref + '" style="color:#2BA471;text-decoration:none;">' + (data.order || "-") + '</a>';
 
             // 货物状态：跟随订单聚合收货状态
             var csEl = document.getElementById("cargoStatus");
@@ -708,14 +951,45 @@
             received = true;
             data.status = "received";
             data.cargoStatus = "received";
+            syncRealtimeReceipt();
             render();
             toast("收货单 " + receiptNo + " 已确认收货！");
+        }
+        function syncRealtimeReceipt() {
+            if (!realtimeReceipt) return;
+            var receipts = [];
+            try { receipts = JSON.parse(localStorage.getItem('haifu_customer_incoming_receipts') || '[]') || []; } catch (e) { receipts = []; }
+            var target = receipts.filter(function (row) { return row && row.no === receiptNo; })[0];
+            if (!target) return;
+            target.status = 'received';
+            target.receivedAt = new Date().toISOString();
+            (target.lines || []).forEach(function (line, index) {
+                var product = data.products[index];
+                if (product) line.received = Number(product.received == null ? product.shipped : product.received);
+            });
+            localStorage.setItem('haifu_customer_incoming_receipts', JSON.stringify(receipts));
+
+            var shipments = [];
+            try { shipments = JSON.parse(localStorage.getItem('haifu_inventory_shipments') || '[]') || []; } catch (e) { shipments = []; }
+            var shipmentNos = [];
+            (target.lines || []).forEach(function (line) { if (line.shipment && shipmentNos.indexOf(line.shipment) < 0) shipmentNos.push(line.shipment); });
+            shipments.forEach(function (shipment) {
+                if (shipmentNos.indexOf(shipment.bizNo) < 0) return;
+                shipment.status = 'received';
+                shipment.receivedAt = new Date().toLocaleString('zh-CN', { hour12: false });
+                (shipment.items || []).forEach(function (item) {
+                    var line = (target.lines || []).filter(function (row) { return row.shipment === shipment.bizNo && row.code === item.code; })[0];
+                    if (line) item.receivedQty = Number(line.received || 0);
+                });
+            });
+            localStorage.setItem('haifu_inventory_shipments', JSON.stringify(shipments));
         }
         function createOwing() {
             openOwingEditor();
         }
 
         render();
+        renderLogistics();
     </script>
 </body>
 </html>

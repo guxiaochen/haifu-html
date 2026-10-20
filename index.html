@@ -38,9 +38,7 @@
     .module-card:hover { transform: translateY(-2px); border-color: #b9d1f8; background: #fff; box-shadow: 0 12px 26px rgba(49,74,110,.10); }
     .module-card b { display: block; margin-bottom: 7px; font-size: 14px; }
     .module-card span { display: block; color: var(--muted); font-size: 11px; line-height: 1.55; }
-    .module-card.stage2 { border-color: #b8e4d3; background: linear-gradient(145deg, #f5fffa, #f2fbf7); }
-    .module-card.stage2 b { color: #14855c; }
-    .terminals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .terminals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: start; }
     .terminal { min-width: 0; background: var(--surface); border: 1px solid rgba(255,255,255,.9); border-radius: 22px; padding: 22px; box-shadow: var(--shadow); backdrop-filter: blur(12px); }
     .terminal-head { display: flex; align-items: center; gap: 13px; padding-bottom: 19px; border-bottom: 1px solid var(--line); }
     .terminal-icon { width: 48px; height: 48px; flex: 0 0 48px; display: grid; place-items: center; border-radius: 15px; color: #fff; font-size: 23px; box-shadow: inset 0 1px rgba(255,255,255,.35); }
@@ -49,6 +47,7 @@
     .platform .terminal-icon { background: linear-gradient(135deg, #f5a24d, #ea6d58); }
     .terminal h2 { margin: 0 0 4px; font-size: 19px; }
     .terminal-head p { margin: 0; color: var(--muted); font-size: 12px; }
+    .terminal .section:last-child { margin-bottom: 0; }
     .section { margin-top: 20px; }
     .section-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; color: #8995a8; font-size: 12px; font-weight: 700; letter-spacing: .08em; }
     .section-title .count { color: #aab5c4; font-size: 11px; font-weight: 500; letter-spacing: 0; }
@@ -58,7 +57,6 @@
     .nav-link strong { display: block; font-size: 14px; font-weight: 600; }
     .nav-link small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
     .arrow { color: #a9b5c5; font-size: 18px; transition: transform .2s; }
-    .phase-tag { display: inline-flex; align-items: center; margin-left: 6px; padding: 1px 6px; border-radius: 8px; background: #eaf8f1; color: #16865d; font-size: 10px; font-weight: 700; letter-spacing: 0; vertical-align: 1px; }
     .flow-link { margin-left: 14px; min-height: 42px; border-left: 2px solid #dbeee5; border-radius: 0 10px 10px 0; background: #fbfefc; }
     .flow-link strong::before { content: "↳ "; color: #69af8d; }
     .nav-link:hover .arrow { color: var(--blue); transform: translateX(3px); }
@@ -79,88 +77,122 @@
       <label class="search"><span>⌕</span><input id="search" type="search" placeholder="搜索页面名称"></label>
     </header>
 
-    
-
     <section class="terminals" id="terminals">
       <article class="terminal client" data-terminal="客户端">
-        <div class="terminal-head"><div class="terminal-icon">⌂</div><div><h2>客户端</h2><p>买家工作台 · 采购与收货</p></div></div>
-        <div class="section" id="stage2-client"><div class="section-title">二期 · 询报价 <span class="count">4 个页面</span></div><div class="link-list">
-          <a class="nav-link" href="客户端/询价单列表.html"><span><strong>询价单列表 <em class="phase-tag">二期</em></strong><small>创建、提交并查看客户询价单</small></span><span class="arrow">›</span></a>
-          <a class="nav-link flow-link" href="客户端/询价单详情.html"><span><strong>询价单详情</strong><small>维护询价基础信息与产品明细</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="客户端/平台报价单列表.html"><span><strong>平台报价单 <em class="phase-tag">二期</em></strong><small>查看平台生成的报价单</small></span><span class="arrow">›</span></a>
-          <a class="nav-link flow-link" href="客户端/平台报价单详情.html"><span><strong>平台报价单详情</strong><small>确认报价、处理拒绝明细并生成采购订单</small></span><span class="arrow">›</span></a>
-        </div></div>
-        <div class="section"><div class="section-title">订单与产品</div><div class="link-list">
-          <a class="nav-link" href="客户端/采购订单列表.html"><span><strong>采购订单列表</strong><small>查看订单状态与订单记录</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="客户端/新建采购订单.html"><span><strong>新建采购订单</strong><small>创建新的采购订单</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="客户端/采购订单详情.html"><span><strong>采购订单详情</strong><small>查看订单明细与备货信息</small></span><span class="arrow">›</span></a>
+        <div class="terminal-head"><div class="terminal-icon">⌂</div><div><h2>客户端</h2><p>买家工作台 · 订货、采购与收货</p></div></div>
+        <div class="section"><div class="section-title">采购管理 <span class="count">16 个页面</span></div><div class="link-list">
+          <a class="nav-link" href="客户端/鸡蛋-订货单列表.html"><span><strong>订货单</strong><small>客户提交的鸡蛋订货单（Excel + 盖章）</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="客户端/鸡蛋-订货单详情.html?no=DH20260901001"><span><strong>订货单详情</strong><small>查看单张订货单与按天明细 · 支持三方电子签章</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="客户端/鸡蛋-新建订货单.html"><span><strong>新建订货单</strong><small>导入 Excel 并上传盖章订货单</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="客户端/采购订单列表.html"><span><strong>采购订单（合并页）</strong><small>鸡蛋业务与其他业务同页，页签切换</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="客户端/采购订单列表.html?cat=egg"><span><strong>· 鸡蛋业务视图</strong><small>采购订单列表 鸡蛋业务页签</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="客户端/鸡蛋-采购订单详情.html?no=EGG-PO-20260905001&status=confirmed"><span><strong>采购订单详情（鸡蛋）</strong><small>含发票页签与结算数据</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="客户端/采购订单详情.html"><span><strong>采购订单详情（其他）</strong><small>原有农产品采购订单详情</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="客户端/鸡蛋-发货单列表.html"><span><strong>发货单</strong><small>平台发货确认单（鸡蛋业务）</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="客户端/鸡蛋-发货确认单详情.html?no=FHD20260906001"><span><strong>发货单详情</strong><small>车辆明细与盖章附件</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="客户端/收货单列表（全部）.html"><span><strong>收货单（合并页）</strong><small>鸡蛋业务与其他业务同页，页签切换</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="客户端/收货单列表（全部）.html?cat=egg"><span><strong>· 鸡蛋业务视图</strong><small>收货单列表 鸡蛋业务页签</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="客户端/鸡蛋-收货单详情.html?no=SH20260906001"><span><strong>收货单详情（鸡蛋）</strong><small>确认收货数量与附件</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="客户端/询价单列表.html"><span><strong>询价单</strong><small>创建与查看询价单</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="客户端/平台报价单列表.html"><span><strong>平台报价单</strong><small>查看平台报价并生成采购订单</small></span><span class="arrow">›</span></a>
           <a class="nav-link" href="客户端/我的产品库.html"><span><strong>我的产品库</strong><small>浏览可采购产品</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="客户端/联系人管理.html"><span><strong>联系人管理</strong><small>维护联系人与收货人信息</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="客户端/账号管理.html"><span><strong>账号管理</strong><small>管理企业登录账号并选择平台授权角色</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="客户端/合同管理.html"><span><strong>合同管理</strong><small>维护合同模板与在线签署</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="客户端/联系人管理.html"><span><strong>收货人管理</strong><small>维护收货联系人</small></span><span class="arrow">›</span></a>
         </div></div>
-        <div class="section"><div class="section-title">收货管理</div><div class="link-list">
-          <a class="nav-link" href="客户端/收货单列表.html"><span><strong>收货单列表</strong><small>查看收货记录</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="客户端/收货单详情.html"><span><strong>收货单详情</strong><small>查看单张收货单信息</small></span><span class="arrow">›</span></a>
+        <div class="section"><div class="section-title">账号管理 <span class="count">1 个页面</span></div><div class="link-list">
+          <a class="nav-link" href="客户端/账号管理.html"><span><strong>登录账号</strong><small>企业账号与平台授权角色</small></span><span class="arrow">›</span></a>
+        </div></div>
+        <div class="section"><div class="section-title">合同管理 <span class="count">1 个页面</span></div><div class="link-list">
+          <a class="nav-link" href="客户端/合同管理.html"><span><strong>合同管理</strong><small>合同模板与在线签署</small></span><span class="arrow">›</span></a>
         </div></div>
       </article>
 
       <article class="terminal supplier" data-terminal="供应商端">
-        <div class="terminal-head"><div class="terminal-icon">▣</div><div><h2>供应商端</h2><p>供应商工作台 · 订单与送货</p></div></div>
-        <div class="section"><div class="section-title">二期 · 供应商报价 <span class="count">3 个页面</span></div><div class="link-list">
-          <a class="nav-link" href="供应商端/供应商报价列表.html"><span><strong>供应商报价列表 <em class="phase-tag">二期</em></strong><small>查看平台发起的供应商询价邀请</small></span><span class="arrow">›</span></a>
-          <a class="nav-link flow-link" href="供应商端/供应商报价详情.html"><span><strong>供应商报价详情</strong><small>填写承诺交期、税率、含税价格与有效期</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="供应商端/外部供应商报价.html"><span><strong>外部供应商报价 <em class="phase-tag">二期</em></strong><small>外部供应商通过公开询价页面提交报价</small></span><span class="arrow">›</span></a>
+        <div class="terminal-head"><div class="terminal-icon">▣</div><div><h2>供应商端</h2><p>供应商工作台 · 订单、发货与开票</p></div></div>
+        <div class="section"><div class="section-title">采购管理 <span class="count">12 个页面</span></div><div class="link-list">
+          <a class="nav-link" href="供应商端/鸡蛋-订货单列表.html"><span><strong>订货单</strong><small>焱丰下发的鸡蛋订货单</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="供应商端/鸡蛋-订货单.html?no=DH20260901001"><span><strong>订货单详情</strong><small>按天明细与采购订单胶囊 · 支持三方电子签章</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="供应商端/销售订单列表.html"><span><strong>销售订单（合并页）</strong><small>鸡蛋业务与其他业务同页，页签切换</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="供应商端/销售订单列表.html?cat=egg"><span><strong>· 鸡蛋业务视图</strong><small>销售订单列表 鸡蛋业务页签</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="供应商端/鸡蛋-销售订单详情.html?no=EGG-SO-20260901002&status=shipped"><span><strong>销售订单详情（鸡蛋）</strong><small>页签：订单明细 / 发票 / 结算单</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="供应商端/销售订单详情.html?no=PO000015"><span><strong>销售订单详情（其他）</strong><small>原有农产品销售订单详情</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="供应商端/送货单列表（全部）.html"><span><strong>发货单（合并页）</strong><small>鸡蛋业务与其他业务同页，页签切换</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="供应商端/送货单列表（全部）.html?cat=egg"><span><strong>· 鸡蛋业务视图</strong><small>鸡蛋收货确认单页签</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="供应商端/鸡蛋-发货确认单详情.html?no=FH20260906001"><span><strong>发货单详情（鸡蛋）</strong><small>车辆明细与盖章附件</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="供应商端/送货单详情.html"><span><strong>送货单详情（其他）</strong><small>原有农产品送货单</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="供应商端/鸡蛋-收货确认单列表.html"><span><strong>收货单</strong><small>平台收货确认单（鸡蛋业务）</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="供应商端/鸡蛋-收货确认单详情.html?no=SH20260906001"><span><strong>收货单详情</strong><small>收货明细与盖章附件</small></span><span class="arrow">›</span></a>
         </div></div>
-        <div class="section"><div class="section-title">订单与履约</div><div class="link-list">
-          <a class="nav-link" href="供应商端/销售订单列表.html"><span><strong>销售订单列表</strong><small>查看平台下发的销售订单</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="供应商端/销售订单详情.html"><span><strong>销售订单详情</strong><small>查看订单与收货信息</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="供应商端/送货单列表.html"><span><strong>送货单列表</strong><small>管理发货与送货记录</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="供应商端/送货单详情.html"><span><strong>送货单详情</strong><small>申请验收与打印送货单</small></span><span class="arrow">›</span></a>
+        <div class="section"><div class="section-title">询价单 <span class="count">3 个页面</span></div><div class="link-list">
+          <a class="nav-link" href="供应商端/供应商报价列表.html"><span><strong>供应商报价</strong><small>查看平台询价邀请并报价</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="供应商端/供应商报价详情.html"><span><strong>报价详情</strong><small>填写交期、税率与含税价</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="供应商端/外部供应商报价.html"><span><strong>外部供应商报价</strong><small>外部供应商报价入口</small></span><span class="arrow">›</span></a>
         </div></div>
-        <div class="section"><div class="section-title">企业管理</div><div class="link-list">
-          <a class="nav-link" href="供应商端/企业认证.html"><span><strong>企业认证</strong><small>维护供应商企业资质</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="供应商端/合同管理.html"><span><strong>合同管理</strong><small>维护合同模板与在线签署</small></span><span class="arrow">›</span></a>
+        <div class="section"><div class="section-title">合同管理 <span class="count">1 个页面</span></div><div class="link-list">
+          <a class="nav-link" href="供应商端/合同管理.html"><span><strong>合同管理</strong><small>合同模板与在线签署</small></span><span class="arrow">›</span></a>
+        </div></div>
+        <div class="section"><div class="section-title">店铺与资质 <span class="count">2 个页面</span></div><div class="link-list">
+          <a class="nav-link" href="供应商端/商家入驻.html"><span><strong>商家入驻</strong><small>提交入驻资料</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="供应商端/企业认证.html"><span><strong>企业认证</strong><small>营业执照与资质信息</small></span><span class="arrow">›</span></a>
+        </div></div>
+        <div class="section"><div class="section-title">财务中心 <span class="count">4 个页面</span></div><div class="link-list">
+          <a class="nav-link" href="供应商端/鸡蛋-发票列表.html"><span><strong>发票</strong><small>台账 + 上传发票（关联销售订单、已开票去重提示）</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="供应商端/鸡蛋-发票详情.html?no=FP20260908001"><span><strong>发票详情</strong><small>只读：票面信息、关联单据、附件与待开票余额</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="供应商端/鸡蛋-预付款列表.html"><span><strong>结算单</strong><small>仅平台已确认付款的单据可见</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="供应商端/鸡蛋-预付款详情.html?no=EGG-PP-20260906001&status=paid"><span><strong>结算单详情</strong><small>只读：单据信息与支付凭证</small></span><span class="arrow">›</span></a>
         </div></div>
       </article>
 
       <article class="terminal platform" data-terminal="平台端">
-        <div class="terminal-head"><div class="terminal-icon">◈</div><div><h2>平台端</h2><p>运营管理平台 · 订单与系统</p></div></div>
-        <div class="section"><div class="section-title">二期 · 平台询报价工作台 <span class="count">9 个页面</span></div><div class="link-list">
-          <a class="nav-link" href="平台端/平台询价单列表.html"><span><strong>平台询价单列表 <em class="phase-tag">二期</em></strong><small>查看客户与平台主动发起的询价单，并区分流转状态</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="平台端/新建平台询价单.html"><span><strong>新建平台询价单 <em class="phase-tag">二期</em></strong><small>平台主动创建询价单，创建后进入待分配</small></span><span class="arrow">›</span></a>
-          <a class="nav-link flow-link" href="平台端/平台询价单详情.html"><span><strong>平台询价单详情</strong><small>分配业务员、维护供应商询价与完成询价</small></span><span class="arrow">›</span></a>
-          <a class="nav-link flow-link" href="平台端/填写供应商询价.html"><span><strong>填写供应商询价</strong><small>按已有或外部供应商发起自定义询价</small></span><span class="arrow">›</span></a>
-          <a class="nav-link flow-link" href="平台端/邀请供应商报价-选择询价明细.html"><span><strong>邀请供应商报价</strong><small>先选择询价明细，再选择已入驻或外部供应商</small></span><span class="arrow">›</span></a>
-          <a class="nav-link flow-link" href="平台端/邀请供应商报价-选择供应商.html"><span><strong>邀请供应商报价 · 选择供应商</strong><small>邀请流程子页</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="平台端/供应商报价列表.html"><span><strong>供应商报价列表 <em class="phase-tag">二期</em></strong><small>按产品明细比较供应商报价并采用</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="平台端/报价单列表.html"><span><strong>平台报价单列表 <em class="phase-tag">二期</em></strong><small>查看待审核、待客户确认与完成报价</small></span><span class="arrow">›</span></a>
-          <a class="nav-link flow-link" href="平台端/平台报价单详情.html"><span><strong>平台报价单详情</strong><small>审核报价并处理客户重新报价请求</small></span><span class="arrow">›</span></a>
+        <div class="terminal-head"><div class="terminal-icon">◈</div><div><h2>平台端</h2><p>运营中枢 · 订货、采购、结算与库存</p></div></div>
+        <div class="section"><div class="section-title">采购管理 <span class="count">14 个页面</span></div><div class="link-list">
+          <a class="nav-link" href="平台端/鸡蛋-订货单列表.html"><span><strong>订货单</strong><small>客户订货单 / 供应商订货单两页签</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="平台端/鸡蛋-订货单详情.html?no=DH20260901001&type=customer"><span><strong>客户订货单详情</strong><small>客户→焱丰，胶囊跳销售订单 · 可盖章生成订单合同</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="平台端/鸡蛋-订货单详情.html?no=DH20260901001&type=supplier"><span><strong>供应商订货单详情</strong><small>焱丰→供应商，胶囊跳采购订单 · 可盖章生成订单合同</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="平台端/销售订单列表.html"><span><strong>销售订单（合并页）</strong><small>鸡蛋业务与其他业务同页，页签切换</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="平台端/销售订单列表.html?cat=egg"><span><strong>· 鸡蛋业务视图</strong><small>销售订单列表 鸡蛋业务页签</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="平台端/鸡蛋-销售订单详情.html?order=EGG-SO-20260901002&status=confirm"><span><strong>销售订单详情（鸡蛋）</strong><small>确认订单、创建预收款</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="平台端/销售订单详情.html"><span><strong>销售订单详情（其他）</strong><small>原有农产品销售订单详情</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="平台端/销售订单审核.html"><span><strong>待采订单（合并页）</strong><small>鸡蛋业务与其他业务同页，页签切换</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="平台端/销售订单审核.html?cat=egg"><span><strong>· 鸡蛋业务视图</strong><small>待采订单 鸡蛋业务页签</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="平台端/鸡蛋-待采订单详情.html?order=EGG-PC-20260901002&amp;status=pending"><span><strong>待采订单详情（鸡蛋）</strong><small>待审核状态下可审核通过或审核驳回</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="平台端/采购订单列表.html"><span><strong>采购订单（合并页）</strong><small>鸡蛋业务与其他业务同页，页签切换</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="平台端/采购订单列表.html?cat=egg"><span><strong>· 鸡蛋业务视图</strong><small>采购订单列表 鸡蛋业务页签</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="平台端/鸡蛋-采购订单详情.html?order=EGG-PO-20260901002&status=confirm"><span><strong>采购订单详情（鸡蛋）</strong><small>创建预付 + 发票页签（只读）</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="平台端/采购订单详情.html"><span><strong>采购订单详情（其他）</strong><small>原有农产品采购订单详情</small></span><span class="arrow">›</span></a>
         </div></div>
-        <div class="section" id="orders"><div class="section-title">订单管理</div><div class="link-list">
-          <a class="nav-link" href="平台端/销售订单列表.html"><span><strong>销售订单</strong><small>管理平台销售订单</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="平台端/销售订单审核.html"><span><strong>待采订单</strong><small>审核待采购订单</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="平台端/采购订单列表.html"><span><strong>采购订单</strong><small>管理供应商采购订单</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="平台端/销售订单新增.html"><span><strong>新建销售订单</strong><small>创建平台销售订单</small></span><span class="arrow">›</span></a>
+        <div class="section"><div class="section-title">询价管理 <span class="count">2 个页面</span></div><div class="link-list">
+          <a class="nav-link" href="平台端/平台询价单列表.html"><span><strong>询价单</strong><small>发起询价、邀请供应商报价</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="平台端/报价单列表.html"><span><strong>报价单</strong><small>查看供应商报价与定标</small></span><span class="arrow">›</span></a>
         </div></div>
-        <div class="section" id="products"><div class="section-title">产品与供应商</div><div class="link-list">
-          <a class="nav-link" href="平台端/产品库.html"><span><strong>产品库</strong><small>维护产品与供应商采购明细</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="平台端/产品新增.html"><span><strong>新增产品</strong><small>创建产品及采购信息</small></span><span class="arrow">›</span></a>
-          <!-- <a class="nav-link" href="平台端/供应商详情.html"><span><strong>供应商详情</strong><small>查看供应商信息</small></span><span class="arrow">›</span></a> -->
+        <div class="section"><div class="section-title">结算 <span class="count">2 个页面</span></div><div class="link-list">
+          <a class="nav-link" href="平台端/鸡蛋-预付款列表.html"><span><strong>预付款</strong><small>待审核 → 待确认 → 已支付</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="平台端/鸡蛋-预付款详情.html?no=EGG-PP-20260906001&status=paid"><span><strong>预付款详情</strong><small>审核弹窗、上传支付凭证</small></span><span class="arrow">›</span></a>
         </div></div>
-        <div class="section" id="contracts"><div class="section-title">合同管理</div><div class="link-list">
-          <a class="nav-link" href="平台端/合同管理.html"><span><strong>合同管理</strong><small>管理合同模板、关联订单与签署流程</small></span><span class="arrow">›</span></a>
+        <div class="section"><div class="section-title">库存管理 <span class="count">5 个页面</span></div><div class="link-list">
+          <a class="nav-link" href="平台端/入库单列表.html"><span><strong>收货单（合并页）</strong><small>含鸡蛋发货确认单页签 · 行内确认收货</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="平台端/入库单列表.html?cat=egg"><span><strong>· 鸡蛋业务视图</strong><small>鸡蛋收货确认单页签</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="平台端/出库单列表.html"><span><strong>发货单（合并页）</strong><small>含鸡蛋收货确认单页签 · 实收数量与差异标色</small></span><span class="arrow">›</span></a>
+          <a class="nav-link flow-link" href="平台端/出库单列表.html?cat=egg"><span><strong>· 鸡蛋业务视图</strong><small>鸡蛋发货确认单页签</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="平台端/目的位置维护.html"><span><strong>目的位置维护</strong><small>维护收货与发货目的地</small></span><span class="arrow">›</span></a>
         </div></div>
-        <div class="section" id="systems"><div class="section-title">系统管理</div><div class="link-list">
-          <a class="nav-link" href="平台端/用户管理.html"><span><strong>用户管理</strong><small>管理平台用户</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="平台端/角色管理.html"><span><strong>角色管理</strong><small>配置角色权限</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="平台端/菜单管理.html"><span><strong>菜单管理</strong><small>维护系统菜单</small></span><span class="arrow">›</span></a>
-          <a class="nav-link" href="平台端/部门管理.html"><span><strong>部门管理</strong><small>维护组织部门</small></span><span class="arrow">›</span></a>
+        <div class="section"><div class="section-title">合同管理 <span class="count">1 个页面</span></div><div class="link-list">
+          <a class="nav-link" href="平台端/合同管理.html"><span><strong>合同管理</strong><small>合同模板与在线签署</small></span><span class="arrow">›</span></a>
+        </div></div>
+        <div class="section"><div class="section-title">产品管理 <span class="count">1 个页面</span></div><div class="link-list">
+          <a class="nav-link" href="平台端/产品库.html"><span><strong>产品库</strong><small>维护产品与税率</small></span><span class="arrow">›</span></a>
+        </div></div>
+        <div class="section"><div class="section-title">公共信息配置 <span class="count">1 个页面</span></div><div class="link-list">
+          <a class="nav-link" href="平台端/公共信息配置.html"><span><strong>公共信息配置</strong><small>店铺分类 / 商品类目 / 客户加价公式维护</small></span><span class="arrow">›</span></a>
+        </div></div>
+        <div class="section"><div class="section-title">系统管理 <span class="count">4 个页面</span></div><div class="link-list">
+          <a class="nav-link" href="平台端/用户管理.html"><span><strong>用户管理</strong><small>账号与权限</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="平台端/角色管理.html"><span><strong>角色管理</strong><small>角色与菜单授权</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="平台端/菜单管理.html"><span><strong>菜单管理</strong><small>菜单结构与路由</small></span><span class="arrow">›</span></a>
+          <a class="nav-link" href="平台端/部门管理.html"><span><strong>部门管理</strong><small>组织架构</small></span><span class="arrow">›</span></a>
         </div></div>
       </article>
-      <div class="empty" id="empty">未找到匹配的页面</div>
     </section>
-    <footer class="footer">共 3 个终端 · 5 类功能模块 · 询报价相关页面均标记为二期</footer>
+    <footer class="footer">共 3 个终端 · 客户端 18 · 供应商端 22 · 平台端 30 · 共 70 个页面（按各端左侧菜单顺序排列，含合并页的鸡蛋业务入口）</footer>
   </main>
   <script>
     (function () {

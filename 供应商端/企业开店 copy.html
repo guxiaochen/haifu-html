@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>商家入驻 - 供应商端</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f0f2f5;color:#262626;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}.main-area{margin-left:200px;min-height:100vh}.top-nav{height:50px;background:#fff;border-bottom:1px solid #f0f0f0;padding:0 24px;display:flex;align-items:center;position:sticky;top:0;z-index:10}.breadcrumb{display:flex;gap:8px;align-items:center;color:#666}.breadcrumb .current{color:#262626;font-weight:500}.sep{color:#d9d9d9}.user{margin-left:auto;color:#666}.main{max-width:1060px;margin:0 auto;padding:22px 20px 48px}.page-title{font-size:20px;font-weight:600;margin:0 0 16px}.steps{background:#fff;border-radius:4px;padding:22px 70px;margin-bottom:16px;display:flex;align-items:flex-start;box-shadow:0 1px 2px rgba(0,0,0,.04)}.step{width:170px;text-align:center;position:relative;color:#999}.circle{width:28px;height:28px;border:1px solid #d9d9d9;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;background:#fff}.step b{display:block;font-size:14px;color:#595959}.step small{display:block;margin-top:3px;color:#999}.step.active .circle,.step.done .circle{color:#fff;background:#1890ff;border-color:#1890ff}.step.active b{color:#1890ff}.step.done b{color:#262626}.line{height:1px;flex:1;background:#d9d9d9;margin-top:14px}.line.done{background:#1890ff}.card{background:#fff;border-radius:4px;padding:28px 40px;box-shadow:0 1px 2px rgba(0,0,0,.04)}.hint{padding:10px 12px;background:#e6f7ff;border:1px solid #91d5ff;border-radius:3px;color:#096dd9;margin-bottom:22px}.info-block{border:1px solid #f0f0f0;border-radius:4px;margin-bottom:18px;padding:20px 22px}.info-block:last-child{margin-bottom:0}.block-head{display:flex;align-items:center;padding-bottom:14px;border-bottom:1px solid #f0f0f0;margin-bottom:4px}.section-title{font-size:15px;font-weight:600;margin:0;padding-left:10px;border-left:3px solid #1890ff}.block-note{margin:8px 0 14px;color:#8c8c8c;font-size:13px}.status-tag{margin-left:auto;padding:3px 8px;border-radius:2px;font-size:12px}.status-tag.verified{background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f}.status-tag.identified{background:#e6f7ff;color:#096dd9;border:1px solid #91d5ff}.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 38px}.item{display:flex;min-height:45px;border-bottom:1px solid #f0f0f0;align-items:center}.item.full{grid-column:1 / -1}.label{width:132px;text-align:right;color:#8c8c8c;padding-right:16px;flex:none}.value{color:#262626;min-width:0;word-break:break-all}.readonly{color:#595959}.license{display:flex;align-items:center;gap:12px}.license-box{width:66px;height:48px;background:#fafafa;border:1px solid #d9d9d9;border-radius:3px;color:#8c8c8c;display:flex;align-items:center;justify-content:center;font-size:19px}.upload-license{display:flex;align-items:center;gap:12px}.upload-license input{display:none}.upload-license label{display:inline-flex;align-items:center;height:32px;padding:0 14px;color:#1890ff;border:1px solid #1890ff;border-radius:2px;cursor:pointer}.upload-license label:hover{background:#e6f7ff}.upload-text{font-size:13px;color:#8c8c8c}.preview{color:#1890ff;cursor:pointer}.field{width:100%;height:34px;border:1px solid #d9d9d9;border-radius:2px;padding:6px 10px;font:inherit;outline:none}.field:focus{border-color:#1890ff;box-shadow:0 0 0 2px rgba(24,144,255,.14)}select.field{background:#fff}.company-input{max-width:290px}.form-item{margin-bottom:20px}.form-item label{display:block;margin-bottom:8px;color:#595959}.required::before{content:"*";color:#ff4d4f;margin-right:4px}.radio{display:flex;gap:25px;height:34px;align-items:center}.radio label{margin:0;color:#262626;cursor:pointer}.category-box{min-height:82px;border:1px solid #d9d9d9;border-radius:2px;padding:9px;display:flex;gap:8px;align-content:flex-start;flex-wrap:wrap}.tag{background:#e6f7ff;border:1px solid #91d5ff;color:#096dd9;border-radius:2px;padding:4px 8px}.tag::after{content:" ×";cursor:pointer}.contact-grid{max-width:520px}.footer{margin-top:26px;display:flex;justify-content:center;gap:12px}.btn{height:34px;padding:0 24px;border:1px solid #d9d9d9;background:#fff;border-radius:2px;color:#595959;cursor:pointer;font:inherit}.btn:hover{color:#1890ff;border-color:#1890ff}.btn.primary{background:#1890ff;color:#fff;border-color:#1890ff}.btn.primary:hover{background:#40a9ff}.step-page{display:none}.step-page.active{display:block}.result{padding:46px 20px;text-align:center}.result-icon{width:56px;height:56px;border-radius:50%;background:#fff7e6;color:#fa8c16;display:inline-flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:14px}.result h2{font-size:18px;margin:0 0 10px}.result p{color:#8c8c8c;margin:0}.result-info{margin:24px auto 0;max-width:470px;text-align:left;background:#fafafa;padding:16px 20px;line-height:2;color:#595959}@media(max-width:760px){.main-area{margin-left:0}.grid{grid-template-columns:1fr}.steps{padding:20px 12px}.step{width:100px}.card{padding:24px 18px}.sidebar{display:none}.item.full{grid-column:auto}}
+</style>
+</head>
+<body>
+<script src="sidebar.js"></script>
+<div class="main-area">
+  <header class="top-nav"><div class="breadcrumb"><span>首页</span><span class="sep">/</span><span class="current">商家入驻</span></div><div class="user">🔔　超级管理员 ▾</div></header>
+  <main class="main">
+    <h1 class="page-title">商家入驻</h1>
+    <section class="steps" id="steps">
+      <div class="step active" data-step="1"><div class="circle">1</div><b>公司信息</b><small>认证信息回填</small></div><div class="line" data-line="1"></div>
+      <div class="step" data-step="2"><div class="circle">2</div><b>店铺经营信息</b><small>填写店铺资料</small></div><div class="line" data-line="2"></div>
+      <div class="step" data-step="3"><div class="circle">3</div><b>企业联系人</b><small>提交审核</small></div>
+    </section>
+
+    <section class="step-page active" id="page-1">
+      <div class="card">
+        <div class="hint">企业认证信息已自动带入；上传营业执照后，系统将自动识别并回填营业执照相关信息。</div>
+        <div class="info-block"><div class="block-head"><h2 class="section-title">企业信息</h2><span class="status-tag verified">已认证</span></div><div class="grid">
+          <div class="item"><div class="label">法人证件照</div><div class="value license"><span class="license-box">▣</span><span class="preview" onclick="alert('演示：在线预览法人证件照')">预览</span></div></div><div class="item"><div class="label">法人手机号码</div><div class="value readonly">176****7818</div></div>
+          <div class="item"><div class="label">法人证件号码</div><div class="value readonly">372901********0216</div></div><div class="item"><div class="label">企业电话</div><div class="value readonly">+86 17661367818</div></div>
+        </div></div>
+        <div class="info-block"><div class="block-head"><h2 class="section-title">营业执照识别信息</h2><span class="status-tag identified">已识别</span></div><div class="grid">
+          <div class="item full"><div class="label">营业执照</div><div class="value upload-license"><span class="license-box">▣</span><input id="licenseFile" type="file" accept="image/*" onchange="recognizeLicense(this)"><label for="licenseFile">上传营业执照</label><span class="upload-text" id="licenseFileText">支持 JPG、JPEG、PNG 格式</span></div></div>
+          <div class="item"><div class="label">公司名称</div><div class="value readonly" id="licenseCompany">上传后自动识别</div></div><div class="item"><div class="label">营业执照号</div><div class="value readonly" id="licenseNumber">上传后自动识别</div></div>
+          <div class="item"><div class="label">组织机构代码</div><div class="value readonly" id="licenseOrgCode">上传后自动识别</div></div><div class="item"><div class="label">统一社会信用代码</div><div class="value readonly" id="licenseCreditCode">上传后自动识别</div></div>
+          <div class="item"><div class="label">法人姓名</div><div class="value readonly" id="licenseLegalPerson">上传后自动识别</div></div><div class="item"><div class="label">营业执照所在地</div><div class="value readonly" id="licenseAddress">上传后自动识别</div></div>
+          <div class="item"><div class="label">营业执照有效期</div><div class="value readonly" id="licenseValidity">上传后自动识别</div></div>
+        </div></div>
+        <div class="info-block"><div class="block-head"><h2 class="section-title">结算账户信息</h2><span class="status-tag verified">认证信息已带入</span></div><div class="block-note">请补充开户行支行信息。</div><div class="grid">
+          <div class="item"><div class="label">开户银行卡号</div><div class="value readonly">6210 **** **** 9477 646</div></div><div class="item"><div class="label">开户银行名称</div><div class="value readonly">中国邮储银行</div></div>
+          <div class="item"><div class="label">开户行支行名称</div><div class="value"><input class="field company-input" placeholder="请输入开户行支行名称"></div></div><div class="item"><div class="label">开户行支行联行号</div><div class="value"><input class="field company-input" placeholder="请输入开户行支行联行号"></div></div>
+        </div></div>
+      </div><div class="footer"><button class="btn primary" onclick="go(2)">下一步</button></div>
+    </section>
+
+    <section class="step-page" id="page-2"><div class="card"><h2 class="section-title">店铺经营信息</h2><div class="grid">
+      <div class="form-item full"><label class="required">店铺名称</label><input class="field" id="storeName" placeholder="请输入店铺名称"></div>
+      <div class="form-item"><label class="required">店铺所在地</label><input class="field" id="storeAddress" placeholder="请选择店铺所在地"></div>
+      <div class="form-item"><label>店铺坐标</label><input class="field" id="storeCoordinate" placeholder="根据店铺所在地获取坐标"></div>
+      <div class="form-item"><label class="required">店铺分类</label><select class="field" id="storeType"><option value="">请选择店铺分类</option><option>农产品供应店</option><option>农资经营店</option></select></div>
+      <div class="form-item"><label class="required">主营类目</label><div class="category-box"><span class="tag">蔬菜</span><span class="tag">调味品</span><span class="preview" onclick="alert('演示：从平台维护的商品类目中选择')">+ 添加类目</span></div></div>
+    </div></div><div class="footer"><button class="btn" onclick="go(1)">上一步</button><button class="btn primary" onclick="go(3)">下一步</button></div></section>
+
+    <section class="step-page" id="page-3"><div class="card"><h2 class="section-title">企业联系人</h2><div class="contact-grid">
+      <div class="form-item"><label class="required">联系人姓名</label><input class="field" id="contactName" placeholder="请输入联系人姓名"></div>
+      <div class="form-item"><label class="required">联系人手机</label><input class="field" id="contactPhone" placeholder="请输入联系人手机"></div>
+      <div class="form-item"><label>短信验证码</label><div style="display:flex;gap:10px"><input class="field" placeholder="请输入验证码"><button class="btn" style="white-space:nowrap" onclick="alert('验证码已发送（演示）')">获取验证码</button></div></div>
+    </div></div><div class="footer"><button class="btn" onclick="go(2)">上一步</button><button class="btn primary" onclick="submitStore()">提交审核</button></div></section>
+
+    <section class="step-page" id="page-result"><div class="card result"><div class="result-icon">◷</div><h2>开店申请已提交</h2><p>平台将审核您的店铺资料，审核结果将通过消息中心通知您。</p><div class="result-info">店铺名称：待填写店铺名称<br>认证主体：海赋（山东）数字产业发展有限公司<br>当前状态：待审核</div></div></section>
+  </main>
+</div>
+<script>
+function go(step){document.querySelectorAll('.step-page').forEach(function(p){p.classList.remove('active')});document.getElementById('page-'+step).classList.add('active');document.querySelectorAll('.step').forEach(function(el){var n=Number(el.dataset.step);el.classList.toggle('active',n===step);el.classList.toggle('done',n<step)});document.querySelectorAll('.line').forEach(function(line){line.classList.toggle('done',Number(line.dataset.line)<step)});window.scrollTo({top:0,behavior:'smooth'})}
+function recognizeLicense(input){if(!input.files || !input.files[0]) return;document.getElementById('licenseFileText').textContent=input.files[0].name+' · 已完成识别';var values={licenseCompany:'海赋（山东）数字产业发展有限公司',licenseNumber:'91371702MA3WGA8G8P',licenseOrgCode:'MA3WGA8G8',licenseCreditCode:'91371702MA3WGA8G8P',licenseLegalPerson:'张三',licenseAddress:'山东省菏泽市牡丹区',licenseValidity:'2021-03-26 至 长期有效'};Object.keys(values).forEach(function(id){document.getElementById(id).textContent=values[id]})}
+if(new URLSearchParams(location.search).get('mode')==='edit'){var note=document.createElement('div');note.className='hint';note.textContent='开店申请已被驳回：开户行支行名称与结算账户信息不一致，请修改后重新提交。';document.querySelector('#page-1 .card').insertBefore(note,document.querySelector('#page-1 .card').firstChild);document.getElementById('storeName').value='海赋农产品供应店';document.getElementById('storeAddress').value='山东省菏泽市牡丹区';document.getElementById('storeCoordinate').value='34.817211,115.549187';document.getElementById('storeType').value='农产品供应店';document.getElementById('contactName').value='谷晨';document.getElementById('contactPhone').value='17661367818'}
+function submitStore(){document.querySelectorAll('.step-page').forEach(function(p){p.classList.remove('active')});document.getElementById('page-result').classList.add('active');document.querySelectorAll('.step').forEach(function(el){el.classList.remove('active');el.classList.add('done')});document.querySelectorAll('.line').forEach(function(line){line.classList.add('done')});window.scrollTo({top:0,behavior:'smooth'})}
+</script>
+</body>
+</html>

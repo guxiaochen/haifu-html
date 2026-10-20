@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>收货单详情 - 运营管理平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+            background: #f5f7fa; color: #333; font-size: 14px; min-height: 100vh;
+        }
+        .top-nav {
+            height: 56px; background: #fff; color: #333;
+            display: flex; align-items: center; padding: 0 20px;
+            border-bottom: 1px solid #f0f0f0;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .top-nav-left { display: flex; align-items: center; gap: 24px; }
+        .brand { display: flex; align-items: center; gap: 8px; }
+        .brand-logo {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #2BA471 0%, #5BC09F 100%);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px;
+        }
+        .brand-name { font-size: 16px; font-weight: 600; color: #333; }
+        .top-nav-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+        .top-nav-icon {
+            cursor: pointer; color: #666; position: relative;
+            font-size: 18px; padding: 6px; border-radius: 4px;
+        }
+        .top-nav-icon:hover { background: #f5f5f5; color: #2BA471; }
+        .top-nav-icon .badge {
+            position: absolute; top: 2px; right: 2px;
+            background: #ff4d4f; color: #fff; font-size: 11px;
+            min-width: 16px; height: 16px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 4px; line-height: 1;
+        }
+        .account {
+            display: flex; align-items: center; gap: 8px;
+            cursor: pointer; padding: 4px 10px; border-radius: 4px;
+            font-size: 13px; color: #333;
+        }
+        .account:hover { background: #f5f5f5; }
+        .account-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: linear-gradient(135deg, #2BA471, #5BC09F);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 500;
+        }
+        .layout { display: flex; min-height: calc(100vh - 56px); }
+        .main { flex: 1; padding: 16px 20px; overflow-x: auto; }
+        .breadcrumb {
+            font-size: 13px; color: #666; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .breadcrumb a { color: #2BA471; text-decoration: none; cursor: pointer; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb .sep { color: #d9d9d9; }
+        .title-card {
+            background: #fff; padding: 14px 20px;
+            border-radius: 4px; margin-bottom: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+        }
+        .title-card .page-title { font-size: 18px; font-weight: 600; color: #333; }
+        .title-card .order-no { font-size: 15px; color: #2BA471; font-weight: 500; }
+        .title-card .spacer { margin-left: auto; }
+        .status {
+            display: inline-block; padding: 3px 12px;
+            border-radius: 10px; font-size: 12px; font-weight: 500;
+        }
+        .status-pending { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+        .status-confirm { background: #e6fffb; color: #00b578; border: 1px solid #87e8de; }
+        .status-done { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        /* 头部状态步骤条：与客户端收货单、供应商端送货单保持一致的观感 */
+        .status-flow { display: flex; align-items: center; gap: 0; }
+        .step-tab {
+            padding: 6px 18px; background: #f5f5f5; color: #666; font-size: 13px;
+            clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%, 8px 50%);
+            margin-right: -8px; transition: all 0.15s;
+        }
+        .step-tab:first-child { clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%); }
+        .step-tab:last-child { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 8px 50%); margin-right: 0; }
+        .step-tab.active { background: #2BA471; color: #fff; }
+        .step-tab.done { background: #e8e8e8; color: #999; }
+        .kind-banner {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 16px; border-radius: 4px;
+            font-size: 13px; margin-bottom: 12px;
+        }
+        .kind-mirror { background: #f0f5ff; color: #1890ff; border: 1px solid #d6e4ff; }
+        .kind-real { background: #f0faf5; color: #2BA471; border: 1px solid #b7eb8f; }
+        .content-card {
+            background: #fff; padding: 20px 24px;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            margin-bottom: 12px;
+        }
+        .action-bar {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 24px; padding-bottom: 20px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .btn-action {
+            padding: 7px 20px; border: 1px solid #d9d9d9;
+            background: #fff; border-radius: 2px;
+            cursor: pointer; font-size: 13px; color: #666;
+            transition: all .15s;
+        }
+        .btn-action:hover { color: #2BA471; border-color: #2BA471; }
+        .btn-action.active { background: #2BA471; color: #fff; border-color: #2BA471; }
+        .btn-action.active:hover { background: #229963; }
+        .btn-action:disabled { color: #ccc; border-color: #eee; background: #fafafa; cursor: not-allowed; }
+        .action-tip { color: #999; font-size: 13px; }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 80px;
+        }
+        .form-item { display: flex; align-items: center; gap: 30px; }
+        .form-item.full { grid-column: span 2; }
+        .form-label {
+            min-width: 100px; color: #666; font-size: 13px;
+            text-align: right; flex-shrink: 0;
+        }
+        .form-value { color: #333; font-size: 13px; }
+        .form-value.highlight { color: #2BA471; font-weight: 500; }
+        .form-value.link { color: #2BA471; cursor: pointer; text-decoration: none; }
+        .form-value.link:hover { text-decoration: underline; }
+        .tab-bar { display: flex; gap: 0; margin-top: 30px; border-bottom: 1px solid #f0f0f0; }
+        .tab-btn {
+            padding: 10px 20px; cursor: pointer;
+            font-size: 14px; color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all .15s;
+        }
+        .tab-btn:hover { color: #2BA471; }
+        .tab-btn.active { color: #2BA471; border-bottom-color: #2BA471; font-weight: 500; }
+        .tab-content { display: none; padding-top: 16px; }
+        .tab-content.active { display: block; }
+        table.items-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table.items-table thead { background: #fafafa; }
+        table.items-table th {
+            padding: 10px 12px; text-align: left; color: #555;
+            font-weight: 500; border-bottom: 1px solid #f0f0f0;
+            white-space: nowrap;
+        }
+        table.items-table td { padding: 12px; color: #333; border-bottom: 1px solid #f5f5f5; }
+        table.items-table tbody tr:hover { background: #fafdfb; }
+        .item-image { width: 42px; min-width: 42px; text-align: center; font-size: 24px; }
+        .tax-tag {
+            display: inline-block; padding: 1px 6px;
+            background: #f0f5ff; color: #1890ff;
+            border: 1px solid #d6e4ff; border-radius: 2px; font-size: 11px;
+        }
+        .qty-input {
+            width: 80px; padding: 5px 8px;
+            border: 1px solid #d9d9d9; border-radius: 2px;
+            font-size: 13px; outline: none;
+        }
+        .qty-input:focus { border-color: #2BA471; }
+        .qty-input.invalid { border-color: #ff4d4f; background: #fff1f0; }
+        .receive-qty { width: 84px; padding: 5px 8px; border: 1px solid #d9d9d9; border-radius: 2px; font-size: 13px; outline: none; }
+        .receive-qty:focus { border-color: #2BA471; }
+        .receive-qty.invalid { border-color: #ff4d4f; background: #fff1f0; }
+        /* 基本信息中的下拉字段（目的位置），平台可选择与修改 */
+        .form-select {
+            padding: 5px 8px; border: 1px solid #d9d9d9; border-radius: 2px;
+            font-size: 13px; color: #333; outline: none; min-width: 220px;
+            background: #fff; font-family: inherit;
+        }
+        .form-select:focus { border-color: #2BA471; }
+        .form-select:disabled { background: #fafafa; color: #999; cursor: not-allowed; }
+        .short-tag {
+            display: inline-block; margin-left: 6px; padding: 1px 6px;
+            border-radius: 2px; font-size: 11px;
+            background: #fff7e6; color: #d46b08; border: 1px solid #ffd591;
+        }
+        .owing-qty { width: 96px; padding: 5px 8px; border: 1px solid #d9d9d9; border-radius: 2px; font-size: 13px; outline: none; }
+        .owing-qty:focus { border-color: #2BA471; }
+        .owing-qty.invalid { border-color: #ff4d4f; background: #fff1f0; }
+        .owing-field-tip { color: #999; font-size: 12px; margin-top: 2px; }
+        /* ===== 物流信息（入库单只读展示）===== */
+        .logistics-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        .logistics-tip { color: #999; font-size: 12px; }
+        .logistics-list { display: flex; flex-direction: column; gap: 12px; }
+        .logistics-card { padding: 16px; border: 1px solid #e7edf3; border-radius: 6px; background: #fbfefc; }
+        .logistics-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .logistics-card-title { color: #2BA471; font-weight: 600; }
+        .logistics-card-meta { color: #999; font-size: 12px; }
+        .logistics-info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 22px; }
+        .logistics-info-item label { color: #888; margin-right: 8px; }
+        .logistics-files { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #f0f0f0; }
+        .logistics-file {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 9px; border: 1px solid #d8eee2; border-radius: 4px;
+            background: #f0faf5; color: #2BA471; font-size: 12px;
+        }
+        .logistics-file button { border: 0; background: transparent; color: #2BA471; cursor: pointer; font: inherit; }
+        .logistics-empty { padding: 34px 0; border: 1px dashed #d9d9d9; color: #999; text-align: center; }
+        .file-preview-mask {
+            position: fixed; inset: 0; z-index: 200; display: none;
+            align-items: center; justify-content: center; padding: 24px;
+            background: rgba(15, 23, 42, .55);
+        }
+        .file-preview-mask.show { display: flex; }
+        .file-preview-modal { width: min(860px, 100%); max-height: calc(100vh - 48px); overflow: hidden; border-radius: 8px; background: #fff; box-shadow: 0 18px 60px rgba(15, 23, 42, .25); }
+        .file-preview-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 18px; border-bottom: 1px solid #f0f0f0; color: #333; font-weight: 600; }
+        .file-preview-close { border: 0; background: transparent; color: #666; font-size: 22px; cursor: pointer; }
+        .file-preview-body { max-height: calc(100vh - 130px); overflow: auto; padding: 22px; background: #f5f5f5; text-align: center; }
+        .preview-sheet { width: 100%; border-collapse: collapse; background: #fff; text-align: left; font-size: 13px; }
+        .preview-sheet th, .preview-sheet td { padding: 10px 12px; border: 1px solid #e5e7eb; }
+        .preview-sheet th { background: #f0faf5; color: #2BA471; }
+        .preview-empty { padding: 42px 0; color: #666; }
+        .footer-bar {
+            display: flex; align-items: flex-end; justify-content: space-between;
+            margin-top: 16px; padding-top: 12px;
+        }
+        .terms-link { font-size: 13px; color: #666; }
+        .terms-link a { color: #2BA471; text-decoration: none; }
+        .totals { text-align: right; }
+        .totals .row { display: flex; gap: 16px; font-size: 13px; margin-bottom: 4px; }
+        .totals .row .label { color: #666; min-width: 70px; text-align: right; }
+        .totals .row .value { color: #333; min-width: 100px; text-align: right; }
+        .totals .row.total .label { font-weight: 600; }
+        .totals .row.total .value { color: #2BA471; font-weight: 600; font-size: 15px; }
+        .empty-tip { text-align: center; padding: 40px 20px; color: #999; font-size: 13px; }
+        .modal-mask {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+            z-index: 200; align-items: center; justify-content: center;
+        }
+        .modal-mask.show { display: flex; }
+        /* 弹窗层级：后弹出的弹窗覆盖在前一个之上，避免点击穿透到下层弹窗 */
+        #receive-modal { z-index: 210; }
+        #owing-modal { z-index: 220; }
+        #owing-editor-modal { z-index: 230; }
+        #filePreviewMask { z-index: 240; }
+        .modal {
+            background: #fff; border-radius: 6px; width: 560px; padding: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+            max-height: 80vh; overflow: auto;
+        }
+        .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .modal-title .warn-icon { color: #faad14; font-size: 18px; }
+        .modal-desc { font-size: 13px; color: #666; margin-bottom: 16px; line-height: 1.7; }
+        .modal-desc b { color: #333; }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+        .modal-actions .btn {
+            padding: 7px 18px; border-radius: 2px; cursor: pointer; font-size: 13px;
+            border: 1px solid #d9d9d9; background: #fff; color: #333;
+        }
+        .modal-actions .btn-pass { background: #2BA471; color: #fff; border-color: #2BA471; }
+        .modal-actions .btn-pass:hover { background: #229963; }
+        .modal-actions .btn-danger { background: #fff; color: #cf1322; border-color: #ffa39e; }
+        .owing-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .owing-table th { padding: 8px 10px; background: #fafafa; color: #555; font-weight: 500; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        .owing-table td { padding: 8px 10px; border-bottom: 1px solid #f5f5f5; }
+        
+    </style>
+</head>
+<body>
+<div class="top-nav">
+    <div class="top-nav-left">
+        <div class="brand">
+            <div class="brand-logo">叶</div>
+            <div class="brand-name">运营管理平台</div>
+        </div>
+    </div>
+    <div class="top-nav-right">
+        <div class="top-nav-icon" title="消息">🔔<span class="badge">13</span></div>
+        <div class="account">
+            <div class="account-avatar">A</div>
+            <div class="account-name">Administrator</div>
+        </div>
+    </div>
+</div>
+<div class="layout">
+    <div id="sidebar-container"></div>
+    <main class="main">
+        <div class="breadcrumb">
+            <a onclick="location.href='入库单列表.html'">收货单</a>
+            <span class="sep">/</span>
+            <span>详情</span>
+        </div>
+        <div class="title-card">
+            <span class="page-title">收货单详情</span>
+            <span class="order-no" id="biz-no"></span>
+            <div class="spacer"></div>
+            <span class="status-flow" id="status-flow">
+                <span class="step-tab" id="step-0">待收货</span>
+                <span class="step-tab" id="step-1">已收货</span>
+            </span>
+        </div>
+        <div class="kind-banner" id="kind-banner"></div>
+        <div class="content-card">
+            <div class="action-bar" id="action-bar"></div>
+            <div class="form-grid">
+                <div class="form-item full">
+                    <label class="form-label">收货单号</label>
+                    <span class="form-value" id="f-biz-no"></span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label" id="l-order-no">平台采购订单号</label>
+                    <span class="form-value highlight link" id="f-order-no" title="查看平台采购订单" onclick="goOrderDetail()"></span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">来源单据</label>
+                    <span class="form-value" id="f-source-doc"></span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">交货方式</label>
+                    <span class="form-value" id="f-mode"></span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">单据来源</label>
+                    <span class="form-value" id="f-kind"></span>
+                </div>
+                <div class="form-item" id="purpose-location-row">
+                    <label class="form-label">目的位置</label>
+                    <span class="form-value">
+                        <select class="form-select" id="f-purpose-location" onchange="onPurposeLocationChange()">
+                            <option value="">请选择</option>
+                        </select>
+                    </span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">创建时间</label>
+                    <span class="form-value" id="f-created"></span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">发货时间</label>
+                    <span class="form-value" id="f-shipment"></span>
+                </div>
+                 <div class="form-item">
+                    <label class="form-label" id="l-counterparty">供应商</label>
+                    <span class="form-value" id="f-counterparty"></span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">收货人</label>
+                    <span class="form-value" id="f-receiver"></span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">收货电话</label>
+                    <span class="form-value" id="f-receiver-phone"></span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">收货地址</label>
+                    <span class="form-value" id="f-receiver-address"></span>
+                </div>
+                <div class="form-item" id="received-at-row">
+                    <label class="form-label">收货时间</label>
+                    <span class="form-value" id="f-received-at"></span>
+                </div>
+            </div>
+            <div class="tab-bar">
+                <div class="tab-btn active" onclick="switchTab('detail', this)">入库明细</div>
+                <div class="tab-btn" onclick="switchTab('logistics', this)">物流信息</div>
+            </div>
+            <div class="tab-content active" id="tab-detail">
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>物料编码</th>
+                            <th>产品名称</th>
+                            <th>商品图片</th>
+                            <th>规格型号</th>
+                            <th>品牌</th>
+                            <th>订单数量</th>
+                            <th>发货数量</th>
+                            <th>收货数量</th>
+                            <th>单位</th>
+                            <th>单价</th>
+                            <th>税率</th>
+                            <th>含税金额</th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-body"></tbody>
+                </table>
+                <div class="footer-bar">
+                    <div class="terms-link">条款和条件: <a href="http://cs2.haifuyun.cn/terms">http://cs2.haifuyun.cn/terms</a></div>
+                    <div class="totals">
+                        <div class="row"><span class="label">未税金额:</span><span class="value" id="subtotal"></span></div>
+                        <div class="row"><span class="label">增值税13%:</span><span class="value" id="tax-total"></span></div>
+                        <div class="row total"><span class="label">总计:</span><span class="value" id="grand-total"></span></div>
+                    </div>
+                </div>
+            </div>
+            <!-- 物流信息面板：入库单由供应商提交，平台只读查看 -->
+            <div class="tab-content" id="tab-logistics">
+                <div class="logistics-toolbar">
+                    <div class="logistics-tip">物流信息由供应商送货时提交，平台仅查看，不提供编辑入口。</div>
+                </div>
+                <div class="logistics-list" id="logistics-list"></div>
+            </div>
+        </div>
+    </main>
+</div>
+<!-- 确认收货弹窗（与客户端收货单一致的文案与交互） -->
+<div class="modal-mask" id="receive-modal">
+    <div class="modal">
+        <div class="modal-title"><span class="warn-icon">!</span>确认收货</div>
+        <div class="modal-desc">
+            请确认本入库单的实际收货数量无误。<br />确认后状态将变为<b>已收货</b>，收货数量将被锁定。<br />是否确认收货？
+        </div>
+        <div class="modal-actions">
+            <button class="btn" onclick="closeReceiveModal()">取消</button>
+            <button class="btn btn-pass" onclick="doConfirm()">确认收货</button>
+        </div>
+    </div>
+</div>
+<!-- 欠单二次确认弹窗（与客户端一致） -->
+<div class="modal-mask" id="owing-modal">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title"><span class="warn-icon">!</span>是否创建欠单</div>
+        <div class="modal-desc">检测到部分产品的收货数量小于发货数量，是否按差额创建欠单？</div>
+        <div class="modal-actions">
+            <button class="btn" onclick="finishReceiptWithoutOwing()">不创建欠单</button>
+            <button class="btn btn-pass" onclick="openOwingEditor()">创建欠单</button>
+        </div>
+    </div>
+</div>
+<!-- 欠单编辑弹窗：与客户端一致的标题与列结构，欠单数量=发货数量-实际收货数量 -->
+<div class="modal-mask" id="owing-editor-modal">
+    <div class="modal">
+        <div class="modal-title">编辑欠单</div>
+        <div class="modal-desc">欠单仅包含未足量收货的产品，欠单数量=发货数量-实际收货数量。</div>
+        <table class="owing-table" id="owing-editor-table"></table>
+        <div class="modal-actions">
+            <button class="btn" onclick="closeOwingEditor()">取消</button>
+            <button class="btn btn-pass" onclick="saveOwingAndReceive()">保存欠单</button>
+        </div>
+    </div>
+</div>
+<div class="file-preview-mask" id="filePreviewMask" onclick="closeFilePreview(event)">
+    <div class="file-preview-modal">
+        <div class="file-preview-head"><span id="filePreviewTitle">文件预览</span><button class="file-preview-close" type="button" onclick="closeFilePreview()">×</button></div>
+        <div class="file-preview-body" id="filePreviewBody"></div>
+    </div>
+</div>
+<script src="sidebar.js"></script>
+<script src="库存演示数据.js"></script>
+<script>
+    var current = null;
+    var pendingReceived = {};
+    function getParam(name) {
+        var reg = new RegExp('[?&]' + name + '=([^&]*)');
+        var m = location.search.match(reg);
+        return m ? decodeURIComponent(m[1]) : '';
+    }
+    function switchTab(tab, btn) {
+        document.querySelectorAll('.tab-btn').forEach(function (b) {
+            b.classList.toggle('active', btn ? b === btn : b.getAttribute('onclick').indexOf("'" + tab + "'") > -1);
+        });
+        document.querySelectorAll('.tab-content').forEach(function (c) { c.classList.remove('active'); });
+        document.getElementById('tab-' + tab).classList.add('active');
+        if (tab === 'logistics') renderLogistics();
+    }
+    // ===== 物流信息（入库单只读）=====
+    function logisticsFiles(record) {
+        return [].concat(record.headPhoto || [], record.tailPhoto || [], record.video || [], record.excel || []);
+    }
+    function previewFile(file) {
+        document.getElementById('filePreviewTitle').textContent = '在线预览 · ' + file.name;
+        var ext = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+        var body = document.getElementById('filePreviewBody');
+        if (file.url && ['.jpg', '.jpeg', '.png'].indexOf(ext) !== -1) {
+            body.innerHTML = '<img src="' + file.url + '" alt="' + file.name + '">';
+        } else if (file.url && ['.mp4', '.mov'].indexOf(ext) !== -1) {
+            body.innerHTML = '<video controls autoplay src="' + file.url + '"></video>';
+        } else if (['.xls', '.xlsx'].indexOf(ext) !== -1) {
+            body.innerHTML = '<table class="preview-sheet"><thead><tr><th>文件名</th><th>工作表</th><th>预览说明</th></tr></thead><tbody><tr><td>' + file.name + '</td><td>运输明细</td><td>原型预览：Excel 文件可在线查看，完整内容以下载文件为准</td></tr></tbody></table>';
+        } else {
+            body.innerHTML = '<div class="preview-empty">当前文件暂无在线预览内容</div>';
+        }
+        document.getElementById('filePreviewMask').classList.add('show');
+    }
+    function closeFilePreview(event) {
+        if (event && event.target && event.target.id !== 'filePreviewMask') return;
+        var video = document.querySelector('#filePreviewBody video');
+        if (video) video.pause();
+        document.getElementById('filePreviewMask').classList.remove('show');
+    }
+    function renderLogistics() {
+        var root = document.getElementById('logistics-list');
+        var records = HaifuInventory.getLogistics(current);
+        if (!records.length) {
+            root.innerHTML = '<div class="logistics-empty">暂无物流信息</div>';
+            return;
+        }
+        root.innerHTML = records.map(function (item, index) {
+            var files = logisticsFiles(item);
+            return '<article class="logistics-card">' +
+                '<div class="logistics-card-head">' +
+                '<span class="logistics-card-title">物流信息 ' + (index + 1) + '</span>' +
+                '<span class="logistics-card-meta">' + (current.kind === 'mirror' ? '供应商直送提交' : '供应商送货到平台提交') + '</span>' +
+                '</div>' +
+                '<div class="logistics-info-grid">' +
+                '<div class="logistics-info-item"><label>车牌号</label><span>' + (item.plate || '—') + '</span></div>' +
+                '<div class="logistics-info-item"><label>司机姓名</label><span>' + (item.driver || '—') + '</span></div>' +
+                '<div class="logistics-info-item"><label>司机手机号</label><span>' + (item.phone || '—') + '</span></div>' +
+                '</div>' +
+                '<div class="logistics-files">' + (files.length
+                    ? files.map(function (file) {
+                        return '<span class="logistics-file"><button type="button" onclick="previewFile(' + JSON.stringify(file).replace(/"/g, '&quot;') + ')">预览 · ' + file.name + '</button></span>';
+                    }).join('')
+                    : '<span class="logistics-card-meta">暂无附件</span>') + '</div>' +
+                '</article>';
+        }).join('');
+    }
+    function money(n) { return HaifuInventory.money(n); }
+    function renderHeader() {
+        document.getElementById('biz-no').textContent = current.bizNo;
+        document.getElementById('f-biz-no').textContent = current.bizNo;
+        document.getElementById('l-order-no').textContent = current.orderLabel;
+        document.getElementById('f-order-no').textContent = current.orderNo || '—';
+        document.getElementById('f-source-doc').textContent = current.sourceDocNo;
+        document.getElementById('l-counterparty').textContent = current.counterpartyLabel;
+        document.getElementById('f-counterparty').textContent = current.counterparty || '—';
+        document.getElementById('f-mode').textContent = current.modeLabel;
+        document.getElementById('f-kind').textContent = current.isOwing ? (current.owingLabel || '供应商补发欠单') : (current.kind === 'mirror' ? current.sourceDocType : '平台收货单');
+        document.getElementById('f-created').textContent = current.createdAt || '—';
+        document.getElementById('f-shipment').textContent = current.shipmentAt || '—';
+        document.getElementById('f-receiver').textContent = current.receiverName || '—';
+        document.getElementById('f-receiver-phone').textContent = current.receiverPhone || '—';
+        document.getElementById('f-receiver-address').textContent = current.receiverAddress || '—';
+        document.getElementById('f-received-at').textContent = current.receivedAt || '—';
+        document.getElementById('received-at-row').style.display = current.receivedAt ? 'flex' : 'none';
+        renderPurposeLocation();
+        document.title = '入库单详情 ' + current.bizNo + ' - 运营管理平台';
+        // 头部状态步骤条：待收货 › 已收货（当前状态高亮，已完成状态置灰）
+        var stepIndex = HaifuInventory.statusStepIndex(current.bizType, current.status);
+        document.querySelectorAll('#status-flow .step-tab').forEach(function (el, i) {
+            el.className = 'step-tab' + (i < stepIndex ? ' done' : (i === stepIndex ? ' active' : ''));
+        });
+        var banner = document.getElementById('kind-banner');
+        if (current.isOwing) {
+            banner.className = 'kind-banner kind-mirror';
+            banner.innerHTML = '平台入库单「' + current.sourceDocNo + '」实际收货不足，本单为供应商补发送货对应的待收货入库单。';
+        } else if (current.kind === 'mirror') {
+            banner.className = 'kind-banner kind-mirror';
+            banner.innerHTML = '供应商送货单「' + current.sourceDocNo + '」生成，平台仅查看，不执行库存变更。';
+        } else {
+            banner.className = 'kind-banner kind-real';
+            banner.innerHTML = '供应商送货到平台后由平台确认收货，确认后系统自动生成平台送货单。';
+        }
+    }
+    // 目的位置：仅平台中转单展示，位置清单由「库存管理 - 目的位置维护」提供，此处只做选择与修改
+    function canEditPurposeLocation() {
+        return !!(current && current.deliveryMode === 'platform' && current.kind === 'real');
+    }
+    function renderPurposeLocation() {
+        var row = document.getElementById('purpose-location-row');
+        var select = document.getElementById('f-purpose-location');
+        if (!canEditPurposeLocation()) {
+            row.style.display = 'none';
+            return;
+        }
+        row.style.display = 'flex';
+        var options = HaifuInventory.getLocations().map(function (loc) {
+            return '<option value="' + loc.location + '">' + loc.location + '</option>';
+        }).join('');
+        select.innerHTML = '<option value="">请选择</option>' + options;
+        // 默认选中字典第一条；已保存过目的位置的单据按原值回显
+        var locations = HaifuInventory.getLocations();
+        var saved = current.purposeLocation || (locations[0] ? locations[0].location : '');
+        if (saved && !locations.some(function (loc) { return loc.location === saved; })) {
+            select.innerHTML += '<option value="' + saved + '">' + saved + '（已失效）</option>';
+        }
+        select.value = saved;
+    }
+    // 目的位置变更后即时保存到单据，刷新页面仍保留
+    function onPurposeLocationChange() {
+        if (!current || !canEditPurposeLocation()) return;
+        var value = document.getElementById('f-purpose-location').value;
+        current.purposeLocation = value;
+        HaifuInventory.saveReceipt(current);
+    }
+    function renderActions() {
+        var bar = document.getElementById('action-bar');
+        if (current.kind === 'mirror') {
+            var extra = current.status === 'received'
+                ? '客户已收货。'
+                : '状态跟随供应商送货单。';
+            bar.innerHTML = '<span class="action-tip">直送模式：' + extra + '平台不提供操作。</span>';
+            return;
+        }
+        var buttons = '';
+        if (current.status === 'pending') {
+            buttons += '<button class="btn-action active" onclick="openReceiveModal()">确认收货</button>';
+        } else {
+            buttons += '<button class="btn-action" disabled>已收货</button>';
+        }
+        var tip = current.status === 'received'
+            ? '<span class="action-tip">已确认收货，系统已生成对应的平台送货单。收货单无需打印。</span>'
+            : '<span class="action-tip">请在入库明细「收货数量」列按实际到货数量录入（默认与发货数量一致），再点击确认收货。</span>';
+        bar.innerHTML = buttons + tip;
+    }
+    // 入库明细「收货数量」列：平台中转单待收货时可直接录入（0 ~ 发货数量），其余场景只读展示
+    function canEditReceiveQty() {
+        return !!(current && current.kind === 'real' && current.status === 'pending');
+    }
+    // 预置收货数量：默认取发货数量，保证未手动修改的产品也按默认值提交
+    function initPendingReceived() {
+        pendingReceived = {};
+        if (!canEditReceiveQty()) return;
+        (current.items || []).forEach(function (item, index) {
+            pendingReceived[String(index)] = Number(item.sentQty) || 0;
+        });
+    }
+    function renderItems() {
+        var tbody = document.getElementById('items-body');
+        var total = 0;
+        tbody.innerHTML = (current.items || []).map(function (item, index) {
+            var amount = Number(item.price || 0) * Number(item.orderQty || 0);
+            total += amount;
+            var receivedCell;
+            if (canEditReceiveQty()) {
+                var value = pendingReceived[String(index)];
+                if (value === undefined) value = Number(item.sentQty) || 0;
+                receivedCell = '<input class="receive-qty" id="receive-input-' + index + '" type="number" min="0" max="' + item.sentQty + '"' +
+                    ' data-max="' + item.sentQty + '" value="' + value + '" oninput="onReceiveInput(' + index + ',this)">';
+            } else {
+                receivedCell = current.status === 'received' ? HaifuInventory.qty(item.receivedQty) : '—';
+            }
+            return '<tr>' +
+                '<td>' + (index + 1) + '</td>' +
+                '<td>' + item.code + '</td>' +
+                '<td>' + item.name + '</td>' +
+                '<td class="item-image">📦</td>' +
+                '<td>' + item.spec + '</td>' +
+                '<td>' + item.brand + '</td>' +
+                '<td>' + HaifuInventory.qty(item.orderQty) + '</td>' +
+                '<td>' + HaifuInventory.qty(item.sentQty) + '</td>' +
+                '<td>' + receivedCell + '</td>' +
+                '<td>' + item.unit + '</td>' +
+                '<td>' + Number(item.price || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</td>' +
+                '<td><span class="tax-tag">13%</span></td>' +
+                '<td>' + money(amount) + '</td>' +
+                '</tr>';
+        }).join('');
+        var subtotal = total / 1.13;
+        document.getElementById('subtotal').textContent = money(subtotal);
+        document.getElementById('tax-total').textContent = money(total - subtotal);
+        document.getElementById('grand-total').textContent = money(total);
+    }
+    function render() {
+        renderHeader();
+        bindOrderNoLink();
+        renderActions();
+        initPendingReceived();
+        renderItems();
+    }
+    // 平台采购订单号跳转到对应的采购订单详情
+    function goOrderDetail() {
+        if (!current || !current.orderNo) return;
+        location.href = '采购订单详情.html?order=' + encodeURIComponent(current.orderNo) + '&status=confirm';
+    }
+    function bindOrderNoLink() {
+        var el = document.getElementById('f-order-no');
+        var clickable = !!(current && current.orderNo);
+        el.classList.toggle('link', clickable);
+        el.style.cursor = clickable ? 'pointer' : 'default';
+        el.title = clickable ? '查看平台采购订单' : '';
+    }
+    // 明细表收货数量录入：默认=发货数量，取值范围 0 ~ 发货数量
+    function onReceiveInput(index, el) {
+        var max = Number(el.getAttribute('data-max'));
+        var value = Number(el.value);
+        var invalid = el.value === '' || isNaN(value) || value < 0 || value > max;
+        el.classList.toggle('invalid', invalid);
+        if (!invalid) pendingReceived[String(index)] = value;
+    }
+    // 第一步：确认收货弹窗（与客户端一致，仅做二次确认，不再展示明细表）
+    function openReceiveModal() {
+        document.getElementById('receive-modal').classList.add('show');
+    }
+    function closeReceiveModal() {
+        document.getElementById('receive-modal').classList.remove('show');
+    }
+    // 收货数量小于发货数量的产品（差额即欠单差额）
+    function shortItems() {
+        return current.items.map(function (item, index) {
+            var received = pendingReceived[String(index)];
+            return {
+                index: index,
+                item: item,
+                sent: Number(item.sentQty) || 0,
+                received: received === undefined ? Number(item.sentQty) || 0 : received
+            };
+        }).filter(function (row) { return row.received < row.sent; });
+    }
+    /** 收集明细表已录入的收货数量；存在非法输入时返回 null
+     *  未找到输入框（如已收货只读）时以发货数量兜底，保证提交值与页面展示一致。 */
+    function collectReceivedQty() {
+        var map = {};
+        var invalid = false;
+        current.items.forEach(function (item, index) {
+            var el = document.getElementById('receive-input-' + index);
+            if (!el) {
+                map[String(index)] = Number(item.sentQty) || 0;
+                return;
+            }
+            var value = Number(el.value);
+            if (el.value === '' || isNaN(value) || value < 0 || value > Number(el.getAttribute('data-max'))) {
+                invalid = true;
+                return;
+            }
+            map[String(index)] = value;
+        });
+        return invalid ? null : map;
+    }
+    // 第二步：确认收货 → 校验收货数量；存在少收时进入欠单二次确认
+    function doConfirm() {
+        closeReceiveModal();
+        // 以明细表录入值为准，同步到 pendingReceived，避免提交时用到未同步的旧值
+        var map = collectReceivedQty();
+        if (!map) {
+            alert('收货数量不能为空、不能为负数，且不能大于发货数量');
+            return;
+        }
+        pendingReceived = map;
+        if (!shortItems().length) {
+            finishReceive(false, false);
+            return;
+        }
+        document.getElementById('owing-modal').classList.add('show');
+    }
+    // 第二步分支：不创建欠单，直接确认收货
+    function finishReceiptWithoutOwing() {
+        document.getElementById('owing-modal').classList.remove('show');
+        finishReceive(true, false);
+    }
+    // 第三步：编辑欠单（与客户端一致的列结构，欠单数量=发货数量-实际收货数量，只读）
+    var pendingOwing = {};
+    function openOwingEditor() {
+        document.getElementById('owing-modal').classList.remove('show');
+        pendingOwing = {};
+        document.getElementById('owing-editor-table').innerHTML =
+            '<thead><tr><th>物料编码</th><th>产品名称</th><th>规格型号</th><th>单位</th><th>欠单数量</th></tr></thead><tbody>' +
+            shortItems().map(function (row) {
+                var gap = row.sent - row.received;
+                pendingOwing[String(row.index)] = gap;
+                return '<tr>' +
+                    '<td>' + row.item.code + '</td>' +
+                    '<td>' + row.item.name + '</td>' +
+                    '<td>' + row.item.spec + '</td>' +
+                    '<td>' + row.item.unit + '</td>' +
+                    '<td>' + HaifuInventory.qty(gap) + '</td>' +
+                    '</tr>';
+            }).join('') + '</tbody>';
+        document.getElementById('owing-editor-modal').classList.add('show');
+    }
+    function closeOwingEditor() {
+        document.getElementById('owing-editor-modal').classList.remove('show');
+    }
+    function saveOwingAndReceive() {
+        closeOwingEditor();
+        finishReceive(true, true);
+    }
+    function finishReceive(noOwing, withOwing) {
+        var result = HaifuInventory.confirmReceipt(current.id, pendingReceived, withOwing, withOwing ? pendingOwing : null);
+        if (!result) { alert('当前入库单不可确认收货'); return; }
+        current = result.receipt;
+        pendingReceived = {};
+        pendingOwing = {};
+        render();
+        alert(withOwing && result.owing
+            ? '已确认收货并创建欠单 ' + result.owing.bizNo + '，供应商端已生成对应的欠单送货单，供应商按欠单数量补发至平台；系统已自动生成平台送货单'
+            : '已确认收货，系统已自动生成平台送货单');
+    }
+    (function init() {
+        var id = getParam('id') || getParam('no');
+        current = id ? HaifuInventory.getReceipt(id) : null;
+        if (!current) {
+            var list = HaifuInventory.getReceipts();
+            current = list[0];
+        }
+        if (!current) {
+            document.querySelector('.content-card').innerHTML = '<div class="empty-tip">未找到对应的入库单</div>';
+            return;
+        }
+        render();
+        renderLogistics();
+        // 列表行内点「确认收货」进入时，自动打开与本页相同的确认收货弹窗
+        if (getParam('confirm') === '1') {
+            var canConfirm = Array.prototype.some.call(document.querySelectorAll('button'), function (bt) {
+                return (bt.getAttribute('onclick') || '').indexOf('openReceiveModal()') >= 0;
+            });
+            if (canConfirm) setTimeout(openReceiveModal, 60);
+        }
+    })();
+</script>
+
+<div id="stkToast" style="display:none;position:fixed;top:82px;left:50%;transform:translateX(-50%);padding:10px 18px;background:#f5fbff;border:1px solid #b7dcff;color:#1677d2;border-radius:6px;font-size:13px;z-index:1500"></div>
+
+</body>
+</html>

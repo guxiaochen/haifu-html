@@ -165,6 +165,11 @@
         .po-alert-card .po-arrow {
             font-size: 14px; line-height: 1;
         }
+        /* 送货单胶囊提醒（跳转出库单列表） */
+        .shipment-alert-card {
+            left: auto; right: 20px; transform: translate(0, -50%);
+        }
+        .shipment-alert-card .po-icon { background: #1890ff; }
         /* 操作按钮 */
         .btn-action {
             padding: 7px 20px; border: 1px solid #d9d9d9;
@@ -364,6 +369,12 @@
                 <span class="po-text" id="poAlertText">采购 1</span>
                 <span class="po-arrow">›</span>
             </div>
+            <!-- 送货单提醒：点击跳转出库单列表，按平台销售订单号筛选 -->
+            <div class="po-alert-card shipment-alert-card" id="shipmentAlert" style="display:none;" onclick="goShipmentList()">
+                <span class="po-icon">🚚</span>
+                <span class="po-text" id="shipmentAlertText">送货单 0</span>
+                <span class="po-arrow">›</span>
+            </div>
         </div>
 
         <!-- 主内容卡片（操作+信息+明细合一） -->
@@ -517,6 +528,7 @@
     </div>
 </div>
 
+<script src="库存演示数据.js"></script>
 <script>
     // Tab 切换
     function switchTab(tab, btn) {
@@ -640,8 +652,29 @@
         }
     }
 
+    // 送货单胶囊：展示该销售订单下的平台送货单（出库单）数量，点击跳转出库单列表并按销售订单号筛选
+    function renderShipmentAlert() {
+        var orderNo = getParam('order') || 'SO000205';
+        var count = 0;
+        try {
+            if (window.HaifuInventory) {
+                count = HaifuInventory.getShipments().filter(function (row) {
+                    return (row.orderNo || '') === orderNo;
+                }).length;
+            }
+        } catch (e) {}
+        document.getElementById('shipmentAlertText').textContent = '送货单 ' + count;
+        document.getElementById('shipmentAlert').style.display = count > 0 ? 'flex' : 'none';
+    }
+
+    function goShipmentList() {
+        var orderNo = getParam('order') || '';
+        location.href = '出库单列表.html' + (orderNo ? '?so=' + encodeURIComponent(orderNo) : '');
+    }
+
     // 页面加载初始化
     initByStatus();
+    renderShipmentAlert();
 </script>
 
 <!-- 左侧菜单组件 -->

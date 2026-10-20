@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发货单详情 - 运营管理平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+            background: #f5f7fa; color: #333; font-size: 14px; min-height: 100vh;
+        }
+        .top-nav {
+            height: 56px; background: #fff; color: #333;
+            display: flex; align-items: center; padding: 0 20px;
+            border-bottom: 1px solid #f0f0f0;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .top-nav-left { display: flex; align-items: center; gap: 24px; }
+        .brand { display: flex; align-items: center; gap: 8px; }
+        .brand-logo {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #2BA471 0%, #5BC09F 100%);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px;
+        }
+        .brand-name { font-size: 16px; font-weight: 600; color: #333; }
+        .top-nav-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+        .top-nav-icon {
+            cursor: pointer; color: #666; position: relative;
+            font-size: 18px; padding: 6px; border-radius: 4px;
+        }
+        .top-nav-icon:hover { background: #f5f5f5; color: #2BA471; }
+        .top-nav-icon .badge {
+            position: absolute; top: 2px; right: 2px;
+            background: #ff4d4f; color: #fff; font-size: 11px;
+            min-width: 16px; height: 16px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 4px; line-height: 1;
+        }
+        .account {
+            display: flex; align-items: center; gap: 8px;
+            cursor: pointer; padding: 4px 10px; border-radius: 4px;
+            font-size: 13px; color: #333;
+        }
+        .account:hover { background: #f5f5f5; }
+        .account-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: linear-gradient(135deg, #2BA471, #5BC09F);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 500;
+        }
+        .layout { display: flex; min-height: calc(100vh - 56px); }
+        .main { flex: 1; padding: 16px 20px; overflow-x: auto; }
+        .breadcrumb {
+            font-size: 13px; color: #666; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .breadcrumb a { color: #2BA471; text-decoration: none; cursor: pointer; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb .sep { color: #d9d9d9; }
+        .title-card {
+            background: #fff; padding: 14px 20px;
+            border-radius: 4px; margin-bottom: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+        }
+        .title-card .page-title { font-size: 18px; font-weight: 600; color: #333; }
+        .title-card .order-no { font-size: 15px; color: #2BA471; font-weight: 500; }
+        .title-card .spacer { margin-left: auto; }
+        .status {
+            display: inline-block; padding: 3px 12px;
+            border-radius: 10px; font-size: 12px; font-weight: 500;
+        }
+        .status-pending { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+        .status-confirm { background: #e6fffb; color: #00b578; border: 1px solid #87e8de; }
+        .status-done { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        /* 头部状态步骤条：与供应商端送货单保持一致的观感 */
+        .status-flow { display: flex; align-items: center; gap: 0; }
+        .step-tab {
+            padding: 6px 18px; background: #f5f5f5; color: #666; font-size: 13px;
+            clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%, 8px 50%);
+            margin-right: -8px; transition: all 0.15s;
+        }
+        .step-tab:first-child { clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%); }
+        .step-tab:last-child { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 8px 50%); margin-right: 0; }
+        .step-tab.active { background: #2BA471; color: #fff; }
+        .step-tab.done { background: #e8e8e8; color: #999; }
+        /* 打印模板选择与打印效果预览（与供应商端送货单打印口径一致） */
+        .print-options { display: flex; flex-direction: column; gap: 10px; }
+        .print-option { display: flex; align-items: center; gap: 8px; color: #333; cursor: pointer; }
+        /* 用 .modal.preview-modal 提升优先级，覆盖 .modal 的 460px 宽与 max-height/overflow，
+           避免预览内容被挤压、底部按钮被截断 */
+        .modal.preview-modal { width: min(960px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: hidden; }
+        .modal.preview-modal .preview-body { max-height: calc(100vh - 150px); overflow: auto; padding: 24px; background: #f5f6f8; }
+        .print-preview-page { background: #fff; min-height: 620px; padding: 34px 42px; color: #111; box-shadow: 0 2px 12px rgba(0,0,0,.12); }
+        .preview-brand { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #8aa7c8; padding-bottom: 10px; }
+        .preview-brand strong { font-size: 22px; color: #1769aa; }
+        .preview-company { font-size: 16px; font-weight: 600; }
+        .preview-title { text-align: center; font-size: 30px; font-weight: 700; margin: 18px 0; }
+        .preview-info-wrap { position: relative; margin-bottom: 24px; }
+        .preview-info { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 28px; line-height: 1.7; padding-right: 136px; }
+        .preview-qr { position: absolute; top: -50px; right: 0; width: 112px; height: 112px; object-fit: contain; border: 1px solid #e5e7eb; padding: 5px; }
+        .preview-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .preview-table th, .preview-table td { border: 1px solid #777; padding: 7px 6px; text-align: left; }
+        .preview-table th { background: #f7f7f7; font-weight: 700; }
+        .preview-footer { display: flex; justify-content: space-between; margin-top: 28px; font-size: 13px; }
+        @media (max-width: 700px) { .preview-info { grid-template-columns: 1fr; } .print-preview-page { padding: 20px; } }
+        /* 打印输出：仅打印送货单纸张本身（#print-area），隐藏页面其余内容 */
+        #print-area { display: none; }
+        @media print {
+            body.printing > *:not(#print-area) { display: none !important; }
+            body.printing #print-area { display: block !important; }
+        }
+        .kind-banner {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 16px; border-radius: 4px;
+            font-size: 13px; margin-bottom: 12px;
+        }
+        .kind-mirror { background: #f0f5ff; color: #1890ff; border: 1px solid #d6e4ff; }
+        .kind-real { background: #f0faf5; color: #2BA471; border: 1px solid #b7eb8f; }
+        .content-card {
+            background: #fff; padding: 20px 24px;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            margin-bottom: 12px;
+        }
+        .action-bar {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 24px; padding-bottom: 20px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .btn-action {
+            padding: 7px 20px; border: 1px solid #d9d9d9;
+            background: #fff; border-radius: 2px;
+            cursor: pointer; font-size: 13px; color: #666;
+            transition: all .15s;
+        }
+        .btn-action:hover { color: #2BA471; border-color: #2BA471; }
+        .btn-action.active { background: #2BA471; color: #fff; border-color: #2BA471; }
+        .btn-action.active:hover { background: #229963; }
+        .btn-action:disabled { color: #ccc; border-color: #eee; background: #fafafa; cursor: not-allowed; }
+        .action-tip { color: #999; font-size: 13px; }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 80px;
+        }
+        .form-item { display: flex; align-items: center; gap: 30px; }
+        .form-item.full { grid-column: span 2; }
+        .form-label {
+            min-width: 100px; color: #666; font-size: 13px;
+            text-align: right; flex-shrink: 0;
+        }
+        .form-value { color: #333; font-size: 13px; }
+        .form-value.highlight { color: #2BA471; font-weight: 500; }
+        .form-value.link { color: #2BA471; cursor: pointer; text-decoration: none; }
+        .form-value.link:hover { text-decoration: underline; }
+        .tab-bar { display: flex; gap: 0; margin-top: 30px; border-bottom: 1px solid #f0f0f0; }
+        .tab-btn {
+            padding: 10px 20px; cursor: pointer;
+            font-size: 14px; color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all .15s;
+        }
+        .tab-btn:hover { color: #2BA471; }
+        .tab-btn.active { color: #2BA471; border-bottom-color: #2BA471; font-weight: 500; }
+        .tab-content { display: none; padding-top: 16px; }
+        .tab-content.active { display: block; }
+        table.items-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table.items-table thead { background: #fafafa; }
+        table.items-table th {
+            padding: 10px 12px; text-align: left; color: #555;
+            font-weight: 500; border-bottom: 1px solid #f0f0f0;
+            white-space: nowrap;
+        }
+        table.items-table td { padding: 12px; color: #333; border-bottom: 1px solid #f5f5f5; }
+        table.items-table tbody tr:hover { background: #fafdfb; }
+        .item-image { width: 42px; min-width: 42px; text-align: center; font-size: 24px; }
+        /* 基本信息中的下拉字段（目的位置），平台可选择与修改 */
+        .form-select {
+            padding: 5px 8px; border: 1px solid #d9d9d9; border-radius: 2px;
+            font-size: 13px; color: #333; outline: none; min-width: 220px;
+            background: #fff; font-family: inherit;
+        }
+        .form-select:focus { border-color: #2BA471; }
+        .form-select:disabled { background: #fafafa; color: #999; cursor: not-allowed; }
+        .qty-input {
+            width: 84px; padding: 5px 8px; font-size: 13px;
+            border: 1px solid #d9d9d9; border-radius: 2px;
+            font-family: inherit; color: #333;
+        }
+        .qty-input:focus { border-color: #2BA471; outline: none; }
+        .qty-input:disabled { background: #fafafa; color: #999; cursor: not-allowed; }
+        .qty-input.invalid { border-color: #ff4d4f; background: #fff1f0; }
+        .qty-unit { color: #999; font-size: 12px; margin-left: 4px; }
+        .tax-tag {
+            display: inline-block; padding: 1px 6px;
+            background: #f0f5ff; color: #1890ff;
+            border: 1px solid #d6e4ff; border-radius: 2px; font-size: 11px;
+        }
+        .footer-bar {
+            display: flex; align-items: flex-end; justify-content: flex-end;
+            margin-top: 16px; padding-top: 12px;
+        }
+        .terms-link { font-size: 13px; color: #666; }
+        .terms-link a { color: #2BA471; text-decoration: none; }
+        .totals { text-align: right; }
+        .totals .row { display: flex; gap: 16px; font-size: 13px; margin-bottom: 4px; }
+        .totals .row .label { color: #666; min-width: 70px; text-align: right; }
+        .totals .row .value { color: #333; min-width: 100px; text-align: right; }
+        .totals .row.total .label { font-weight: 600; }
+        .totals .row.total .value { color: #2BA471; font-weight: 600; font-size: 15px; }
+        .empty-tip { text-align: center; padding: 40px 20px; color: #999; font-size: 13px; }
+        .modal-mask {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+            z-index: 200; align-items: center; justify-content: center;
+        }
+        .modal-mask.show { display: flex; }
+        .modal {
+            background: #fff; border-radius: 6px; width: 460px; padding: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+        }
+        .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .modal-title .warn-icon { color: #faad14; font-size: 18px; }
+        .modal-desc { font-size: 13px; color: #666; margin-bottom: 20px; line-height: 1.7; }
+        .modal-desc b { color: #333; }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .modal-actions .btn {
+            padding: 7px 18px; border-radius: 2px; cursor: pointer; font-size: 13px;
+            border: 1px solid #d9d9d9; background: #fff; color: #333;
+        }
+        .modal-actions .btn-pass { background: #2BA471; color: #fff; border-color: #2BA471; }
+        .modal-actions .btn-pass:hover { background: #229963; }
+        .modal { max-height: 80vh; overflow: auto; }
+        /* 弹窗层级：后弹出的弹窗覆盖在前一个之上，避免点击穿透到下层弹窗 */
+        #accept-modal { z-index: 210; }
+        #owing-modal { z-index: 220; }
+        #print-modal { z-index: 210; }
+        #preview-modal { z-index: 220; }
+        .owing-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+        .owing-table th { padding: 8px 10px; background: #fafafa; color: #555; font-weight: 500; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        .owing-table td { padding: 8px 10px; border-bottom: 1px solid #f5f5f5; }
+        /* ===== 物流信息（出库单由平台上传维护）===== */
+        .logistics-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        .logistics-tip { color: #999; font-size: 12px; }
+        .logistics-save-hint { color: #d46b08; font-size: 12px; margin-right: 8px; }
+        .logistics-list { display: flex; flex-direction: column; gap: 12px; }
+        .logistics-card { padding: 16px; border: 1px solid #e7edf3; border-radius: 6px; background: #fbfefc; }
+        .logistics-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+        .logistics-card-title { color: #2BA471; font-weight: 600; }
+        .logistics-card-meta { color: #999; font-size: 12px; margin-left: 8px; }
+        .logistics-card-actions { display: flex; align-items: center; gap: 8px; }
+        .logistics-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 20px; }
+        .logistics-field label { display: block; margin-bottom: 5px; color: #888; font-size: 12px; }
+        .logistics-field input {
+            width: 100%; height: 34px; padding: 0 10px;
+            border: 1px solid #d9d9d9; border-radius: 2px; color: #333; outline: none;
+        }
+        .logistics-field input:focus { border-color: #2BA471; }
+        .logistics-field input:disabled { background: #fafafa; color: #999; }
+        .logistics-files { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+        .file-upload-box { min-height: 92px; padding: 12px; border: 1px dashed #b7e4cd; border-radius: 6px; background: #fbfefc; }
+        .file-upload-box h4 { margin: 0 0 8px; color: #555; font-size: 12px; font-weight: 500; }
+        .file-upload-box input[type="file"] { width: 100%; font-size: 12px; color: #666; }
+        .file-list { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+        .file-chip {
+            display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
+            padding: 4px 8px; border: 1px solid #d8eee2; border-radius: 4px;
+            background: #fff; color: #52606f; font-size: 12px;
+        }
+        .file-chip button { border: 0; padding: 0; background: transparent; color: #2BA471; cursor: pointer; font: inherit; }
+        .file-chip button.remove { color: #ff4d4f; }
+        .logistics-empty { padding: 34px 0; border: 1px dashed #d9d9d9; color: #999; text-align: center; }
+        .logistics-readonly { color: #999; font-size: 12px; }
+        .file-preview-mask {
+            position: fixed; inset: 0; z-index: 200; display: none;
+            align-items: center; justify-content: center; padding: 24px;
+            background: rgba(15, 23, 42, .55);
+        }
+        .file-preview-mask.show { display: flex; }
+        .file-preview-modal { width: min(860px, 100%); max-height: calc(100vh - 48px); overflow: hidden; border-radius: 8px; background: #fff; box-shadow: 0 18px 60px rgba(15, 23, 42, .25); }
+        .file-preview-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 18px; border-bottom: 1px solid #f0f0f0; color: #333; font-weight: 600; }
+        .file-preview-close { border: 0; background: transparent; color: #666; font-size: 22px; cursor: pointer; }
+        .file-preview-body { max-height: calc(100vh - 130px); overflow: auto; padding: 22px; background: #f5f5f5; text-align: center; }
+        .file-preview-body img, .file-preview-body video { max-width: 100%; max-height: 64vh; border-radius: 5px; background: #111; }
+        .preview-sheet { width: 100%; border-collapse: collapse; background: #fff; text-align: left; font-size: 13px; }
+        .preview-sheet th, .preview-sheet td { padding: 10px 12px; border: 1px solid #e5e7eb; }
+        .preview-sheet th { background: #f0faf5; color: #2BA471; }
+        .zip-result { display: none; margin: 12px 0 4px; padding: 14px 16px; border: 1px solid #b7e4cd; background: #f7fdfa; border-radius: 6px; }
+        .zip-result.show { display: block; }
+        .zip-result h4 { margin: 0 0 10px; font-size: 13px; color: #1d6b46; }
+        .zip-folder { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-top: 1px dashed #d7ece2; font-size: 13px; }
+        .zip-folder .fld { color: #2BA471; font-weight: 600; white-space: nowrap; }
+        .zip-folder .files { color: #52606f; line-height: 1.8; }
+        .zip-folder .miss { color: #d46b08; }
+        .preview-file-line { margin-bottom: 10px; font-size: 13px; color: #344054; }
+        .preview-file-note { margin-top: 10px; font-size: 12px; color: #8c98a8; }
+        .preview-empty { padding: 42px 0; color: #666; }
+        
+    </style>
+</head>
+<body>
+<div class="top-nav">
+    <div class="top-nav-left">
+        <div class="brand">
+            <div class="brand-logo">叶</div>
+            <div class="brand-name">运营管理平台</div>
+        </div>
+    </div>
+    <div class="top-nav-right">
+        <div class="top-nav-icon" title="消息">🔔<span class="badge">13</span></div>
+        <div class="account">
+            <div class="account-avatar">A</div>
+            <div class="account-name">Administrator</div>
+        </div>
+    </div>
+</div>
+<div class="layout">
+    <div id="sidebar-container"></div>
+    <main class="main">
+        <div class="breadcrumb">
+            <a onclick="location.href='出库单列表.html'">发货单</a>
+            <span class="sep">/</span>
+            <span>详情</span>
+        </div>
+        <div class="title-card">
+            <span class="page-title">发货单详情</span>
+            <span class="order-no" id="biz-no"></span>
+            <div class="spacer"></div>
+            <span class="status-flow" id="status-flow">
+                <span class="step-tab" id="step-0">待发货</span>
+                <span class="step-tab" id="step-1">已发货</span>
+                <span class="step-tab" id="step-2">已收货</span>
+            </span>
+        </div>
+        <div class="kind-banner" id="kind-banner"></div>
+        <div class="content-card">
+            <div class="action-bar" id="action-bar"></div>
+            <div class="form-grid">
+                <div class="form-item full">
+                    <label class="form-label">发货单号</label>
+                    <span class="form-value" id="f-biz-no"></span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label" id="l-order-no">平台销售订单号</label>
+                    <span class="form-value highlight link" id="f-order-no" title="查看平台销售订单" onclick="goOrderDetail()"></span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">来源单据</label>
+                    <span class="form-value" id="f-source-doc"></span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label" id="l-counterparty">客户</label>
+                    <span class="form-value" id="f-counterparty"></span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">交货方式</label>
+                    <span class="form-value" id="f-mode"></span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">单据来源</label>
+                    <span class="form-value" id="f-kind"></span>
+                </div>
+                <div class="form-item" id="purpose-location-row">
+                    <label class="form-label">目的位置</label>
+                    <span class="form-value">
+                        <select class="form-select" id="f-purpose-location" onchange="onPurposeLocationChange()">
+                            <option value="">请选择</option>
+                        </select>
+                    </span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">创建时间</label>
+                    <span class="form-value" id="f-created"></span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">发货时间</label>
+                    <span class="form-value" id="f-shipment"></span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">收货人</label>
+                    <span class="form-value" id="f-receiver"></span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">收货电话</label>
+                    <span class="form-value" id="f-receiver-phone"></span>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">收货地址</label>
+                    <span class="form-value" id="f-receiver-address"></span>
+                </div>
+                <div class="form-item" id="received-at-row">
+                    <label class="form-label">收货时间</label>
+                    <span class="form-value" id="f-received-at"></span>
+                </div>
+            </div>
+            <div class="tab-bar">
+                <div class="tab-btn active" onclick="switchTab('detail', this)">出库明细</div>
+                <div class="tab-btn" onclick="switchTab('logistics', this)">物流信息</div>
+            </div>
+            <div class="tab-content active" id="tab-detail">
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>物料编码</th>
+                            <th>产品名称</th>
+                            <th>商品图片</th>
+                            <th>规格型号</th>
+                            <th>品牌</th>
+                            <th>订单数量</th>
+                            <th>剩余数量</th>
+                            <th>发货数量</th>
+                            <th>单位</th>
+                            <th>单价</th>
+                            <th>税率</th>
+                            <th>含税金额</th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-body"></tbody>
+                </table>
+                <div class="footer-bar">
+                    <div class="totals">
+                        <div class="row"><span class="label">未税金额:</span><span class="value" id="subtotal"></span></div>
+                        <div class="row"><span class="label">增值税13%:</span><span class="value" id="tax-total"></span></div>
+                        <div class="row total"><span class="label">总计:</span><span class="value" id="grand-total"></span></div>
+                    </div>
+                </div>
+            </div>
+            <!-- 物流信息面板：出库单由平台上传维护，申请验收后转为只读 -->
+            <div class="tab-content" id="tab-logistics">
+                <div class="logistics-toolbar">
+                    <div class="logistics-tip" id="logistics-tip"></div>
+                    <button class="btn-action active" type="button" id="logistics-add" onclick="addLogistics()">新增</button>
+                    <button class="btn-action" type="button" id="logistics-zip" onclick="openZipUpload()">统一上传 (zip，按车辆建文件夹)</button>
+                    <input type="file" id="zip-input" accept=".zip" style="display:none" onchange="handleZip(this)">
+                </div>
+                <div class="zip-result" id="zip-result"></div>
+                <div class="logistics-list" id="logistics-list"></div>
+            </div>
+        </div>
+    </main>
+</div>
+<div class="file-preview-mask" id="filePreviewMask" onclick="closeFilePreview(event)">
+    <div class="file-preview-modal">
+        <div class="file-preview-head"><span id="filePreviewTitle">文件预览</span><button class="file-preview-close" type="button" onclick="closeFilePreview()">×</button></div>
+        <div class="file-preview-body" id="filePreviewBody"></div>
+    </div>
+</div>
+<!-- 选择打印模板（与供应商端送货单打印一致，支持含/不含单价金额） -->
+<div class="modal-mask" id="print-modal">
+    <div class="modal">
+        <div class="modal-title">选择打印模板</div>
+        <div class="modal-desc">
+            <div class="print-options">
+                <label class="print-option"><input type="radio" name="printTemplate" value="with-price" checked> 显示单价金额</label>
+                <label class="print-option"><input type="radio" name="printTemplate" value="without-price"> 不显示单价金额</label>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn" onclick="closePrintModal()">取消</button>
+            <button class="btn" onclick="previewShipment()">预览</button>
+            <button class="btn btn-pass" onclick="printShipment()">确认打印</button>
+        </div>
+    </div>
+</div>
+<!-- 打印效果预览 -->
+<div class="modal-mask" id="preview-modal">
+    <div class="modal preview-modal">
+        <div class="modal-title">打印效果预览</div>
+        <div class="preview-body" id="preview-body"></div>
+        <div class="modal-actions">
+            <button class="btn" onclick="closePreviewModal()">返回修改</button>
+            <button class="btn btn-pass" onclick="printFromPreview()">打印</button>
+        </div>
+    </div>
+</div>
+<!-- 打印专用容器：打印时仅输出此处注入的送货单纸张 -->
+<div id="print-area"></div>
+<div class="modal-mask" id="accept-modal">
+    <div class="modal">
+        <div class="modal-title"><span class="warn-icon">!</span>确认申请验收</div>
+        <div class="modal-desc">
+            提交后出库单状态将变为<b>已发货</b>，发货数量将被锁定无法修改。<br />是否确认提交？
+        </div>
+        <div class="modal-actions">
+            <button class="btn" onclick="closeAcceptModal()">取消</button>
+            <button class="btn btn-pass" onclick="submitAcceptance()">确认提交</button>
+        </div>
+    </div>
+</div>
+<!-- 欠单二次确认：保留平台端二次确认，文案与供应商端口径对齐 -->
+<div class="modal-mask" id="owing-modal">
+    <div class="modal">
+        <div class="modal-title"><span class="warn-icon">!</span>是否生成欠单收货单</div>
+        <div class="modal-desc" id="owing-desc"></div>
+        <table class="owing-table" id="owing-table"></table>
+        <div class="modal-actions">
+            <button class="btn" onclick="closeOwingModal()">取消</button>
+            <button class="btn btn-pass" onclick="confirmAcceptWithOwing()">确认提交并生成欠单</button>
+        </div>
+    </div>
+</div>
+<script src="sidebar.js"></script>
+<script src="库存演示数据.js"></script>
+<script>
+    var current = null;
+    var pendingSent = {};       // 明细中待提交的发货数量（按明细下标）
+    var pendingAcceptQty = null; // 待确认的申请验收数量（存在欠单时暂存）
+    function getParam(name) {
+        var reg = new RegExp('[?&]' + name + '=([^&]*)');
+        var m = location.search.match(reg);
+        return m ? decodeURIComponent(m[1]) : '';
+    }
+    function switchTab(tab, btn) {
+        document.querySelectorAll('.tab-btn').forEach(function (b) {
+            b.classList.toggle('active', btn ? b === btn : b.getAttribute('onclick').indexOf("'" + tab + "'") > -1);
+        });
+        document.querySelectorAll('.tab-content').forEach(function (c) { c.classList.remove('active'); });
+        document.getElementById('tab-' + tab).classList.add('active');
+        if (tab === 'logistics') renderLogistics();
+    }
+    // ===== 物流信息（出库单由平台上传维护）=====
+    var logisticsRecords = [];
+    function logisticsFiles(record) {
+        return [].concat(record.headPhoto || [], record.tailPhoto || [], record.video || [], record.excel || []);
+    }
+    function persistLogistics() {
+        HaifuInventory.saveLogistics(current.id, logisticsRecords);
+    }
+    function findLogistics(id) {
+        return logisticsRecords.filter(function (item) { return String(item.id) === String(id); })[0];
+    }
+    function hasRequiredLogistics(item) {
+        return !!(item && String(item.plate || '').trim() && String(item.driver || '').trim() && String(item.phone || '').trim());
+    }
+    function addLogistics() {
+        logisticsRecords.push({ id: Date.now(), plate: '', driver: '', phone: '', headPhoto: [], tailPhoto: [], video: [], excel: [], saved: false });
+        persistLogistics();
+        switchTab('logistics');
+        renderLogistics();
+    }
+    function updateLogistics(id, field, value) {
+        var item = findLogistics(id);
+        if (!item) return;
+        item[field] = value;
+        item.saved = false;
+        persistLogistics();
+    }
+    function saveLogistics(id) {
+        var item = findLogistics(id);
+        if (!hasRequiredLogistics(item)) {
+            alert('请填写车牌号、司机姓名和司机手机号');
+            return;
+        }
+        item.saved = true;
+        persistLogistics();
+        renderLogistics();
+        alert('物流信息已保存');
+    }
+    function removeLogistics(id) {
+        if (!confirm('删除后，该条物流信息及其全部照片、视频和 Excel 将一起删除，是否继续？')) return;
+        logisticsRecords = logisticsRecords.filter(function (item) { return String(item.id) !== String(id); });
+        persistLogistics();
+        renderLogistics();
+    }
+    function fileRule(type) {
+        return type === 'video' ? { accept: '.mp4,.mov', max: 200 * 1024 * 1024 } :
+            type === 'excel' ? { accept: '.xls,.xlsx', max: 20 * 1024 * 1024 } :
+            { accept: '.jpg,.jpeg,.png', max: 10 * 1024 * 1024 };
+    }
+    function addFiles(id, type, input) {
+        var item = findLogistics(id);
+        if (!item) return;
+        var rule = fileRule(type);
+        Array.from(input.files || []).forEach(function (file) {
+            var ext = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+            if (rule.accept.split(',').indexOf(ext) === -1) { alert('文件格式不支持：' + file.name); return; }
+            if (file.size > rule.max) { alert('文件超过大小限制：' + file.name); return; }
+            item[type].push({ name: file.name, size: file.size, url: URL.createObjectURL(file) });
+        });
+        input.value = '';
+        item.saved = false;
+        persistLogistics();
+        renderLogistics();
+    }
+    function removeFile(id, type, index) {
+        var item = findLogistics(id);
+        if (!item) return;
+        item[type].splice(index, 1);
+        item.saved = false;
+        persistLogistics();
+        renderLogistics();
+    }
+    function previewFile(file) {
+        document.getElementById('filePreviewTitle').textContent = '在线预览 · ' + file.name;
+        var ext = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+        var body = document.getElementById('filePreviewBody');
+        if (file.url && ['.jpg', '.jpeg', '.png'].indexOf(ext) !== -1) {
+            body.innerHTML = '<img src="' + file.url + '" alt="' + file.name + '">';
+        } else if (file.url && ['.mp4', '.mov'].indexOf(ext) !== -1) {
+            body.innerHTML = '<video controls autoplay src="' + file.url + '"></video>';
+        } else if (['.xls', '.xlsx'].indexOf(ext) !== -1) {
+            var sheetRows = (current && current.items ? current.items : []).map(function (item, index) {
+                var sent = Number((item.shippedQty !== undefined && item.shippedQty !== null ? item.shippedQty : item.sentQty) || 0);
+                return '<tr><td>' + (index + 1) + '</td><td>' + item.code + '</td><td>' + item.name + '</td><td>' + item.spec + '</td><td>' + item.unit + '</td>' +
+                    '<td>' + HaifuInventory.qty(sent) + '</td></tr>';
+            }).join('');
+            body.innerHTML = '<div class="preview-file-line">文件：' + file.name + '　·　工作表：发货明细</div>' +
+                '<table class="preview-sheet"><thead><tr><th>序号</th><th>物料编码</th><th>产品名称</th><th>规格型号</th><th>单位</th><th>发货数量</th></tr></thead><tbody>' +
+                (sheetRows || '<tr><td colspan="6" class="preview-empty">该出库单暂无明细</td></tr>') + '</tbody></table>' +
+                '<div class="preview-file-note">原型预览：完整内容以下载文件为准。</div>';
+        } else {
+            body.innerHTML = '<div class="preview-empty">当前文件暂无在线预览内容</div>';
+        }
+        document.getElementById('filePreviewMask').classList.add('show');
+    }
+    function closeFilePreview(event) {
+        if (event && event.target && event.target.id !== 'filePreviewMask') return;
+        var video = document.querySelector('#filePreviewBody video');
+        if (video) video.pause();
+        document.getElementById('filePreviewMask').classList.remove('show');
+    }
+    function fileChips(item, type, label, editable) {
+        var files = item[type] || [];
+        var accept = type === 'video' ? '.mp4,.mov' : type === 'excel' ? '.xls,.xlsx' : '.jpg,.jpeg,.png';
+        return '<div class="file-upload-box"><h4>' + label + '</h4>' +
+            (editable ? '<input type="file" accept="' + accept + '" multiple onchange="addFiles(' + lgArg(item.id) + ',\'' + type + '\',this)">' : '') +
+            '<div class="file-list">' + (files.length ? files.map(function (file, index) {
+                var action = type === 'video' ? '播放' : '预览';
+                return '<span class="file-chip"><button type="button" onclick="previewFile(' + JSON.stringify(file).replace(/"/g, '&quot;') + ')">' + action + ' · ' + file.name + '</button>' +
+                    (editable ? '<button type="button" class="remove" onclick="removeFile(' + lgArg(item.id) + ',\'' + type + '\',' + index + ')">删除</button>' : '') + '</span>';
+            }).join('') : '<span class="logistics-readonly">暂无附件</span>') + '</div></div>';
+    }
+    // 可编辑：平台中转 + 待收货（未申请验收）；已发货/已收货/直送镜像只读
+    function logisticsEditable() {
+        return HaifuInventory.canEditLogistics(current);
+    }
+    // 物流记录 id 在 onclick 中作为参数传递：数字直接用，字符串需加引号
+    function lgArg(id) {
+        return typeof id === 'number' ? String(id) : '\'' + String(id).replace(/'/g, "\\'") + '\'';
+    }
+    // ===== 统一上传 zip：压缩包内按车牌号建文件夹，逐个车辆回填附件 =====
+    function openZipUpload() {
+        if (!logisticsEditable()) { showZipResult('当前出库单物流信息已锁定（' + (current.kind === 'mirror' ? '直送单由供应商上传' : '已申请验收') + '），如需重传请先解锁或到对应确认单查看。', []); return; }
+        var el = document.getElementById('zip-input');
+        el.value = '';
+        el.click();
+    }
+    function showZipResult(msg, folders) {
+        var box = document.getElementById('zip-result');
+        if (!box) return;
+        box.className = 'zip-result show';
+        box.innerHTML = '<h4>' + msg + '</h4>' + folders.map(function (x) {
+            return '<div class="zip-folder"><span class="fld">📁 ' + x.plate + '/</span><span class="files">' +
+                (x.miss ? '<span class="miss">未找到对应车辆，请先新增并保存该车的物流信息</span>' : x.files.map(function (n) { return '· ' + n; }).join('<br>')) +
+                '</span></div>';
+        }).join('');
+    }
+    function handleZip(input) {
+        var file = input.files && input.files[0];
+        if (!file) return;
+        if (!/\.zip$/i.test(file.name)) { showZipResult('仅支持 .zip 压缩包（内含以车牌号命名的文件夹）。', []); return; }
+        var plates = logisticsRecords.filter(function (r) { return r.plate && String(r.plate).trim(); });
+        if (!plates.length) { showZipResult('未识别到车辆：请先新增并保存物流信息（车牌号）后再统一上传。', []); return; }
+        // 原型模拟解压：以已保存的车牌号建立同名文件夹，每夹装车照片 2 张 + 随车单据 1 份
+        var folders = plates.map(function (r) {
+            var plate = String(r.plate).trim();
+            var names = ['装车照片_01.jpg', '装车照片_02.jpg', '随车单据_' + plate + '.xlsx'];
+            names.forEach(function (n) {
+                var ext = n.slice(n.lastIndexOf('.')).toLowerCase();
+                var type = ext === '.xlsx' ? 'excel' : 'headPhoto';
+                r[type] = (r[type] || []).concat([{ name: plate + '/' + n, url: '' }]);
+            });
+            return { plate: plate, files: names };
+        });
+        persistLogistics();
+        renderLogistics();
+        showZipResult('已解析 ' + file.name + '，按车辆归入 ' + folders.length + ' 个文件夹、共 ' + (folders.length * 3) + ' 个文件：', folders);
+    }
+    function renderLogistics() {
+        var root = document.getElementById('logistics-list');
+        var editable = logisticsEditable();
+        var tip = document.getElementById('logistics-tip');
+        var addBtn = document.getElementById('logistics-add');
+        var zipBtn = document.getElementById('logistics-zip');
+        if (editable) {
+            tip.textContent = '一张出库单可关联多条物流信息；车牌号、司机姓名、司机手机号为必填，附件均为非必填。可用「统一上传」一次导入按车辆分文件夹的 zip 包。';
+            addBtn.style.display = '';
+            if (zipBtn) { zipBtn.style.display = ''; zipBtn.disabled = false; zipBtn.title = '一次上传按车辆分文件夹的 zip 包'; }
+        } else {
+            tip.textContent = current.kind === 'mirror'
+                ? '直送模式下物流信息由供应商提交，平台仅查看。'
+                : '已申请验收，物流信息已锁定，平台仅查看。';
+            addBtn.style.display = 'none';
+            // 统一上传按钮常驻可见，锁定时置灰并说明原因
+            if (zipBtn) { zipBtn.style.display = ''; zipBtn.disabled = true; zipBtn.title = current.kind === 'mirror' ? '直送单物流由供应商维护，平台不可上传' : '已申请验收，物流信息已锁定'; }
+        }
+        if (!logisticsRecords.length) {
+            root.innerHTML = '<div class="logistics-empty">' + (editable ? '暂无物流信息，请点击「新增」上传' : '暂无物流信息') + '</div>';
+            return;
+        }
+        root.innerHTML = logisticsRecords.map(function (item, index) {
+            var head = '<div class="logistics-card-head"><div><span class="logistics-card-title">物流信息 ' + (index + 1) + '</span>' +
+                '<span class="logistics-card-meta">' + (editable ? '车辆与司机信息必填' : (item.saved === false ? '未保存' : '供应商提交')) + '</span></div>' +
+                '<div class="logistics-card-actions">' + (editable
+                    ? (!item.saved ? '<span class="logistics-save-hint">未保存</span><button class="btn-action active" type="button" onclick="saveLogistics(' + lgArg(item.id) + ')">保存</button>' : '<span class="logistics-card-meta">已保存</span>') +
+                      '<button class="btn-action" type="button" onclick="removeLogistics(' + lgArg(item.id) + ')">删除</button>'
+                    : '') + '</div></div>';
+            var fields = '<div class="logistics-fields">' +
+                '<div class="logistics-field"><label>车牌号' + (editable ? ' *' : '') + '</label><input value="' + (item.plate || '') + '" placeholder="请输入车牌号"' + (editable ? ' onchange="updateLogistics(' + lgArg(item.id) + ',\'plate\',this.value)"' : ' disabled') + '></div>' +
+                '<div class="logistics-field"><label>司机姓名' + (editable ? ' *' : '') + '</label><input value="' + (item.driver || '') + '" placeholder="请输入司机姓名"' + (editable ? ' onchange="updateLogistics(' + lgArg(item.id) + ',\'driver\',this.value)"' : ' disabled') + '></div>' +
+                '<div class="logistics-field"><label>司机手机号' + (editable ? ' *' : '') + '</label><input value="' + (item.phone || '') + '" placeholder="请输入司机手机号"' + (editable ? ' onchange="updateLogistics(' + lgArg(item.id) + ',\'phone\',this.value)"' : ' disabled') + '></div>' +
+                '</div>';
+            var files = '<div class="logistics-files">' +
+                fileChips(item, 'headPhoto', '车辆车头照片' + (editable ? '（可选）' : ''), editable) +
+                fileChips(item, 'tailPhoto', '车辆车尾照片' + (editable ? '（可选）' : ''), editable) +
+                fileChips(item, 'video', '视频' + (editable ? '（可选，MP4/MOV，≤200MB）' : ''), editable) +
+                fileChips(item, 'excel', 'Excel' + (editable ? '（可选，XLS/XLSX，≤20MB）' : ''), editable) +
+                '</div>';
+            return '<article class="logistics-card">' + head + fields + files + '</article>';
+        }).join('');
+    }
+    function money(n) { return HaifuInventory.money(n); }
+    function renderHeader() {
+        document.getElementById('biz-no').textContent = current.bizNo;
+        document.getElementById('f-biz-no').textContent = current.bizNo;
+        document.getElementById('l-order-no').textContent = current.orderLabel;
+        document.getElementById('f-order-no').textContent = current.orderNo || '—';
+        document.getElementById('f-source-doc').textContent = current.sourceDocNo;
+        document.getElementById('l-counterparty').textContent = current.counterpartyLabel;
+        document.getElementById('f-counterparty').textContent = current.counterparty || '—';
+        document.getElementById('f-mode').textContent = current.modeLabel;
+        document.getElementById('f-kind').textContent = current.kind === 'mirror' ? current.sourceDocType : (current.owingLabel || '平台送货单');
+        document.getElementById('f-created').textContent = current.createdAt || '—';
+        document.getElementById('f-shipment').textContent = current.shipmentAt || '—';
+        document.getElementById('f-receiver').textContent = current.receiverName || '—';
+        document.getElementById('f-receiver-phone').textContent = current.receiverPhone || '—';
+        document.getElementById('f-receiver-address').textContent = current.receiverAddress || '—';
+        document.getElementById('f-received-at').textContent = current.receivedAt || '—';
+        document.getElementById('received-at-row').style.display = current.receivedAt ? 'flex' : 'none';
+        renderPurposeLocation();
+        document.title = '出库单详情 ' + current.bizNo + ' - 运营管理平台';
+        // 头部状态步骤条：待发货 › 已发货 › 已收货（当前状态高亮，已完成状态置灰）
+        var stepIndex = HaifuInventory.statusStepIndex(current.bizType, current.status);
+        document.querySelectorAll('#status-flow .step-tab').forEach(function (el, i) {
+            el.className = 'step-tab' + (i < stepIndex ? ' done' : (i === stepIndex ? ' active' : ''));
+        });
+        var banner = document.getElementById('kind-banner');
+        if (current.kind === 'mirror') {
+            banner.className = 'kind-banner kind-mirror';
+            banner.innerHTML = '单依据客户收货单「' + current.sourceDocNo + '」生成，平台仅查看，不执行库存变更。';
+        } else if (current.isOwing && current.owingType === 'platform_replenishment') {
+            banner.className = 'kind-banner kind-real';
+            banner.innerHTML = '平台出库单「' + current.sourceDocNo + '」本次发货不足，本单为平台补发送货单。';
+        } else {
+            banner.className = 'kind-banner kind-real';
+            banner.innerHTML = '';
+            banner.style.display = 'none';
+        }
+    }
+    // 目的位置：仅平台中转单展示，位置清单由「库存管理 - 目的位置维护」提供，此处只做选择与修改
+    function canEditPurposeLocation() {
+        return !!(current && current.deliveryMode === 'platform' && current.kind === 'real');
+    }
+    function renderPurposeLocation() {
+        var row = document.getElementById('purpose-location-row');
+        var select = document.getElementById('f-purpose-location');
+        if (!canEditPurposeLocation()) {
+            row.style.display = 'none';
+            return;
+        }
+        row.style.display = 'flex';
+        var options = HaifuInventory.getLocations().map(function (loc) {
+            return '<option value="' + loc.location + '">' + loc.location + '</option>';
+        }).join('');
+        select.innerHTML = '<option value="">请选择</option>' + options;
+        // 默认选中字典第一条；已保存过目的位置的单据按原值回显
+        var locations = HaifuInventory.getLocations();
+        var saved = current.purposeLocation || (locations[0] ? locations[0].location : '');
+        if (saved && !locations.some(function (loc) { return loc.location === saved; })) {
+            select.innerHTML += '<option value="' + saved + '">' + saved + '（已失效）</option>';
+        }
+        select.value = saved;
+    }
+    // 目的位置变更后即时保存到单据，刷新页面仍保留
+    function onPurposeLocationChange() {
+        if (!current || !canEditPurposeLocation()) return;
+        var value = document.getElementById('f-purpose-location').value;
+        current.purposeLocation = value;
+        HaifuInventory.saveShipment(current);
+    }
+    function renderActions() {
+        var bar = document.getElementById('action-bar');
+        if (current.kind === 'mirror') {
+            var extra = current.status === 'received'
+                ? '客户已收货。'
+                : '状态跟随客户收货单。';
+            // bar.innerHTML = '<span class="action-tip">直送模式：' + extra + '平台不提供操作。</span>';
+            return;
+        }
+        var buttons = '';
+        if (current.status === 'pending') {
+            buttons += '<button class="btn-action active" onclick="openAcceptModal()">申请验收</button>';
+        } else if (current.status === 'sent') {
+            buttons += '<button class="btn-action" disabled>已申请验收</button>';
+        } else {
+            buttons += '<button class="btn-action" disabled>客户已收货</button>';
+        }
+        buttons += '<button class="btn-action" onclick="openPrintModal()">打印送货单</button>';
+        var tip = current.status === 'pending'
+            ? '<span class="action-tip"></span>'
+            : (current.status === 'sent'
+                ? '<span class="action-tip"></span>'
+                : '<span class="action-tip"></span>');
+        bar.innerHTML = buttons + tip;
+    }
+    // 剩余发货数量（尚未发货的数量 = 发货数量 - 已发货数量）
+    function remainQty(item) {
+        return HaifuInventory.remainQty(item);
+    }
+    // 待收货（平台中转）时发货数量可修改，仅能填写本次实际发货数量
+    function canEditSentQty() {
+        return !!current && current.kind === 'real' && current.status === 'pending';
+    }
+    // 发货数量单元格：可修改时渲染输入框，并展示剩余发货数量
+    function sentCell(item, index) {
+        if (!canEditSentQty()) {
+            var done = Number(item.shippedQty || 0);
+            var owe = Number(item.owingQty || 0);
+            return HaifuInventory.qty(item.sentQty) +
+                (done > 0 && done < Number(item.sentQty)
+                    ? '<span class="qty-unit">（已发货 ' + HaifuInventory.qty(done) + item.unit +
+                      (owe > 0 ? '，欠单 ' + HaifuInventory.qty(owe) + item.unit : '') + '）</span>'
+                    : '');
+        }
+        pendingSent[String(index)] = remainQty(item);
+        return '<input class="qty-input" id="sent-input-' + index + '" type="number" min="0" max="' + remainQty(item) + '"' +
+            ' value="' + remainQty(item) + '" data-remain="' + remainQty(item) + '"' +
+            ' oninput="onSentInput(' + index + ', this)" onchange="onSentInput(' + index + ', this)">' +
+            '<span class="qty-unit">' + item.unit + '（剩余 ' + HaifuInventory.qty(remainQty(item)) + '）</span>';
+    }
+    // 校验单行发货数量：0 ≤ 本次发货数量 ≤ 剩余发货数量
+    function onSentInput(index, el) {
+        var remain = Number(el.getAttribute('data-remain'));
+        var value = Number(el.value);
+        var invalid = el.value === '' || isNaN(value) || value < 0 || value > remain;
+        el.classList.toggle('invalid', invalid);
+        if (!invalid) pendingSent[String(index)] = value;
+    }
+    // 收集明细中的发货数量，存在非法输入时返回 null
+    function collectSentQty() {
+        var invalid = current.items.some(function (item, index) {
+            var el = document.getElementById('sent-input-' + index);
+            if (!el) return false;
+            var value = Number(el.value);
+            return el.value === '' || isNaN(value) || value < 0 || value > Number(el.getAttribute('data-remain'));
+        });
+        return invalid ? null : pendingSent;
+    }
+    function renderItems() {
+        var tbody = document.getElementById('items-body');
+        var total = 0;
+        pendingSent = {};
+        tbody.innerHTML = (current.items || []).map(function (item, index) {
+            var amount = Number(item.price || 0) * Number(item.orderQty || 0);
+            total += amount;
+            return '<tr>' +
+                '<td>' + (index + 1) + '</td>' +
+                '<td>' + item.code + '</td>' +
+                '<td>' + item.name + '</td>' +
+                '<td class="item-image">📦</td>' +
+                '<td>' + item.spec + '</td>' +
+                '<td>' + item.brand + '</td>' +
+                '<td>' + HaifuInventory.qty(item.orderQty) + '</td>' +
+                '<td>' + HaifuInventory.qty(current.status === 'pending' ? remainQty(item) : 0) + '</td>' +
+                '<td>' + sentCell(item, index) + '</td>' +
+                '<td>' + item.unit + '</td>' +
+                '<td>' + Number(item.price || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</td>' +
+                '<td><span class="tax-tag">13%</span></td>' +
+                '<td>' + money(amount) + '</td>' +
+                '</tr>';
+        }).join('');
+        var subtotal = total / 1.13;
+        document.getElementById('subtotal').textContent = money(subtotal);
+        document.getElementById('tax-total').textContent = money(total - subtotal);
+        document.getElementById('grand-total').textContent = money(total);
+    }
+    function render() {
+        renderHeader();
+        bindOrderNoLink();
+        renderActions();
+        renderItems();
+        logisticsRecords = HaifuInventory.getLogistics(current);
+        renderLogistics();
+    }
+    // 平台销售订单号跳转到对应的销售订单详情
+    function goOrderDetail() {
+        if (!current || !current.orderNo) return;
+        location.href = '销售订单详情.html?order=' + encodeURIComponent(current.orderNo) + '&status=confirm';
+    }
+    function bindOrderNoLink() {
+        var el = document.getElementById('f-order-no');
+        var clickable = !!(current && current.orderNo);
+        el.classList.toggle('link', clickable);
+        el.style.cursor = clickable ? 'pointer' : 'default';
+        el.title = clickable ? '查看平台销售订单' : '';
+    }
+    function openAcceptModal() {
+        if (canEditSentQty()) {
+            var map = collectSentQty();
+            if (!map) {
+                alert('发货数量不能为空、不能为负数，且不能大于剩余发货数量');
+                return;
+            }
+            // 以明细表录入值为准同步到 pendingSent，避免申请验收时用到渲染时的旧值
+            pendingSent = map;
+        }
+        document.getElementById('accept-modal').classList.add('show');
+    }
+    function closeAcceptModal() {
+        document.getElementById('accept-modal').classList.remove('show');
+    }
+    // 本次申请验收发货数量小于剩余发货数量的产品（差额即欠单数量）
+    function shortItems() {
+        var map = collectSentQty();
+        if (!map) return [];
+        return current.items.map(function (item, index) {
+            var sent = map[String(index)];
+            var remain = remainQty(item);
+            return {
+                index: index,
+                item: item,
+                sent: sent === undefined ? remain : Number(sent),
+                remain: remain
+            };
+        }).filter(function (row) { return row.sent < row.remain; });
+    }
+    function submitAcceptance() {
+        var map = canEditSentQty() ? collectSentQty() : null;
+        if (canEditSentQty()) {
+            if (!map) {
+                alert('发货数量不能为空、不能为负数，且不能大于剩余发货数量');
+                return;
+            }
+            pendingSent = map;
+        }
+        var shorts = shortItems();
+        if (shorts.length) {
+            pendingAcceptQty = map;
+            closeAcceptModal();
+            document.getElementById('owing-desc').innerHTML =
+                '录入的发货数量小于本次可发货数量，差额将生成对应的欠单收货单，客户侧按欠单数量补收货。<br />是否确认提交？';
+            document.getElementById('owing-table').innerHTML =
+                '<thead><tr><th>产品</th><th>可发货数量</th><th>本次发货数量</th><th>欠单数量</th></tr></thead><tbody>' +
+                shorts.map(function (row) {
+                    return '<tr>' +
+                        '<td>' + row.item.name + '</td>' +
+                        '<td>' + HaifuInventory.qty(row.remain) + ' ' + row.item.unit + '</td>' +
+                        '<td>' + HaifuInventory.qty(row.sent) + ' ' + row.item.unit + '</td>' +
+                        '<td>' + HaifuInventory.qty(row.remain - row.sent) + ' ' + row.item.unit + '</td>' +
+                        '</tr>';
+                }).join('') + '</tbody>';
+            document.getElementById('owing-modal').classList.add('show');
+            return;
+        }
+        finishAcceptance(map);
+    }
+    function closeOwingModal() {
+        document.getElementById('owing-modal').classList.remove('show');
+        pendingAcceptQty = null;
+    }
+    function confirmAcceptWithOwing() {
+        var map = pendingAcceptQty;
+        document.getElementById('owing-modal').classList.remove('show');
+        pendingAcceptQty = null;
+        finishAcceptance(map);
+    }
+    function finishAcceptance(map) {
+        var result = HaifuInventory.applyAcceptance(current.id, map);
+        if (!result) { alert('当前出库单不可申请验收'); return; }
+        current = result.shipment;
+        pendingSent = {};
+        pendingAcceptQty = null;
+        render();
+        alert(result.owing
+            ? '已发货并生成对应欠单 ' + result.owing.bizNo + '，客户侧已生成收货单，欠单数量待补发'
+            : '已申请验收，平台将向客户发货，客户侧已生成收货单');
+    }
+    // ===== 打印平台送货单（与供应商端送货单打印口径一致：先选模板，可预览，再打印）=====
+    var selectedPrintTemplate = 'with-price';
+    function openPrintModal() {
+        if (current.kind !== 'real') return;
+        document.getElementById('print-modal').classList.add('show');
+    }
+    function closePrintModal() {
+        document.getElementById('print-modal').classList.remove('show');
+    }
+    function getPrintTemplate() {
+        return document.querySelector('input[name="printTemplate"]:checked').value;
+    }
+    function formatPrintDate(date) {
+        return date.getFullYear() + '年' +
+            String(date.getMonth() + 1).padStart(2, '0') + '月' +
+            String(date.getDate()).padStart(2, '0') + '日';
+    }
+    // 生成占位二维码（原型用，仅供打印效果展示）
+    function buildQrDataUrl() {
+        var size = 33;
+        var cells = [];
+        for (var y = 0; y < size; y++) {
+            cells[y] = [];
+            for (var x = 0; x < size; x++) cells[y][x] = false;
+        }
+        function finder(left, top) {
+            for (var fy = 0; fy < 7; fy++) {
+                for (var fx = 0; fx < 7; fx++) {
+                    cells[top + fy][left + fx] = fx === 0 || fx === 6 || fy === 0 || fy === 6 || (fx >= 2 && fx <= 4 && fy >= 2 && fy <= 4);
+                }
+            }
+        }
+        finder(1, 1); finder(size - 8, 1); finder(1, size - 8);
+        for (var row = 0; row < size; row++) {
+            for (var col = 0; col < size; col++) {
+                var reserved = (row < 9 && col < 9) || (row < 9 && col > size - 10) || (row > size - 10 && col < 9);
+                if (!reserved && ((row * 17 + col * 31 + row * col * 7 + 13) % 11 < 5)) cells[row][col] = true;
+            }
+        }
+        var rects = '';
+        for (var r = 0; r < size; r++) {
+            for (var c = 0; c < size; c++) {
+                if (cells[r][c]) rects += '<rect x="' + c + '" y="' + r + '" width="1" height="1"/>';
+            }
+        }
+        return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + size + ' ' + size + '"><rect width="100%" height="100%" fill="white"/><g fill="black">' + rects + '</g></svg>'
+        );
+    }
+    function buildPreview() {
+        var showPrice = selectedPrintTemplate === 'with-price';
+        var rows = (current.items || []).map(function (item, index) {
+            var amount = Number(item.price || 0) * Number(item.orderQty || 0);
+            return '<tr>' +
+                '<td>' + (index + 1) + '</td>' +
+                '<td>' + item.code + '</td>' +
+                '<td>' + item.name + '</td>' +
+                '<td>' + item.spec + '</td>' +
+                '<td>' + item.brand + '</td>' +
+                '<td>' + HaifuInventory.qty(item.orderQty) + '</td>' +
+                '<td>' + HaifuInventory.qty(item.sentQty) + '</td>' +
+                '<td>' + item.unit + '</td>' +
+                (showPrice ? '<td>' + Number(item.price || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</td>' : '') +
+                '<td>13% 销项税</td>' +
+                (showPrice ? '<td>' + money(amount) + '</td>' : '') +
+                '</tr>';
+        }).join('');
+        return '<div class="print-preview-page">' +
+            '<div class="preview-brand"><strong>元象</strong><span class="preview-company">海赋科技（山东）数字产业发展有限公司</span></div>' +
+            '<div class="preview-title">平台送货单</div>' +
+            '<div class="preview-info-wrap"><div class="preview-info">' +
+            '<div><b>编号：</b>' + current.bizNo + '</div>' +
+            '<div><b>平台销售订单号：</b>' + (current.orderNo || '—') + '</div>' +
+            '<div><b>客户：</b>' + (current.counterparty || '—') + '</div>' +
+            '<div><b>收货人：</b>' + (current.receiverName || '—') + ' ' + (current.receiverPhone || '') + '</div>' +
+            '<div><b>收货地址：</b>' + (current.receiverAddress || '—') + '</div>' +
+            '<div><b>目的位置：</b>' + (current.purposeLocation || '—') + '</div>' +
+            '</div><img class="preview-qr" alt="收货确认二维码" src="' + buildQrDataUrl() + '" /></div>' +
+            '<table class="preview-table"><thead><tr><th>No.</th><th>物料编码</th><th>产品名称</th><th>规格</th><th>品牌</th><th>订单数量</th><th>发货数量</th><th>单位</th>' +
+            (showPrice ? '<th>单价</th>' : '') + '<th>税项</th>' + (showPrice ? '<th>含税金额</th>' : '') + '</tr></thead><tbody>' + rows + '</tbody></table>' +
+            '<div class="preview-footer"><span>打印日期：' + formatPrintDate(new Date()) + '</span><span>收货人：' + (current.receiverName || '—') + '</span></div>' +
+            '</div>';
+    }
+    function previewShipment() {
+        selectedPrintTemplate = getPrintTemplate();
+        document.getElementById('preview-body').innerHTML = buildPreview();
+        closePrintModal();
+        document.getElementById('preview-modal').classList.add('show');
+    }
+    function closePreviewModal() {
+        document.getElementById('preview-modal').classList.remove('show');
+        document.getElementById('print-modal').classList.add('show');
+    }
+    function printFromPreview() {
+        document.getElementById('preview-modal').classList.remove('show');
+        printPaper();
+    }
+    function printShipment() {
+        selectedPrintTemplate = getPrintTemplate();
+        closePrintModal();
+        printPaper();
+    }
+    /** 仅打印送货单纸张本身：把预览内容注入打印专用容器，隐藏页面其余部分 */
+    function printPaper() {
+        var area = document.getElementById('print-area');
+        area.innerHTML = buildPreview();
+        document.body.classList.add('printing');
+        window.print();
+        setTimeout(function () {
+            document.body.classList.remove('printing');
+            area.innerHTML = '';
+        }, 500);
+    }
+    (function init() {
+        var id = getParam('id') || getParam('no');
+        current = id ? HaifuInventory.getShipment(id) : null;
+        if (!current) {
+            var list = HaifuInventory.getShipments();
+            current = list[0];
+        }
+        if (!current) {
+            document.querySelector('.content-card').innerHTML = '<div class="empty-tip">未找到对应的出库单</div>';
+            return;
+        }
+        render();
+    })();
+</script>
+
+<div id="stkToast" style="display:none;position:fixed;top:82px;left:50%;transform:translateX(-50%);padding:10px 18px;background:#f5fbff;border:1px solid #b7dcff;color:#1677d2;border-radius:6px;font-size:13px;z-index:1500"></div>
+
+</body>
+</html>

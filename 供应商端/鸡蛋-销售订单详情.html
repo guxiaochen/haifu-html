@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>销售订单详情 - 供应商端</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f4f6f9;color:#1f2937;font-size:14px;min-height:100vh}
+
+/* ===== 主区域 ===== */
+.main-area{margin-left:200px;min-height:100vh}
+.top-nav{height:64px;background:#fff;display:flex;align-items:center;padding:0 32px;border-bottom:1px solid #edf0f4;position:sticky;top:0;z-index:10}
+.breadcrumb{display:flex;align-items:center;gap:9px;color:#9aa5b1;font-size:13px}
+.breadcrumb a{color:#667382;text-decoration:none;cursor:pointer}
+.breadcrumb a:hover{color:#1890ff}
+.breadcrumb .current{color:#253142;font-weight:600}
+.breadcrumb .sep{color:#cfd6de}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:22px;color:#778393}
+.notice{font-size:18px;position:relative;cursor:pointer}
+.badge{position:absolute;top:-7px;right:-8px;background:#ff4d4f;border:2px solid #fff;color:#fff;min-width:16px;height:16px;padding:0 4px;border-radius:9px;font-size:10px;display:flex;align-items:center;justify-content:center}
+.user{display:flex;align-items:center;gap:9px;color:#475467;cursor:pointer}
+.avatar{width:30px;height:30px;border-radius:50%;background:#e6f4ff;color:#1890ff;display:flex;align-items:center;justify-content:center;font-weight:600}
+
+.main{padding:26px 32px 40px;max-width:1600px}
+
+/* ===== 页面标题卡片 ===== */
+.title-card{position:relative;background:#fff;padding:14px 20px;border-radius:4px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.04);display:flex;align-items:center;justify-content:space-between}
+.title-card-left{display:flex;align-items:center;gap:12px}
+.title-order-no{font-size:18px;font-weight:600;color:#253142}
+.title-card-right{display:flex;align-items:center;gap:0}
+
+/* ===== 送货单胶囊提醒（嵌入标题卡片右侧、与步骤条垂直居中） ===== */
+.delivery-alert{display:none;align-items:center;gap:6px;padding:5px 12px 5px 8px;background:#f0faf5;color:#2BA471;border:1px solid #b7eb8f;border-radius:16px;font-size:12px;cursor:pointer;transition:all .2s}
+.delivery-alert-group{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:12px;z-index:5}
+.delivery-alert:hover{background:#e6f7ef;border-color:#2BA471}
+.delivery-alert .alert-icon{width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:#2BA471;color:#fff;border-radius:50%;font-size:12px}
+.delivery-alert .alert-text{font-weight:500}
+.delivery-alert .alert-arrow{font-size:14px}
+
+/* ===== 主内容卡片 ===== */
+.content-card{background:#fff;padding:20px 24px;border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.04);margin-bottom:12px}
+
+/* ===== 操作栏 + 步骤条 ===== */
+.action-bar{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid #f5f5f5}
+.action-bar-left{display:flex;align-items:center;gap:8px}
+.action-bar-right{margin-left:auto;display:flex;align-items:center;gap:0}
+
+/* 操作按钮 */
+.btn-action{padding:7px 20px;border:1px solid #d9d9d9;background:#fff;border-radius:2px;cursor:pointer;font-size:13px;color:#666;transition:all .15s}
+.btn-action:hover{color:#1890ff;border-color:#1890ff}
+.btn-action.primary{background:#1890ff;color:#fff;border-color:#1890ff}
+.btn-action.primary:hover{background:#40a9ff;border-color:#40a9ff}
+.btn-action:disabled{color:#ccc;border-color:#eee;background:#fafafa;cursor:not-allowed}
+.btn-action:disabled:hover{color:#ccc;border-color:#eee;background:#fafafa}
+
+/* 斜箭头步骤条 */
+.step-tabs{display:flex;align-items:center;gap:0}
+.step-tab{padding:6px 18px;background:#f5f5f5;color:#666;font-size:13px;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 50%,calc(100% - 8px) 100%,0 100%,8px 50%);margin-right:-8px;transition:all .15s}
+.step-tab:first-child{clip-path:polygon(0 0,calc(100% - 8px) 0,100% 50%,calc(100% - 8px) 100%,0 100%)}
+.step-tab:last-child{clip-path:polygon(0 0,100% 0,100% 100%,0 100%,8px 50%);margin-right:0}
+.step-tab.active{background:#1890ff;color:#fff}
+.step-tab.done{background:#e8e8e8;color:#999}
+
+/* ===== 订单信息区 ===== */
+.info-section{display:grid;grid-template-columns:1fr 1fr;gap:36px 72px;margin-bottom:8px}
+.info-column{display:flex;flex-direction:column;gap:22px;padding:4px 0}
+.info-column-title{font-size:14px;font-weight:600;color:#253142;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.info-column-title::before{content:"";display:inline-block;width:3px;height:14px;background:#1890ff;border-radius:2px}
+.form-item{display:flex;align-items:flex-start;gap:20px;padding:4px 0}
+.form-label{min-width:84px;color:#667382;font-size:13px;text-align:right;flex-shrink:0;padding-top:2px}
+.form-value{color:#253142;font-size:13px;flex:1;line-height:1.6}
+.form-value .link{color:#1890ff;cursor:pointer;text-decoration:none}
+.form-value .link:hover{text-decoration:underline}
+
+/* 红色标注说明 */
+.tag-hint{display:inline-block;margin-left:6px;padding:1px 6px;background:#fff7e6;color:#d48806;border:1px solid #ffd591;font-size:11px;border-radius:2px}
+.tag-hint.red{background:#fff2f0;color:#cf1322;border:1px solid #ffa39e}
+.tag-hint-block{display:block;margin-top:4px;padding:1px 6px;background:#fff2f0;color:#cf1322;border:1px solid #ffa39e;font-size:11px;border-radius:2px}
+
+/* ===== Tab 切换 ===== */
+.tab-bar{display:flex;gap:0;margin-top:28px;border-bottom:1px solid #f0f0f0}
+.tab-btn{padding:10px 20px;cursor:pointer;font-size:14px;color:#666;border-bottom:2px solid transparent;transition:all .15s}
+.tab-btn:hover{color:#1890ff}
+.tab-btn.active{color:#1890ff;border-bottom-color:#1890ff;font-weight:500}
+.tab-content{display:none;padding-top:16px}
+.tab-content.active{display:block}
+
+/* 空内容提示 */
+.empty-tip{text-align:center;padding:40px 20px;color:#999;font-size:13px}
+
+/* ===== 明细表 ===== */
+table.items-table{width:100%;border-collapse:collapse;font-size:13px}
+table.items-table thead{background:#fafafa}
+table.items-table th{padding:10px 12px;text-align:left;color:#555;font-weight:500;border-bottom:1px solid #f0f0f0;white-space:nowrap}
+table.items-table td{padding:12px;color:#333;border-bottom:1px solid #f5f5f5}
+table.items-table tbody tr:hover{background:#fafbff}
+.product-info{display:flex;flex-direction:column;gap:2px}
+.product-code{font-size:12px;color:#999}
+.product-img{width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;background:#f5f7fa;border:1px solid #e5e7eb;border-radius:5px;font-size:22px}
+.tax-tag{display:inline-block;padding:1px 6px;background:#f0f5ff;color:#1890ff;border:1px solid #d6e4ff;border-radius:2px;font-size:11px}
+
+/* 底部金额 */
+.footer-bar{display:flex;align-items:flex-end;justify-content:space-between;margin-top:16px;padding-top:12px}
+.settle-title{font-size:14px;font-weight:600;color:#1890ff;margin:4px 0 12px;padding-left:10px;border-left:3px solid #1890ff}
+.settle-empty{text-align:center;color:#999;padding:26px 0 !important}
+.totals{text-align:right}
+.totals .row{display:flex;gap:16px;font-size:13px;margin-bottom:4px}
+.totals .row .label{color:#666;min-width:70px;text-align:right}
+.totals .row .value{color:#333;min-width:100px;text-align:right}
+.totals .row.total .label{font-weight:600}
+.totals .row.total .value{color:#1890ff;font-weight:600;font-size:15px}
+
+/* ===== Toast ===== */
+.toast{position:fixed;top:82px;left:50%;transform:translateX(-50%);padding:11px 20px;border:1px solid #b7dcff;background:#f5fbff;color:#1677d2;border-radius:5px;box-shadow:0 7px 20px rgba(24,144,255,.12);display:none;z-index:50}
+.toast.show{display:block}
+
+/* ===== 确认弹窗 ===== */
+.modal-mask{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
+.modal-mask.show{display:flex}
+.modal{background:#fff;border-radius:6px;width:380px;padding:24px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:8px}
+.modal-desc{font-size:13px;color:#666;margin-bottom:20px;line-height:1.6}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+.modal-actions .btn{padding:7px 18px;border-radius:2px;cursor:pointer;font-size:13px;border:1px solid #d9d9d9;background:#fff;color:#333;transition:all .15s}
+.modal-actions .btn:hover{color:#1890ff;border-color:#1890ff}
+.modal-actions .btn-primary{background:#1890ff;color:#fff;border-color:#1890ff}
+.modal-actions .btn-primary:hover{background:#40a9ff}
+
+
+        /* ===== 发票模块 ===== */
+        .inv-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; max-width: 620px; }
+        .inv-cell { padding: 9px 12px; border: 1px solid #f0f0f0; border-radius: 4px; background: #fafafa; }
+        .inv-cell .k { font-size: 12px; color: #888; }
+        .inv-cell .v { font-size: 15px; font-weight: 600; color: #333; margin-top: 3px; font-variant-numeric: tabular-nums; }
+        .inv-cell.accent { background: #eaf4ff; border-color: #b7dcff; }
+        .inv-cell.accent .v { color: #1890ff; }
+        .inv-head { display: flex; align-items: center; margin-bottom: 12px; }
+        .inv-title { font-size: 14px; font-weight: 600; color: #1890ff; padding-left: 10px; border-left: 3px solid #1890ff; }
+        .inv-title .cnt { font-size: 12px; color: #999; font-weight: 400; margin-left: 8px; }
+        .inv-actions { margin-left: auto; }
+        .inv-empty { text-align: center; color: #999; font-size: 13px; padding: 26px 0; }
+        .inv-tag { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #f5f5f5; color: #888; border: 1px solid #e3e7ec; }
+        .inv-tag.done { background: #f1fae9; color: #389e0d; border-color: #b7eb8f; }
+        .inv-tag.part { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+        .inv-file { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #fafafa; border: 1px solid #eee; border-radius: 6px; max-width: 380px; margin-bottom: 8px; }
+        .inv-file .fi { width: 32px; height: 32px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; background: #d9534f; flex-shrink: 0; }
+        .inv-file .fn { flex: 1; min-width: 0; font-size: 13px; color: #333; }
+        .inv-file .fo { display: inline-flex; gap: 10px; }
+        .inv-file .fo a { color: #1890ff; cursor: pointer; font-size: 13px; text-decoration: none; }
+        .inv-upload { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1px dashed #d9d9d9; border-radius: 6px; cursor: pointer; color: #1890ff; font-size: 13px; margin-top: 4px; }
+        .inv-upload:hover { border-color: #1890ff; background: #eaf4ff; }
+        .inv-mask { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1200; align-items: center; justify-content: center; }
+        .inv-mask.show { display: flex; }
+        .inv-modal { width: 720px; max-width: calc(100vw - 32px); background: #fff; border-radius: 4px; box-shadow: 0 8px 24px rgba(0,0,0,.18); overflow: hidden; }
+        .inv-modal-head { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; }
+        .inv-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #999; line-height: 1; }
+        .inv-modal-body { padding: 20px; max-height: calc(100vh - 220px); overflow: auto; }
+        .inv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; }
+        .inv-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .inv-row.top { align-items: flex-start; }
+        .inv-row.full { grid-column: 1 / -1; }
+        .inv-row label { width: 104px; text-align: right; margin-right: 12px; color: #555; font-size: 13px; flex-shrink: 0; }
+        .inv-row input, .inv-row select, .inv-row textarea { flex: 1; min-width: 0; padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 2px; font: inherit; font-size: 13px; outline: none; background: #fff; }
+        .inv-row input, .inv-row select { height: 32px; }
+        .inv-row textarea { min-height: 56px; resize: vertical; }
+        .inv-row input[readonly] { background: #f5f6f7; color: #999; cursor: default; }
+        .inv-row input:focus, .inv-row select:focus { border-color: #1890ff; }
+        .inv-unit { margin-left: 8px; color: #666; font-size: 12px; flex-shrink: 0; }
+        .inv-err { font-size: 12px; color: #ff4d4f; min-height: 16px; }
+        .inv-ocr { font-size: 12px; color: #389e0d; margin-top: 6px; display: none; }
+        .inv-tip { grid-column: 1 / -1; padding: 9px 12px; margin-bottom: 4px; border-radius: 4px; font-size: 12px; line-height: 1.7; background: #f0faf5; border: 1px solid #b7e4cd; color: #1d6b46; }
+        .inv-section { grid-column: 1 / -1; padding-top: 4px; margin-top: 2px; border-top: 1px solid #f0f0f0; color: #1890ff; font-size: 13px; font-weight: 600; }
+        .inv-required { color: #ff4d4f; margin-right: 3px; }
+        .inv-modal-foot { padding: 12px 20px; border-top: 1px solid #f0f0f0; text-align: right; }
+        .inv-modal-foot .btn { margin-left: 8px; padding: 6px 16px; border: 1px solid #d9d9d9; border-radius: 2px; background: #fff; cursor: pointer; font: inherit; font-size: 13px; color: #333; }
+        .inv-modal-foot .btn:hover { border-color: #1890ff; color: #1890ff; }
+        .inv-modal-foot .btn.pri { background: #1890ff; border-color: #1890ff; color: #fff; }
+        .inv-modal-foot .btn.pri:hover { background: #096dd9; color: #fff; }
+        .inv-kv { display: flex; gap: 14px; margin-bottom: 12px; font-size: 13px; }
+        .inv-kv .k { min-width: 88px; text-align: right; color: #888; flex-shrink: 0; }
+        .inv-kv .v { flex: 1; color: #333; }
+        .inv-sec { font-size: 13px; font-weight: 600; color: #1890ff; margin: 4px 0 12px; padding-left: 8px; border-left: 3px solid #1890ff; }
+    </style>
+</head>
+<body>
+<script src="sidebar.js"></script>
+
+<div class="main-area">
+    <header class="top-nav">
+        <div class="breadcrumb">
+             <a onclick="location.href='销售订单列表.html?cat=egg'">首页</a><span class="sep">/</span>
+            <a onclick="location.href='销售订单列表.html?cat=egg'">销售订单</a><span class="sep">/</span>
+            <span class="current" id="breadcrumb-order">销售订单详情</span>
+        </div>
+        <div class="top-actions"><span class="notice">♧<span class="badge">3</span></span><div class="user"><span class="avatar">管</span><span>超级管理员</span><span style="font-size:11px">⌄</span></div></div>
+    </header>
+
+    <main class="main">
+
+        <!-- 页面标题卡片 -->
+        <div class="title-card">
+            <div class="title-card-left">
+                <span class="title-order-no" id="display-order-no">EGG-SO-20260905001</span>
+            </div>
+            <div class="title-card-right">
+                <div class="step-tabs">
+                    <div class="step-tab active" id="step-0">待确认</div>
+                    <div class="step-tab" id="step-1">已确认</div>
+                </div>
+            </div>
+            <div class="delivery-alert-group">
+                <div class="delivery-alert" id="deliveryAlert" onclick="openShipments()">
+                    <span class="alert-icon">📦</span>
+                    <span class="alert-text" id="deliveryAlertText">供应商发货确认单 × 1</span>
+                    <span class="alert-arrow">›</span>
+                </div>
+                <div class="delivery-alert" id="recvAlert" onclick="goRecvList()">
+                    <span class="alert-icon">📄</span>
+                    <span class="alert-text">平台收货确认单 × 1</span>
+                    <span class="alert-arrow">›</span>
+                </div>
+                <!-- <div class="delivery-alert" id="prepayAlert" onclick="goSettleList()">
+                    <span class="alert-icon">💰</span>
+                    <span class="alert-text" id="prepayAlertText">结算单 × 1</span>
+                    <span class="alert-arrow">›</span>
+                </div> -->
+            </div>
+        </div>
+
+        <!-- 主内容卡片 -->
+        <div class="content-card">
+
+            <!-- 操作按钮 -->
+            <div class="action-bar">
+                <div class="action-bar-left">
+                    <button class="btn-action primary" id="btn-confirm" onclick="confirmOrder()">确认销售</button>
+                </div>
+            </div>
+
+            <!-- 订单信息（左右两栏） -->
+            <div class="info-section">
+                <!-- 左栏：销售方（供应商自身） -->
+                <div class="info-column">
+                    <div class="info-column-title">销售方信息</div>
+                    <div class="form-item">
+                        <label class="form-label">供应商</label>
+                        <div class="form-value">平原县蛋鸡养殖合作社</div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label" style="font-weight:700;color:#344054">联系人</label>
+                        <div class="form-value">张建国</div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label" style="font-weight:700;color:#344054">联系电话</label>
+                        <div class="form-value">0534-8212688</div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">地址</label>
+                        <div class="form-value">山东省德州市平原县坊子乡蛋鸡养殖产业园1号</div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label">发货日期</label>
+                        <div class="form-value">2026年09月05日</div>
+                    </div>
+                    <style>
+                      .egg-file { display:inline-flex; align-items:center; gap:10px; padding:8px 12px; background:#f7f9fb; border:1px solid #edf0f4; border-radius:6px; max-width:100%; }
+                      .egg-file .ico { width:32px; height:32px; border-radius:5px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:15px; flex-shrink:0; }
+                      .egg-file .ico.pdf{background:#d9534f;} .egg-file .ico.img{background:#4aa3df;} .egg-file .ico.xls{background:#217346;}
+                      .egg-file .nm{font-size:13px;color:#1f2937;} .egg-file .tp{font-size:11px;color:#8c98a8;}
+                      .egg-file .ops{display:inline-flex;gap:10px;margin-left:6px;}
+                      .egg-file .ops a{color:#1890ff;cursor:pointer;font-size:13px;text-decoration:none;}
+                      .egg-file .ops a:hover{text-decoration:underline;}
+                      .egg-file .ops a.del{color:#ff4d4f;}
+                    </style>
+                    <div class="form-item">
+                        <label class="form-label">订货单</label>
+                        <div class="form-value"><span class="egg-file"><span class="ico pdf">PDF</span><span class="nm">订货单（aqtest薄眠-焱丰）_20260905.pdf</span><span class="tp">PDF</span><span class="ops"><a onclick="showToast('预览（演示）')" title="预览">🔍</a><a onclick="showToast('下载（演示）')" title="下载">⬇</a></span></span></div>
+                    </div>
+                </div>
+
+                <!-- 右栏：客户信息 -->
+                <div class="info-column">
+                    <div class="info-column-title">客户信息</div>
+                    <div class="form-item">
+                        <label class="form-label">客户</label>
+                        <div class="form-value">焱丰（山东）供应链管理有限公司</div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label" style="font-weight:700;color:#344054">收货人</label>
+                        <div class="form-value">李守货</div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label" style="font-weight:700;color:#344054">收货人电话</label>
+                        <div class="form-value">17505308090</div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label" style="font-weight:700;color:#344054">收货地址</label>
+                        <div class="form-value">山东省济南市历城区冷链物流园B区12号库</div>
+                    </div>
+                    <div class="form-item">
+                        <label class="form-label" style="font-weight:700;color:#344054">备注</label>
+                        <div class="form-value">按发货日期分批发货，到货需冷藏运输并附检疫合格证明</div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- Tab 切换 -->
+            <div class="tab-bar">
+                <div class="tab-btn active" onclick="showTab('product')">订单明细</div>
+                <div class="tab-btn" onclick="showTab('invoice')">发票</div>
+                <div class="tab-btn" onclick="showTab('prepay')">结算单</div>
+            </div>
+
+            <!-- 订单明细 -->
+            <div class="tab-content active" id="tab-product">
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>商品图片</th>
+                            <th>物料编码</th>
+                            <th>产品名称</th>
+                            <th>规格型号</th>
+                            <th>品牌</th>
+                            <th>数量</th>
+                            <th>单位</th>
+                            <th>单价</th>
+                            <th>税率</th>
+                            <th>不含税金额</th>
+                            <th>已接受</th>
+                            <th>已结算</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td><span class="product-img" aria-label="商品图片">🥚</span></td>
+                            <td>0000807</td>
+                            <td>
+                                <div class="product-info">
+                                    <div>鲜鸡蛋（分级红皮蛋）</div>
+                                    <div class="product-code">EGG-FRESH-30</div>
+                                </div>
+                            </td>
+                            <td>30枚/箱 净重约16kg</td>
+                            <td>平原蛋鸡</td>
+                            <td id="d-qty">800</td>
+                            <td>箱</td>
+                            <td id="d-price">0.00</td>
+                            <td><span class="tax-tag">0%</span></td>
+                            <td id="d-amount">¥ 0.00</td>
+                            <td id="d-accepted">—</td>
+                            <td id="d-settled">—</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="footer-bar">
+                    <div></div>
+                    <div class="totals">
+                        <div class="row"><span class="label">未税金额:</span><span class="value" id="t-net">¥ 0.00</span></div>
+                        <div class="row"><span class="label">增值税0%:</span><span class="value" id="t-tax">¥ 0.00</span></div>
+                        <div class="row total"><span class="label">总计:</span><span class="value" id="t-total">¥ 0.00</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 其他信息：结算单列表（平台确认付款后同步至供应商端） -->
+            <!-- 发票 -->
+            <div class="tab-content" id="tab-invoice">
+                <div class="inv-head">
+                    <div class="inv-title">发票<span class="cnt" id="invCount">共 0 条</span></div>
+                    <div class="inv-actions"><button class="btn-action primary" id="invUploadBtn" onclick="openInvModal()">⬆ 上传发票</button></div>
+                </div>
+                <div class="inv-bar">
+                    <div class="inv-cell"><div class="k">订单总金额</div><div class="v" id="invTotal">¥ 0.00</div></div>
+                    <div class="inv-cell"><div class="k">已开票金额</div><div class="v" id="invDone">¥ 0.00</div></div>
+                    <div class="inv-cell accent"><div class="k">待开票金额</div><div class="v" id="invTodo">¥ 0.00</div></div>
+                </div>
+                <div class="inv-empty" id="invEmpty">暂无发票 —— 可为该订单开具并上传发票</div>
+                <table class="items-table" id="invTable" style="display:none;">
+                    <thead><tr><th>序号</th><th>发票号码</th><th>开票日期</th><th>票种</th><th style="text-align:right;">金额（不含税）</th><th style="text-align:right;">税额</th><th style="text-align:right;">价税合计</th><th>状态</th><th>附件</th></tr></thead>
+                    <tbody id="invTbody"></tbody>
+                </table>
+            </div>
+
+            <!-- 上传发票弹窗 -->
+            <div class="inv-mask" id="invModal">
+                <div class="inv-modal">
+                    <div class="inv-modal-head">上传发票<button class="inv-close" onclick="closeInvModal()">×</button></div>
+                    <div class="inv-modal-body">
+                        <div class="inv-grid">
+                            <div class="inv-tip">当前销售订单 <strong id="ivOrderNo"></strong>，无需再选择销售订单。</div>
+                            <div class="inv-row full top"><label><span class="inv-required">*</span>发票附件</label><span style="flex:1;"><span id="ivFiles"></span><span class="inv-upload" onclick="invAddFile()">⬆ 上传发票附件（PDF / 图片）</span><div class="inv-ocr" id="ivOcr"></div></span></div>
+                            <div class="inv-section">发票信息</div>
+                            <div class="inv-row"><label>购方（平台）</label><input id="ivBuyer" value="焱丰（山东）供应链管理有限公司" readonly></div>
+                            <div class="inv-row"><label>本方（销方）</label><input id="ivSeller" readonly></div>
+                            <div class="inv-row"><label>订单金额</label><input id="ivOrderAmt" readonly></div>
+                            <div class="inv-row"><label>待开票金额</label><input id="ivTodo" readonly></div>
+                            <div class="inv-row"><label><span class="inv-required">*</span>发票号码</label><input id="ivNo" placeholder="请输入发票号码" maxlength="20"></div>
+                            <div class="inv-row"><label>发票代码</label><input id="ivCode" placeholder="请输入发票代码"></div>
+                            <div class="inv-row"><label><span class="inv-required">*</span>开票日期</label><input id="ivDate" type="date" value="2026-10-14"></div>
+                            <div class="inv-row"><label>票种</label><input id="ivKind" value="增值税普通发票（免税）" readonly></div>
+                            <div class="inv-row"><label><span class="inv-required">*</span>金额（不含税）</label><input id="ivAmount" type="number" step="0.01" min="0" oninput="invCalc()"></div>
+                            <div class="inv-row"><label>税率 / 税额</label><input id="ivTax" value="免税 / 0.00" readonly></div>
+                            <div class="inv-row full"><label>价税合计</label><input id="ivTotal" value="0.00" readonly></div>
+                            <div class="inv-row full" style="margin-top:-6px;"><label></label><span class="inv-err" id="ivErr"></span></div>
+                            <div class="inv-row full top"><label>备注</label><textarea id="ivRemark" rows="2" placeholder="如：对应结算单 EGG-PP-XXXXXXXXXXX"></textarea></div>
+                        </div>
+                    </div>
+                    <div class="inv-modal-foot"><button class="btn" onclick="closeInvModal()">取消</button><button class="btn pri" onclick="submitInvoice()">确定</button></div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-prepay">
+                <div class="settle-title">结算单</div>
+                <table class="items-table">
+                    <thead><tr><th>序号</th><th>结算单号</th><th>销售订单号</th><th style="text-align:right;">付款金额</th><th>付款方式</th><th>付款日期</th></tr></thead>
+                    <tbody id="settle-tbody"></tbody>
+                </table>
+                <div class="footer-bar">
+                    <div></div>
+                    <div class="totals">
+                        <div class="row"><span class="label">累计已收金额:</span><span class="value" id="settle-sum">¥ 0.00</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+</div>
+
+<!-- 确认弹窗 -->
+<div class="modal-mask" id="confirmModal">
+    <div class="modal">
+        <div class="modal-title" id="modalTitle">确认销售</div>
+        <div class="modal-desc" id="modalDesc">确认后将接受此销售订单，是否继续？</div>
+        <div class="modal-actions">
+            <button class="btn" onclick="closeModal()">取消</button>
+            <button class="btn btn-primary" id="modalConfirmBtn" onclick="doConfirm()">确认</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="鸡蛋发票数据.js"></script>
+<script>
+    function curOrderNo() { return document.getElementById('display-order-no').textContent.trim(); }
+    function goRecvList() { location.href = '鸡蛋-收货确认单列表.html?so=' + encodeURIComponent(curOrderNo()); }
+    function goSettleList() { location.href = '鸡蛋-预付款列表.html?so=' + encodeURIComponent(curOrderNo()); }
+
+    // ===== 工具函数 =====
+    function showToast(msg) {
+        var t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(window._toastTimer);
+        window._toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2200);
+    }
+
+    function getParam(name) {
+        var reg = new RegExp('[?&]' + name + '=([^&]*)');
+        var m = location.search.match(reg);
+        return m ? decodeURIComponent(m[1]) : '';
+    }
+
+    // ===== 按销售订单号索引的送货单字典（用于详情页胶囊统计条数） =====
+    var SHIPMENT_DB = {
+        PO000015: [{ sale: "PO000015", delivery: "DS/00001", status: "pending" }],
+        PO000019: [{ sale: "PO000019", delivery: "DS/00001", status: "pending" }],
+        PO000023: [{ sale: "PO000023", delivery: "DS/00001", status: "sent" }],
+        PO000026: [
+            { sale: "PO000026", delivery: "DS/00001", status: "pending" },
+            { sale: "PO000026", delivery: "DS/00002", status: "sent" },
+            { sale: "PO000026", delivery: "DS/00003", status: "received" }
+        ]
+    };
+
+    // ===== 销售订单状态 =====
+    var currentStatus = 0;
+    var shipment = 'unshipped';
+    var pendingAction = null;
+
+    function updateSteps() {
+        for (var i = 0; i < 2; i++) {
+            var el = document.getElementById('step-' + i);
+            el.className = 'step-tab';
+            if (i < currentStatus) el.classList.add('done');
+            else if (i === currentStatus) el.classList.add('active');
+        }
+    }
+
+    function updateActionButtons() {
+        var btn = document.getElementById('btn-confirm');
+        // 只保留「确认销售」：待确认可点，已确认及之后按钮隐藏（发货由送货单驱动）
+        if (currentStatus === 0) { btn.style.display = ''; btn.textContent = '确认销售'; btn.disabled = false; }
+        else { btn.style.display = 'none'; }
+        document.getElementById('deliveryAlert').style.display = currentStatus >= 1 ? 'flex' : 'none';
+        document.getElementById('recvAlert').style.display = currentStatus >= 1 ? 'flex' : 'none';
+        // 结算单胶囊数量与「其他信息」Tab 的结算单数据保持一致；无结算单则不展示
+        var curOrder = document.getElementById('display-order-no').textContent.trim();
+        var settleCount = (typeof SETTLE_DB !== 'undefined' && SETTLE_DB[curOrder]) ? SETTLE_DB[curOrder].length : 0;
+        document.getElementById('prepayAlert').style.display = (currentStatus >= 1 && settleCount > 0) ? 'flex' : 'none';
+        document.getElementById('prepayAlertText').textContent = '结算单 × ' + settleCount;
+        // 按订单号查送货单字典，动态统计送货单条数（部分发货 PO000026 = 3 条，其余 = 1 条）
+        var orderNo = document.getElementById('display-order-no').textContent;
+        var count = (SHIPMENT_DB[orderNo] && SHIPMENT_DB[orderNo].length) || 1;
+        document.getElementById('deliveryAlertText').textContent = '供应商发货确认单 × ' + count;
+    }
+
+    function openShipments() {
+        var orderNo = document.getElementById('display-order-no').textContent;
+        location.href = '送货单列表（全部）.html?cat=egg&so=' + encodeURIComponent(orderNo) + '&shipment=' + encodeURIComponent(shipment);
+    }
+
+    function showTab(name) {
+        var map = { product: 0, invoice: 1, prepay: 2 };
+        var btns = document.querySelectorAll('.tab-btn');
+        for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+        var panels = document.querySelectorAll('.tab-content');
+        for (var j = 0; j < panels.length; j++) panels[j].classList.remove('active');
+        var idx = map[name] == null ? 0 : map[name];
+        if (btns[idx]) btns[idx].classList.add('active');
+        var panel = document.getElementById('tab-' + name);
+        if (panel) panel.classList.add('active');
+    }
+
+    function confirmOrder() {
+        pendingAction = 'confirm';
+        document.getElementById('modalTitle').textContent = '确认销售';
+        document.getElementById('modalDesc').textContent = '确认后将接受此销售订单，是否继续？';
+        document.getElementById('modalConfirmBtn').textContent = '确认销售';
+        document.getElementById('confirmModal').classList.add('show');
+    }
+
+    function closeModal() { document.getElementById('confirmModal').classList.remove('show'); pendingAction = null; }
+
+    function doConfirm() {
+        closeModal();
+        currentStatus = 1; updateSteps(); updateActionButtons();
+        showToast('上传盖章送货单后，将按发货日期(天)生成多条销售订单');
+    }
+
+    // ===== 其他信息 Tab：结算单列表（仅平台已确认付款的单据同步到供应商端）=====
+    var SETTLE_DB = {
+        'EGG-SO-20260901002': [{ no: 'EGG-PP-20260906001', amt: 50000, way: '银行转账', date: '2026年09月06日' }],
+        'EGG-SO-20260828003': [{ no: 'EGG-PP-20260909004', amt: 60000, way: '银行转账', date: '2026年09月09日' }]
+    };
+    function fmtAmt(n) { return n.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+    // 发票演示数据：与结算单金额对齐（先款后票，但不做卡控）
+    var INVOICE_DB = (window.EggInv ? EggInv.toInvoiceDb() : {});
+    var ORDER_TOTAL = { 'EGG-SO-20260901002': 128587.20, 'EGG-SO-20260828003': 196465.72, 'EGG-SO-20260905001': 0 };
+    function curOrderKey() { return invCur(); }
+    function renderSettleTab(orderNo) {
+        var rows = SETTLE_DB[orderNo] || [];
+        var tb = document.getElementById('settle-tbody');
+        var sum = document.getElementById('settle-sum');
+        if (!rows.length) {
+            tb.innerHTML = '<tr><td colspan="6" class="settle-empty">暂无结算单 —— 平台确认付款后，结算单将同步到这里</td></tr>';
+            sum.textContent = '¥ 0.00';
+            return;
+        }
+        var total = 0;
+        tb.innerHTML = rows.map(function (r, i) {
+            total += r.amt;
+            return '<tr style="cursor:pointer;" onclick="location.href=\'鸡蛋-预付款详情.html?no=' + r.no + '&status=paid\'">'
+                + '<td>' + (i + 1) + '</td><td>' + r.no + '</td><td>' + orderNo + '</td>'
+                + '<td style="text-align:right;font-weight:600;">¥ ' + fmtAmt(r.amt) + '</td>'
+                + '<td>' + r.way + '</td><td>' + r.date + '</td></tr>';
+        }).join('');
+        sum.textContent = '¥ ' + fmtAmt(total);
+    }
+
+    function init() {
+        var orderNo = getParam('no') || getParam('order'); var status = getParam('status'); var ship = getParam('shipment');
+        if (orderNo) { document.getElementById('display-order-no').textContent = orderNo; document.getElementById('breadcrumb-order').textContent = orderNo; document.title = '鸡蛋销售订单详情 ' + orderNo + ' - 供应商端'; }
+        if (ship === 'unshipped' || ship === 'partial' || ship === 'complete') shipment = ship;
+        if (status === 'pending') currentStatus = 0;
+        else if (status === 'confirmed') currentStatus = 1;
+        else if (status === 'shipped') currentStatus = 1;
+        // 订单详情步骤条只展示「待确认→已确认」两级（发货状态由送货单驱动，不在此回显）
+        updateSteps(); updateActionButtons();
+        renderSettleTab(document.getElementById('display-order-no').textContent.trim());
+    }
+
+    init();
+
+</script>
+<script>
+(function(){
+  function g(n){var m=location.search.match(new RegExp('[?&]'+n+'=([^&]*)'));return m?decodeURIComponent(m[1]):'';}
+  var no=g('no')||g('order')||'EGG-SO-20260905001';
+  var AMT={'EGG-SO-20260905001':0,'EGG-SO-20260901002':128587.20,'EGG-SO-20260828003':196465.72};
+  var amt=AMT[no]; if(amt===undefined) amt=0;
+  if(amt<=0) return;
+  var fmt=function(n){return '¥ '+n.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});};
+  var qty=800;
+  document.getElementById('d-price').textContent=(amt/qty).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('d-amount').textContent=fmt(amt);
+  document.getElementById('d-accepted').textContent=qty+' 箱';
+  document.getElementById('d-settled').textContent=fmt(amt);
+  document.getElementById('t-net').textContent=fmt(amt);
+  document.getElementById('t-tax').textContent='¥ 0.00';
+  document.getElementById('t-total').textContent=fmt(amt);
+})();
+</script>
+
+<script>
+    // ===== 发票模块（供应商端：可上传、可删附件；平台端只读） =====
+    var INV_FILES = [];
+    function invMoney(n) { return '¥ ' + Number(n).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function invCur() { return (document.getElementById('display-order-no') || {}).textContent.trim() || 'EGG-SO-20260901002'; }
+    function invList() { var k = invCur(); if (!INVOICE_DB[k]) INVOICE_DB[k] = []; return INVOICE_DB[k]; }
+    function renderInvoice() {
+        var k = curOrderKey(), list = invList();
+        var total = ORDER_TOTAL[k] || 0;
+        var done = list.reduce(function (s, x) { return s + x.amount; }, 0);
+        document.getElementById('invTotal').textContent = invMoney(total);
+        document.getElementById('invDone').textContent = invMoney(done);
+        document.getElementById('invTodo').textContent = invMoney(Math.max(0, total - done));
+        document.getElementById('invCount').textContent = '共 ' + list.length + ' 条';
+        document.getElementById('invEmpty').style.display = list.length ? 'none' : 'block';
+        document.getElementById('invTable').style.display = list.length ? 'table' : 'none';
+        document.getElementById('invTbody').innerHTML = list.map(function (x, i) {
+            return '<tr><td>' + (i + 1) + '</td><td>' + x.no + '</td><td>' + x.date + '</td><td>' + x.kind + '</td>'
+                + '<td style="text-align:right;">' + invMoney(x.amount) + '</td><td style="text-align:right;">¥ 0.00</td>'
+                + '<td style="text-align:right;font-weight:600;">' + invMoney(x.amount + x.tax) + '</td>'
+                + '<td><span class="inv-tag done">已开票</span></td><td>' + (x.files.length ? x.files.length + ' 个' : '—') + '</td></tr>';
+        }).join('');
+        var st = document.getElementById('invStatus');
+        if (st) { st.className = 'inv-tag ' + (list.length ? (done >= total && total > 0 ? 'done' : 'part') : '');
+                  st.textContent = !list.length ? '未开票' : (done >= total && total > 0 ? '全部开票' : '部分开票'); }
+    }
+    function openInvModal() {
+        var k = curOrderKey(), total = ORDER_TOTAL[k] || 0;
+        var done = invList().reduce(function (s, x) { return s + x.amount; }, 0);
+        INV_FILES = [];
+        document.getElementById('ivOrderNo').textContent = k;
+        document.getElementById('ivOrderAmt').value = invMoney(total);
+        document.getElementById('ivTodo').value = invMoney(Math.max(0, total - done));
+        document.getElementById('ivNo').value = '';
+        document.getElementById('ivCode').value = '';
+        document.getElementById('ivAmount').value = (Math.max(0, total - done)).toFixed(2);
+        document.getElementById('ivRemark').value = '';
+        document.getElementById('ivSeller').value = (document.querySelector('#tab-product .supplier-text') || {}).textContent || '平原县蛋鸡养殖合作社';
+        document.getElementById('ivFiles').innerHTML = '';
+        var ocr = document.getElementById('ivOcr'); if (ocr) { ocr.style.display = 'none'; ocr.textContent = ''; }
+        invErr(''); invCalc();
+        document.getElementById('invModal').classList.add('show');
+    }
+    function closeInvModal() { document.getElementById('invModal').classList.remove('show'); }
+    function invErr(m) { document.getElementById('ivErr').textContent = m || ''; }
+    function invCalc() {
+        var a = parseFloat((document.getElementById('ivAmount').value || '0').replace(/[^0-9.]/g, '')) || 0;
+        document.getElementById('ivTotal').value = a.toFixed(2);
+        document.getElementById('ivTax').value = '免税 / 0.00';
+        invErr('');
+    }
+    function invAddFile() {
+        INV_FILES.push('发票文件_' + (INV_FILES.length + 1) + '.pdf');
+        invAddFileRefresh();
+        invOcrRead();
+    }
+    // 上传附件后模拟 OCR：自动读取票面信息（仅填空白项，可手动修改）
+    function invOcrRead() {
+        var n = INV_FILES.length;
+        var noEl = document.getElementById('ivNo'), codeEl = document.getElementById('ivCode'),
+            dateEl = document.getElementById('ivDate'), amtEl = document.getElementById('ivAmount'),
+            kindEl = document.getElementById('ivKind');
+        var filled = [];
+        if (!noEl.value.trim()) { noEl.value = '243510' + ('0' + n).slice(-2); filled.push('发票号码'); }
+        if (!codeEl.value.trim() && kindEl.value.indexOf('数电') < 0) { codeEl.value = '310023451300'; filled.push('发票代码'); }
+        if (!dateEl.value) { dateEl.value = '2026-10-14'; filled.push('开票日期'); }
+        if (!amtEl.value) { invFillAmount(); filled.push('金额'); }
+        invCalc();
+        var tip = document.getElementById('ivOcr');
+        if (tip) {
+            tip.style.display = filled.length ? 'block' : 'none';
+            tip.textContent = '已自动识别票面信息：' + filled.join('、') + '（可手动修改）';
+        }
+    }
+    function invFillAmount() {
+        var k = curOrderKey(), total = ORDER_TOTAL[k] || 0;
+        var done = invList().reduce(function (s, x) { return s + x.amount; }, 0);
+        document.getElementById('ivAmount').value = Math.max(0, total - done).toFixed(2);
+    }
+    function invDelFile(i) { INV_FILES.splice(i, 1); invAddFileRefresh(); }
+    function invAddFileRefresh() {
+        document.getElementById('ivFiles').innerHTML = INV_FILES.map(function (f, idx) {
+            return '<span class="inv-file"><span class="fi">PDF</span><span class="fn">' + f + '</span><span class="fo"><a onclick="invDelFile(' + idx + ')">✕</a></span></span>';
+        }).join('');
+    }
+    function submitInvoice() {
+        var no = document.getElementById('ivNo').value.trim();
+        var amt = parseFloat((document.getElementById('ivAmount').value || '0').replace(/[^0-9.]/g, '')) || 0;
+        var k = curOrderKey(), total = ORDER_TOTAL[k] || 0;
+        var done = invList().reduce(function (s, x) { return s + x.amount; }, 0);
+        if (!/^\d{8}$/.test(no)) { invErr('发票号码需为 8 位数字'); return; }
+        if (amt <= 0) { invErr('金额需大于 0'); return; }
+        if (amt > total - done + 0.005) { invErr('超出待开票金额 ' + invMoney(Math.max(0, total - done)) + '，请调整'); return; }
+        if (!INV_FILES.length) { invErr('请上传发票文件'); return; }
+        invList().push({ no: no, so: k, code: document.getElementById('ivCode').value.trim(), date: document.getElementById('ivDate').value,
+            kind: document.getElementById('ivKind').value, amount: amt, tax: 0,
+            buyer: document.getElementById('ivBuyer').value, seller: document.getElementById('ivSeller').value,
+            files: INV_FILES.slice(), remark: document.getElementById('ivRemark').value, by: '供应商上传' });
+        if (window.EggInv) EggInv.sync(k, invList());
+        closeInvModal(); renderInvoice(); showToast('发票上传成功（演示）');
+    }
+    document.getElementById('invModal').addEventListener('click', function (e) { if (e.target === this) closeInvModal(); });
+    renderInvoice();
+
+    // 深链：从「发票」菜单或发票详情跳回时，直接定位到对应页签
+    (function () {
+        var t = (location.search.match(/[?&]tab=([^&]*)/) || [])[1];
+        if (t === 'invoice' || t === 'prepay' || t === 'product') { showTab(t); }
+    })();
+</script>
+</body>
+</html>

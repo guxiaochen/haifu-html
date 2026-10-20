@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>结算流程 · 两两对照版</title>
+    <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --c-supplier: #2e7d32;
+            --c-supplier-bg: #e8f5e9;
+            --c-supplier-soft: #f1f8e9;
+            --c-platform: #1565c0;
+            --c-platform-bg: #e3f2fd;
+            --c-platform-soft: #e3f2fd;
+            --c-customer: #c62828;
+            --c-customer-bg: #fce4ec;
+            --c-customer-soft: #fff5f7;
+            --c-warn: #e65100;
+            --c-warn-bg: #fff3e0;
+            --c-text: #333;
+            --c-text-soft: #666;
+            --c-line: #e0e0e0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--c-text);
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 1800px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        .version-tag {
+            text-align: center;
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 22px;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin: 36px 0 16px;
+            padding-left: 12px;
+            border-left: 4px solid var(--c-platform);
+        }
+
+        h3 {
+            font-size: 17px;
+            margin: 24px 0 12px;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+            font-size: 14px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        /* ================== 概述 ================== */
+        .lead {
+            background: #fafafa;
+            border: 1px solid var(--c-line);
+            border-radius: 6px;
+            padding: 16px 20px;
+            font-size: 14px;
+            line-height: 1.85;
+            color: var(--c-text-soft);
+        }
+
+        .lead strong {
+            color: var(--c-text);
+        }
+
+        .overview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+            font-size: 13px;
+        }
+
+        .overview-table th,
+        .overview-table td {
+            border: 1px solid var(--c-line);
+            padding: 10px 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .overview-table th {
+            background: #fafafa;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .overview-table td {
+            background: #fff;
+        }
+
+        .insight {
+            margin-top: 14px;
+            padding: 12px 16px;
+            background: var(--c-warn-bg);
+            border-left: 4px solid var(--c-warn);
+            border-radius: 0 4px 4px 0;
+            font-size: 13px;
+            line-height: 1.8;
+            color: #6d4c41;
+        }
+
+        .insight strong {
+            color: var(--c-warn);
+        }
+
+        /* ================== 两两对照 ================== */
+        .pair-card {
+            border: 1px solid var(--c-line);
+            border-radius: 8px;
+            margin-bottom: 28px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .pair-header {
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pair-header.pair-sp {
+            background: linear-gradient(90deg, var(--c-supplier-bg) 0%, var(--c-platform-bg) 100%);
+            color: #1b5e20;
+            border-bottom: 2px solid var(--c-supplier);
+        }
+
+        .pair-header.pair-pc {
+            background: linear-gradient(90deg, var(--c-platform-bg) 0%, var(--c-customer-bg) 100%);
+            color: #0d47a1;
+            border-bottom: 2px solid var(--c-platform);
+        }
+
+        .pair-summary {
+            padding: 14px 20px;
+            font-size: 13px;
+            line-height: 1.85;
+            color: var(--c-text-soft);
+            background: #fcfcfc;
+            border-bottom: 1px solid var(--c-line);
+        }
+
+        .pair-summary strong {
+            color: var(--c-text);
+        }
+
+        /* ================== 泳道式流程条 ================== */
+        .swim-wrap {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .phase {
+            border: 1px solid var(--c-line);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .phase-title {
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #455a64;
+            background: #f7f9fb;
+            border-bottom: 1px solid var(--c-line);
+        }
+
+        .chain {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: stretch;
+            gap: 10px;
+            padding: 16px;
+        }
+
+        .node {
+            flex: 1 1 170px;
+            min-width: 170px;
+            max-width: 300px;
+            padding: 12px 14px;
+            border: 1px solid #dfe6ec;
+            border-left-width: 5px;
+            border-radius: 6px;
+            background: #fff;
+        }
+
+        .node.supplier {
+            border-left-color: var(--c-supplier);
+            background: var(--c-supplier-soft);
+        }
+
+        .node.platform {
+            border-left-color: var(--c-platform);
+            background: var(--c-platform-soft);
+        }
+
+        .node.customer {
+            border-left-color: var(--c-customer);
+            background: var(--c-customer-soft);
+        }
+
+        .node .who {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
+
+        .node.supplier .who {
+            background: var(--c-supplier-bg);
+            color: var(--c-supplier);
+        }
+
+        .node.platform .who {
+            background: var(--c-platform-bg);
+            color: var(--c-platform);
+        }
+
+        .node.customer .who {
+            background: var(--c-customer-bg);
+            color: var(--c-customer);
+        }
+
+        .node .act {
+            display: block;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.5;
+            color: var(--c-text);
+        }
+
+        .node .st {
+            display: block;
+            margin-top: 7px;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.65;
+        }
+
+        .chain .arrow {
+            align-self: center;
+            color: #b0bec5;
+            font-size: 22px;
+            font-weight: 700;
+            flex: 0 0 auto;
+        }
+
+        .doc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            padding: 0 20px 20px 20px;
+        }
+
+        .pair-side {
+            border: 1px solid var(--c-line);
+            border-radius: 6px;
+            padding: 12px 14px;
+            background: #fff;
+        }
+
+        .pair-side h4 {
+            font-size: 13px;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px dashed var(--c-line);
+            color: var(--c-text);
+        }
+
+        .pair-side.supplier {
+            border-left: 4px solid var(--c-supplier);
+        }
+
+        .pair-side.platform {
+            border-left: 4px solid var(--c-platform);
+        }
+
+        .pair-side.customer {
+            border-left: 4px solid var(--c-customer);
+        }
+
+        .pair-side .doc-quote {
+            font-size: 12px;
+            line-height: 1.7;
+            color: #555;
+        }
+
+        .pair-side .doc-quote ol {
+            padding-left: 18px;
+        }
+
+        .pair-side .doc-quote li {
+            margin-bottom: 4px;
+        }
+
+        /* ================== 步骤对照表 ================== */
+        .step-table-wrap {
+            margin: 0 20px 20px 20px;
+            overflow-x: auto;
+        }
+
+        .step-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            min-width: 920px;
+        }
+
+        .step-table th,
+        .step-table td {
+            border: 1px solid var(--c-line);
+            padding: 8px 10px;
+            text-align: left;
+            vertical-align: top;
+            line-height: 1.6;
+        }
+
+        .step-table th {
+            background: #fafafa;
+            color: #555;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .step-table td.step-no {
+            text-align: center;
+            font-weight: 700;
+            color: var(--c-text);
+            background: #fafafa;
+            width: 40px;
+        }
+
+        .step-table td.col-sp {
+            background: var(--c-supplier-soft);
+        }
+
+        .step-table td.col-pf {
+            background: var(--c-platform-soft);
+        }
+
+        .step-table td.col-cu {
+            background: var(--c-customer-soft);
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-weight: 600;
+            font-size: 11px;
+            margin: 0 2px;
+        }
+
+        .pill.supplier {
+            background: var(--c-supplier-bg);
+            color: var(--c-supplier);
+        }
+
+        .pill.platform {
+            background: var(--c-platform-bg);
+            color: var(--c-platform);
+        }
+
+        .pill.customer {
+            background: var(--c-customer-bg);
+            color: var(--c-customer);
+        }
+
+        .pill.gray {
+            background: #eee;
+            color: #777;
+        }
+
+        /* ================== 文档空白 ================== */
+        .gap-callout {
+            margin: 0 20px 20px 20px;
+            padding: 12px 16px;
+            background: #fff8e1;
+            border-left: 4px solid #ffb300;
+            border-radius: 0 4px 4px 0;
+            font-size: 12px;
+            line-height: 1.75;
+            color: #6d4c41;
+        }
+
+        .gap-callout strong {
+            color: #e65100;
+        }
+
+        /* ================== 底部 ================== */
+        .footer-note {
+            margin-top: 36px;
+            padding-top: 20px;
+            border-top: 2px dashed var(--c-line);
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            line-height: 1.7;
+        }
+
+        .download-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .download-btn:hover {
+            background-color: #0056b3;
+        }
+
+        @media (max-width: 1180px) {
+            .doc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" id="capture-container">
+        <h1>结算流程</h1>
+
+        <div class="legend">
+            <div class="legend-item"><span class="legend-dot" style="background:var(--c-supplier-bg);border:2px solid var(--c-supplier);"></span>供应商端</div>
+            <div class="legend-item"><span class="legend-dot" style="background:var(--c-platform-bg);border:2px solid var(--c-platform);"></span>平台端</div>
+            <div class="legend-item"><span class="legend-dot" style="background:var(--c-customer-bg);border:2px solid var(--c-customer);"></span>客户端</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#fff3e0;border:2px solid #ff9800;"></span>流程问题</div>
+        </div>
+
+        <!-- ========== 一、结论先行 ========== -->
+        <section id="sec-overview">
+            <h2>一、结论先行：所谓"结算"实际上是三段账，不是一个动作</h2>
+            <div class="lead">
+                客户在采购订单中感受到的"结算"，在系统内部并不是一次"付款"动作，而是三段前后衔接的账务。</br>
+                <strong>段一 供应商结算</strong>由供应商主动开账、与平台结清；</br>
+                <strong>段二 客户结算</strong>由平台开账、与客户结清；</br>
+                <strong>段三 票据还款</strong>则是客户在供应链金融票据到期后向银行还款并上传凭证，与段二在时间上是分离的。
+            </div>
+
+            <table class="overview-table">
+                <thead>
+                    <tr>
+                        <th style="width:14%;">段</th>
+                        <th style="width:18%;">资金方向</th>
+                        <th style="width:14%;">单据数量</th>
+                        <th style="width:24%;">谁是主动方</th>
+                        <th>收尾标志</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="pill supplier">段一</span> 供应商结算</td>
+                        <td>平台 → 供应商</td>
+                        <td><strong>N</strong> 张（每个供应商 1 张）</td>
+                        <td><span class="pill supplier">供应商</span> 在自家销售订单上主动"创建结算"</td>
+                        <td>供应商结算单 <span class="pill supplier">已支</span>，供应商可查看付款单</td>
+                    </tr>
+                    <tr>
+                        <td><span class="pill platform">段二</span> 客户结算</td>
+                        <td>客户 → 平台</td>
+                        <td><strong>1</strong> 张（对应客户采购订单）</td>
+                        <td><span class="pill platform">平台</span> 在会计模块发起（"创建"动作文档未明确）</td>
+                        <td>客户账单 <span class="pill customer">已支</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="pill customer">段三</span> 票据还款</td>
+                        <td>客户 → 银行 → 平台</td>
+                        <td>按票据张数</td>
+                        <td><span class="pill customer">客户</span> 在票据到期时上传银行还款凭证</td>
+                        <td>供应链金融票据 <span class="pill customer">已还款</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+         
+        </section>
+
+        <!-- ========== 二、两两结算的文档原文还原 ========== -->
+        <section id="sec-pairwise">
+            <h2>二、平台 ↔ 客户、供应商 ↔ 平台结算的文档流程还原</h2>
+
+            <!-- 2.1 供应商 ↔ 平台 -->
+            <article class="pair-card" id="pair-sp">
+                <div class="pair-header pair-sp">
+                    <span>2.1 供应商 ↔ 平台</span>
+                </div>
+
+                <div class="pair-summary">
+                    段一的全部动作由<strong>供应商发起账单、平台审核与付款</strong>完成。</br>
+                    单据上：一张平台采购单 = 一张供应商结算单 = 一张供应商销售订单。</br>
+                    关键时序：供应商开账 → 推送平台 → 平台审核 → 供应商开票 → 平台两确认（业务+财务）→ 平台出纳拆分票据 → 平台创建付款 → 供应商结算单落地。
+                </div>
+                <div class="doc-grid">
+                    
+                </div>
+                <div class="step-table-wrap">
+                    <table class="step-table">
+                        <thead>
+                            <tr>
+                                <th>步</th>
+                                <th>供应商侧（供应商手册 3.7）</th>
+                                <th>平台侧（平台手册 3.6 · 供应商结算）</th>
+                                <th>单据 / 状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="step-no">1</td>
+                                <td class="col-sp">客户确认收货后，进入销售订单 →【创建结算】→ 生成<strong>草稿账单</strong></td>
+                                <td class="col-pf">—（平台此时未介入）</td>
+                                <td>供应商结算单：<span class="pill supplier">草稿</span></td>
+                            </tr>
+                            <tr>
+                                <td class="step-no">2</td>
+                                <td class="col-sp">核对金额、维护账单日期 →【推送到平台】</td>
+                                <td class="col-pf">平台财务人员：会计 > 供应商 > 账单 出现待处理记录</td>
+                                <td>供应商结算单：<span class="pill platform">待审核账单</span></td>
+                            </tr>
+                            <tr>
+                                <td class="step-no">3</td>
+                                <td class="col-sp">等待</td>
+                                <td class="col-pf">账单详情 →【平台审核】</td>
+                                <td>供应商结算单：<span class="pill platform">待付款</span></td>
+                            </tr>
+                            <tr>
+                                <td class="step-no">4</td>
+                                <td class="col-sp">状态变"待过账"，出现【添加税票】→ 维护发票号 / 类别 / 开票日期 + 上传发票附件 →【确认】</td>
+                                <td class="col-pf">—（平台此时未介入）等待供应商推税票</td>
+                                <td>供应商结算单：<span class="pill platform">待付款</span></td>
+                            </tr>
+                            <tr>
+                                <td class="step-no">5</td>
+                                <td class="col-sp">【确认并推送平台】</td>
+                                <td class="col-pf">账单页顶部出现【税票】→ 税票列表 → 税票详情</td>
+                                <td>进项票：<span class="pill platform">草稿</span></td>
+                            </tr>
+                            <tr>
+                                <td class="step-no">6</td>
+                                <td class="col-sp">等待</td>
+                                <td class="col-pf">税票详情 →【平台确认】（平台业务人员）</td>
+                                <td>进项票：<span class="pill platform">业务确认</span></td>
+                            </tr>
+                            <tr>
+                                <td class="step-no">7</td>
+                                <td class="col-sp">等待</td>
+                                <td class="col-pf">税票详情 →【财务确认】→ 税票状态"有效"</td>
+                                <td>进项票：<span class="pill platform">有效</span></td>
+                            </tr>
+                            <tr>
+                                <td class="step-no">8</td>
+                                <td class="col-sp">等待</td>
+                                <td class="col-pf">返回账单页 → 维护支付人 →【推送付款单】（文档原误写"推送贷款单"）→ 推给平台出纳</td>
+                                <td>供应商结算单：<span class="pill platform">待付款</span></td>
+                            </tr>
+                            <tr>
+                                <!-- <td class="step-no">9</td>
+                                <td class="col-sp">等待</td>
+                                <td class="col-pf">出纳【拆分票据】→ 维护处置方式 / 处置日期 + 上传新票据附件 →【确认】</td>
+                                <td>供应链金融票据：拆分完成</td> -->
+                            </tr>
+                            <tr>
+                                <td class="step-no">10</td>
+                                <td class="col-sp">等待</td>
+                                <td class="col-pf">平台出纳 →【支付】→ 支付页 → 【创建付款】</td>
+                                <td>供应商结算单：<span class="pill platform">已付款</span>（平台手册称"已支"）</td>
+                            </tr>
+                            <tr>
+                                <td class="step-no">11</td>
+                                <td class="col-sp">结算单状态显示"已支"，可查看支付凭证；点【付款】查看付款单详情</td>
+                                <td class="col-pf">—</td>
+                                <td>供应商结算单：<span class="pill supplier">已收款</span>（终态）</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+            <!-- 2.2 平台 ↔ 客户 -->
+            <article class="pair-card" id="pair-pc">
+                <div class="pair-header pair-pc">
+                    <span>2.2 平台 ↔ 客户</span>
+                </div>
+
+                <div class="pair-summary">
+                    段二的<strong>开票</strong>动作由平台完成，<strong>确认</strong>动作由客户完成，<strong>实际付款</strong>则以"票据到期还款"的形式发生在段三。</br>
+                    客户侧<strong>没有"审核账单"和"付款"按钮</strong>，只有查看结算单、确认税票和票据到期还款三件事。
+                </div>
+
+                <div class="doc-grid">
+                    
+                </div>
+
+                <div class="step-table-wrap">
+                    <table class="step-table">
+                        <thead>
+                            <tr>
+                                <th>步</th>
+                                <th>平台侧（平台手册 §3.6 · 客户结算）</th>
+                                <th>客户侧（客户手册 §3.7）</th>
+                                <th>单据 / 状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="step-no">1</td>
+                                <td class="col-pf">会计 > 客户 > 账单 找到客户账单（创建/推送动作文档未述）</td>
+                                <td class="col-cu">—（客户侧此时无入口）</td>
+                                <td>客户结算单：<span class="pill supplier">草稿</span><span class="pill gray">（创建/推送动作缺失）</span></td>
+                            </tr>
+                            <tr>
+                                <td class="step-no">2</td>
+                                <td class="col-pf">账单详情 →【添加税票】→ 维护发票号 / 类别 / 开票日期 + 上传附件 →【确认】</td>
+                                <td class="col-cu">等待</td>
+                                <td>销项票：<span class="pill supplier">草稿</span></br>
+                                客户结算单：<span class="pill supplier">草稿</span></td>
+                            </tr>
+                            <tr>
+                                <td class="step-no">3</td>
+                                <td class="col-pf">发票详情 →【审核并推送给客户】</td>
+                                <td class="col-cu">等待推送</td>
+                                <td>销项票：<span class="pill customer">待确认</span></td>
+                            </tr>
+                            <tr>
+                                <td class="step-no">4</td>
+                                <td class="col-pf">等待客户确认</td>
+                                <td class="col-cu">采购订单详情页顶部【结算单】→ 结算单详情（只读）</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td class="step-no">5</td>
+                                <td class="col-pf">等待</td>
+                                <td class="col-cu">结算单页【税票】→ 税票列表 → 税票详情 →【确认】</td>
+                                <td>销项票：<span class="pill customer">已确认</span></td>
+                            </tr>
+                            <tr>
+                                <td class="step-no">6</td>
+                                <td class="col-pf">等待票据到期还款</td>
+                                <td class="col-cu">客户端 > 供应链金融票据 → 应还款票据 → 详情 → 上传还款附件 →【还款】</td>
+                                <td>供应链金融票据：<span class="pill customer">已还款</span></td>
+                            </tr>
+                            <tr>
+                                <td class="step-no">7</td>
+                                <td class="col-pf">客户账单状态变"已支"（平台手册用词）</td>
+                                <td class="col-cu">—</td>
+                                <td>客户账单：<span class="pill platform">已收款</span>（终态）</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        </section>
+        <div class="gap-callout">
+                    <strong>⚠ 流程问题：</strong></br>
+                    ① 客户账单的"创建"动作在平台手册中完全没有描述（既没有"创建客户账单"，也没有"推送客户账单"步骤）；</br>
+                    ② 客户侧没有"审核账单"动作（文档无）；</br>
+                    ③ 客户侧没有"付款"按钮（由段三票据到期还款实现，供应链票据在采购订单时已确认取消）。</br>
+                </div>
+        <div class="footer-note">
+            基于《海赋数字化产业互联网平台系统操作手册》三端结算章节梳理
+        </div>
+    </div>
+
+    <button class="download-btn" onclick="downloadImage()">下载 PNG 图片</button>
+
+    <script>
+        function downloadImage() {
+            var container = document.getElementById('capture-container');
+            var button = document.querySelector('.download-btn');
+            button.style.display = 'none';
+            htmlToImage.toPng(container, { quality: 0.95, backgroundColor: '#ffffff', pixelRatio: 2 })
+                .then(function (dataUrl) {
+                    var link = document.createElement('a');
+                    link.download = '结算流程-两两对照版.png';
+                    link.href = dataUrl;
+                    link.click();
+                })
+                .catch(function (error) { console.error(error); alert('抱歉，图片生成失败，请重试。'); })
+                .finally(function () { button.style.display = 'block'; });
+        }
+    </script>
+</body>
+
+</html>

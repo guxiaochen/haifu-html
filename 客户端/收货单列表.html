@@ -240,12 +240,12 @@
             <div class="breadcrumb-bar">
                 <a onclick="location.href='采购订单列表.html'">采购订单</a>
                 <span class="sep">/</span>
-                <span class="current">收货单列表</span>
+                <span class="current">收货单</span>
             </div>
 
             <!-- 页面标题 -->
             <div class="page-title-bar">
-                <div class="page-title" id="pageTitle">收货单列表</div>
+                <div class="page-title" id="pageTitle">收货单</div>
                 <div id="orderBadge"></div>
             </div>
 
@@ -340,7 +340,7 @@
         }
 
         function goDetail(no, order) {
-            location.href = '收货单详情.html?receipt=' + encodeURIComponent(no) + '&order=' + encodeURIComponent(order);
+            location.href = '收货单详情.html?source=order&receipt=' + encodeURIComponent(no) + '&order=' + encodeURIComponent(order);
         }
         function createOwing(no) {
             goDetail(no, getParam("order"));
@@ -370,11 +370,11 @@
             var badgeEl = document.getElementById("orderBadge");
             if (order && ORDER_DB[order]) {
                 var od = ORDER_DB[order];
-                titleEl.textContent = "收货单列表 · " + od.title;
+                titleEl.textContent = "收货单 · " + od.title;
                 badgeEl.innerHTML = '<span class="order-badge ' + (od.orderStatus === "completed" ? "st-completed" : "st-confirmed") + '">' +
                     ORDER_STATUS_TEXT[od.orderStatus] + '<span class="ob-sep">·</span>' + RECV_STATUS_TEXT[od.recvStatus] + '</span>';
             } else {
-                titleEl.textContent = "收货单列表";
+                titleEl.textContent = "收货单";
                 badgeEl.innerHTML = "";
             }
 

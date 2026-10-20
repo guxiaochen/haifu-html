@@ -491,11 +491,7 @@
         <main class="main">
 
             <!-- 面包屑导航 -->
-            <div class="breadcrumb-bar">
-                <a onclick="location.href='采购订单列表.html'">采购订单</a>
-                <span class="sep">/</span>
-                <span class="current">查看采购订单</span>
-            </div>
+            <div class="breadcrumb-bar" id="breadcrumb"></div>
 
             <!-- 页面标题 -->
             <div class="page-title-bar">
@@ -673,6 +669,24 @@
         // 订单日期自动填充（详情页为只读展示，无需自动填充）
         // 菜单跳转
         function goNew() { location.href = '新建采购订单.html'; }
+        function getQueryParam(name) {
+            var match = location.search.match(new RegExp('[?&]' + name + '=([^&]*)'));
+            return match ? decodeURIComponent(match[1]) : '';
+        }
+        function renderBreadcrumb() {
+            var root = document.getElementById('breadcrumb');
+            var orderNo = getQueryParam('order') || '采购订单详情';
+            if (getQueryParam('source') === 'receipt-menu') {
+                var receiptNo = getQueryParam('receipt');
+                root.innerHTML = '<a onclick="location.href=\'收货单列表（全部）.html\'">收货单</a>' +
+                    (receiptNo ? '<span class="sep">/</span><a onclick="location.href=\'收货单详情.html?source=receipt-menu&amp;receipt=' + encodeURIComponent(receiptNo) + '&amp;order=' + encodeURIComponent(orderNo) + '\'">' + receiptNo + '</a>' : '') +
+                    '<span class="sep">/</span><span class="current">' + orderNo + '</span>';
+                return;
+            }
+            root.innerHTML = '<a onclick="location.href=\'采购订单列表.html\'">采购订单</a>' +
+                '<span class="sep">/</span><span class="current">查看采购订单</span>';
+        }
+        renderBreadcrumb();
         function enforceStockDays(input) {
             var minimum = Number(input.min) || 0;
             if (Number(input.value) < minimum) {
@@ -775,7 +789,7 @@
             var orderNo = 'PO20260802003';
             if (st === 'partial') orderNo = 'PO20260730004';
             else if (st === 'completed') orderNo = 'PO20260728005';
-            location.href = '收货单列表.html?order=' + orderNo;
+            location.href = '收货单列表.html?source=order&order=' + orderNo;
         }
 
         // Tab 切换

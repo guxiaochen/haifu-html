@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>订货单列表 - 商家管理平台</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",Arial,sans-serif; background:#f4f6f9; color:#1f2937; font-size:14px; }
+.top-nav { height:64px; background:#fff; display:flex; align-items:center; padding:0 24px; border-bottom:1px solid #edf0f4; position:sticky; top:0; z-index:15; margin-left:200px; }
+.brand { display:flex; align-items:center; gap:10px; font-size:16px; font-weight:600; }
+.brand-logo { width:32px; height:32px; border-radius:6px; background:#1890ff; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; }
+.top-nav-right { margin-left:auto; display:flex; align-items:center; gap:14px; color:#667382; font-size:13px; }
+.avatar { width:30px; height:30px; border-radius:50%; background:#1890ff; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; }
+.page { margin-left:200px; padding:22px 26px; }
+.breadcrumb { font-size:13px; color:#8c98a8; margin-bottom:14px; display:flex; align-items:center; gap:6px; }
+.breadcrumb a { color:#1890ff; text-decoration:none; cursor:pointer; }
+.breadcrumb a:hover { text-decoration:underline; }
+.breadcrumb .sep { color:#cbd5e1; }
+.breadcrumb .current { color:#1f2937; }
+.page-head { background:#fff; border-radius:8px; box-shadow:0 4px 16px rgba(29,45,61,.03); padding:16px 20px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; }
+.page-title { font-size:18px; font-weight:600; color:#111827; }
+.btn { padding:8px 18px; border:1px solid #d8dee6; border-radius:4px; background:#fff; color:#667382; font-size:13px; cursor:pointer; }
+.btn:hover { border-color:#1890ff; color:#1890ff; }
+.btn-primary { background:#1890ff; border-color:#1890ff; color:#fff; }
+.btn-primary:hover { background:#096dd9; color:#fff; }
+.filter-card { background:#fff; border-radius:8px; box-shadow:0 4px 16px rgba(29,45,61,.03); padding:16px 20px; margin-bottom:14px; }
+.filter-row { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+.filter-item { display:flex; align-items:center; gap:8px; }
+.filter-label { font-size:13px; color:#667382; white-space:nowrap; }
+.filter-input { padding:6px 10px; border:1px solid #d8dee6; border-radius:4px; font-size:13px; outline:none; width:180px; font-family:inherit; }
+.filter-input:focus { border-color:#1890ff; }
+.filter-select { padding:6px 10px; border:1px solid #d8dee6; border-radius:4px; font-size:13px; outline:none; font-family:inherit; background:#fff; }
+.table-card { background:#fff; border-radius:8px; box-shadow:0 4px 16px rgba(29,45,61,.03); overflow:hidden; }
+.data-table { width:100%; border-collapse:collapse; font-size:13px; }
+.data-table th { background:#fafbfd; color:#555; font-weight:500; padding:12px 16px; text-align:left; border-bottom:1px solid #edf0f4; white-space:nowrap; }
+.data-table td { padding:12px 16px; border-bottom:1px solid #f1f4f7; vertical-align:middle; }
+.data-table tbody tr { cursor:pointer; }
+.data-table tbody tr:hover td { background:#f5fbff; }
+.pagination { display:flex; align-items:center; justify-content:flex-end; gap:6px; padding:16px 20px; }
+.page-btn { min-width:32px; height:32px; border:1px solid #d8dee6; background:#fff; border-radius:4px; cursor:pointer; font-size:13px; color:#555; display:flex; align-items:center; justify-content:center; padding:0 8px; }
+.page-btn:hover { border-color:#1890ff; color:#1890ff; }
+.page-btn.active { background:#1890ff; color:#fff; border-color:#1890ff; }
+.page-btn:disabled { color:#ccc; cursor:not-allowed; }
+.page-info { font-size:13px; color:#8c98a8; margin-right:12px; }
+@media(max-width:900px){ .top-nav,.page{margin-left:0;} }
+</style>
+</head>
+<body>
+<script src="sidebar.js"></script>
+
+
+<div class="page">
+  <div class="breadcrumb">
+    <a onclick="location.href='鸡蛋-订货单列表.html'">鸡蛋采购</a>
+    <span class="sep">/</span>
+    <span class="current">订货单</span>
+  </div>
+
+  <div class="page-head">
+    <div class="page-title">订货单列表</div>
+  </div>
+
+  <div class="filter-card">
+    <div class="filter-row">
+      <div class="filter-item"><span class="filter-label">订货单编号：</span><input class="filter-input" placeholder="请输入订货单编号"></div>
+      <div class="filter-item"><span class="filter-label">采购单位：</span><input class="filter-input" placeholder="请输入采购单位"></div>
+      <div class="filter-item"><span class="filter-label">开单日期：</span><input class="filter-input" type="date"></div>
+      <div class="filter-item"><button class="btn btn-primary">查询</button><button class="btn">重置</button></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table class="data-table">
+      <thead>
+        <tr><th>序号</th><th>订货单编号</th><th>采购单位</th><th>供货单位</th><th>开单日期</th></tr>
+      </thead>
+      <tbody>
+        <tr onclick="goDetail('DH20260905002')"><td>1</td><td>DH20260905002</td><td>焱丰（山东）供应链管理有限公司</td><td>平原县蛋鸡养殖合作社</td><td>2026-09-05</td></tr>
+        <tr onclick="goDetail('DH20260901001')"><td>2</td><td>DH20260901001</td><td>焱丰（山东）供应链管理有限公司</td><td>平原县蛋鸡养殖合作社</td><td>2026-09-01</td></tr>
+        <tr onclick="goDetail('DH20260828003')"><td>3</td><td>DH20260828003</td><td>焱丰（山东）供应链管理有限公司</td><td>夏津县绿源养殖专业合作社</td><td>2026-08-28</td></tr>
+        <tr onclick="goDetail('DH20260820004')"><td>4</td><td>DH20260820004</td><td>焱丰（山东）供应链管理有限公司</td><td>临邑县丰羽蛋鸡养殖场</td><td>2026-08-20</td></tr>
+      </tbody>
+    </table>
+    <div class="pagination"><span class="page-info">共 4 条</span><button class="page-btn" disabled>‹</button><button class="page-btn active">1</button><button class="page-btn">›</button></div>
+  </div>
+</div>
+
+<script>
+function goDetail(no){ location.href='鸡蛋-订货单.html?no='+encodeURIComponent(no); }
+</script>
+</body>
+</html>

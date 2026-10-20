@@ -1,0 +1,810 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>发货单 - 供应商端</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#1890ff;--blue-dark:#096dd9;--ink:#1f2937;--muted:#8c98a8;--line:#edf0f4;--surface:#fff;--page:#f4f6f9}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--page);color:var(--ink);font-size:14px;min-height:100vh}
+.main-area{margin-left:200px;min-height:100vh}
+.top-nav{height:64px;background:#fff;display:flex;align-items:center;padding:0 32px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.breadcrumb{display:flex;align-items:center;gap:9px;color:#9aa5b1;font-size:13px}
+.breadcrumb a{color:#667382;text-decoration:none;cursor:pointer}
+.breadcrumb a:hover{color:var(--blue)}
+.breadcrumb .current{color:#253142;font-weight:600}
+.sep{color:#cfd6de}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:22px;color:#778393}
+.notice{font-size:18px;position:relative;cursor:pointer}
+.badge{position:absolute;top:-7px;right:-8px;background:#ff4d4f;border:2px solid #fff;color:#fff;min-width:16px;height:16px;padding:0 4px;border-radius:9px;font-size:10px;display:flex;align-items:center;justify-content:center}
+.user{display:flex;align-items:center;gap:9px;color:#475467;cursor:pointer}
+.avatar{width:30px;height:30px;border-radius:50%;background:#e6f4ff;color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:600}
+.main{padding:26px 32px 40px;max-width:1600px}
+.page-banner{font-size:20px;color:#253142;font-weight:600;margin-bottom:16px}
+.filter-card,.table-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 16px rgba(29,45,61,.03)}
+.filter-card{padding:18px 20px;margin-bottom:16px}
+.filter-row{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.filter-item{display:flex;align-items:center;gap:8px}
+.filter-label{font-size:12px;color:#667382;white-space:nowrap}
+.filter-input,.filter-select{height:34px;border:1px solid #d8dee6;border-radius:4px;padding:0 10px;outline:none;color:#344054;background:#fff;font-family:inherit;font-size:13px;min-width:180px}
+.filter-input:focus,.filter-select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(24,144,255,.12)}
+.filter-actions{display:flex;gap:8px;margin-left:auto}
+.btn{height:34px;padding:0 17px;border-radius:4px;font-family:inherit;font-size:13px;cursor:pointer;transition:all .2s}
+.btn-primary{border:1px solid var(--blue);color:#fff;background:var(--blue)}
+.btn-primary:hover{background:var(--blue-dark);border-color:var(--blue-dark)}
+.btn-primary:disabled{border-color:#e5e7eb;background:#f5f5f5;color:#b7bec8;cursor:not-allowed}
+.btn-default{border:1px solid #d8dee6;color:#52606f;background:#fff}
+.btn-default:hover{border-color:var(--blue);color:var(--blue)}
+.table-head{height:58px;display:flex;align-items:center;padding:0 20px;border-bottom:1px solid var(--line)}
+.table-title{font-size:15px;font-weight:600;color:#253142}
+.table-title span{font-size:12px;color:#98a2b3;font-weight:400;margin-left:6px}
+.table-title .hint{margin-left:10px;font-size:12px;color:#98a2b3;font-weight:400}
+.table-tools{margin-left:auto;display:flex;gap:8px}
+.tool-btn{border:1px solid #d8dee6;background:#fff;color:#667382;height:30px;padding:0 12px;border-radius:4px;cursor:pointer;font-size:12px}
+.tool-btn:hover{color:var(--blue);border-color:var(--blue)}
+.table-wrap{overflow-x:auto}
+.data-table{width:100%;min-width:1240px;border-collapse:collapse;font-size:13px}
+.data-table th{height:44px;background:#fafbfd;color:#667382;font-weight:600;text-align:left;padding:0 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+.data-table td{height:64px;padding:0 14px;border-bottom:1px solid #f2f4f7;color:#344054;white-space:nowrap}
+.data-table tbody tr:hover{background:#fbfdff}
+.check{width:16px;height:16px;accent-color:var(--blue);cursor:pointer}
+.check:disabled{cursor:not-allowed}
+.link{color:var(--blue);font-weight:600;cursor:pointer}
+.link:hover{text-decoration:underline}
+.muted{color:#8b96a3}
+.qty{font-variant-numeric:tabular-nums;font-weight:600}
+.status{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:4px;font-size:12px}
+.status::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.status-pending{color:#667382;background:#f4f5f7}
+.status-sent{color:#389e0d;background:#f1fae9}
+.status-received{color:#1677d2;background:#eaf4ff}
+.tag-batch{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:3px;font-size:11px;font-weight:400;color:#1677d2;background:#eaf4ff;border:1px solid #b7dcff;vertical-align:middle}
+.tag-owing{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:3px;font-size:11px;font-weight:400;color:#d46b08;background:#fff7e6;border:1px solid #ffd591;vertical-align:middle}
+.tag-normal{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:3px;font-size:11px;font-weight:400;color:#52606f;background:#f4f5f7;border:1px solid #e3e7ec;vertical-align:middle}
+.remain-cell{font-variant-numeric:tabular-nums;font-weight:600;color:#389e0d}
+.remain-cell.short{color:#d46b08}
+.batch-card{margin-bottom:16px}
+.batch-card .data-table td{height:52px}
+.empty{text-align:center;color:#98a2b3;padding:48px 0 !important;height:auto !important}
+.pagination{height:64px;display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:0 20px;color:#98a2b3;font-size:12px}
+.page-btn{min-width:28px;height:28px;border:1px solid #d8dee6;background:#fff;color:#667382;border-radius:4px;cursor:pointer}
+.page-btn:hover,.page-btn.active{border-color:var(--blue);color:var(--blue)}
+.page-btn.active{background:var(--blue);color:#fff}
+.page-btn:disabled{color:#cbd2da;cursor:not-allowed}
+.action-bar{display:flex;align-items:center;min-height:68px;margin-bottom:16px;padding:0 20px;border:1px solid #b7dcff;border-radius:8px;background:#fff}
+.action-bar .selection{color:#667382}
+.action-bar .selection b{color:var(--blue);font-size:16px}
+.action-bar .amount{margin-left:22px;color:#8b96a3}
+.action-bar .amount b{color:#253142}
+.action-bar .btn{min-width:144px;height:38px}
+.action-bar .btn:first-of-type{margin-left:auto}
+.action-bar .btn + .btn{margin-left:10px}
+.modal-mask{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(0,21,41,.45)}
+.modal-mask.show{display:flex}
+.modal{width:620px;max-width:calc(100vw - 32px);border-radius:8px;background:#fff;box-shadow:0 14px 42px rgba(0,0,0,.18)}
+.modal-head{display:flex;align-items:center;padding:17px 20px;border-bottom:1px solid var(--line);font-size:16px;font-weight:600}
+.close{margin-left:auto;border:0;background:transparent;color:#98a2b3;cursor:pointer;font-size:24px}
+.modal-body{padding:20px;color:#52606f;line-height:1.8;font-size:13px;max-height:60vh;overflow:auto}
+.modal-body .group{display:flex;align-items:center;gap:8px;margin:14px 0 8px;font-weight:600;color:#253142}
+.modal-body .group span{font-weight:400;color:#8b96a3;font-size:12px}
+.mini-table{width:100%;border-collapse:collapse;font-size:12px}
+.mini-table th{background:#fafbfd;color:#667382;font-weight:600;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+.mini-table td{padding:8px 10px;border-bottom:1px solid #f2f4f7;color:#344054}
+.mini-qty{width:78px;height:30px;border:1px solid #d8dee6;border-radius:4px;padding:0 8px;font-family:inherit;font-size:13px;color:#344054;outline:none}
+.mini-qty:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(24,144,255,.12)}
+.mini-qty.invalid{border-color:#ff4d4f;box-shadow:0 0 0 2px rgba(255,77,79,.12)}
+.mini-qty[readonly]{background:#f5f6f7;color:#99a4a8}
+.short-cell{color:#8b96a3}
+.short-cell.short{color:#d46b08;font-weight:600}
+.batch-tip{margin:10px 0 0;padding:12px 14px;border-radius:6px;background:#f7faff;color:#52606f;line-height:2}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--line)}
+.toast{position:fixed;top:82px;left:50%;transform:translateX(-50%);padding:11px 20px;border:1px solid #b7eb8f;background:#f0faf5;color:#2f8f62;border-radius:5px;box-shadow:0 7px 20px rgba(56,158,13,.12);display:none;z-index:60}
+.toast.show{display:block}
+@media(max-width:1000px){.sidebar{width:180px}.main-area{margin-left:180px}.top-nav,.main{padding-left:20px;padding-right:20px}.filter-actions{margin-left:0}.action-bar{align-items:flex-start;flex-wrap:wrap;padding:14px 20px}.action-bar .btn{width:100%;margin:12px 0 0}}
+
+
+        /* ===== 鸡蛋业务面板：状态小徽标（配色与宿主语义一致） ===== */
+        #catEgg .bg { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+        #catEgg .bg-green { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        #catEgg .bg-orange { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+        #catEgg .bg-blue { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+        #catEgg .bg-gray { background: #f5f5f5; color: #999; border: 1px solid #d9d9d9; }
+        #catEgg .egg-title-bar { display: flex; align-items: center; margin-bottom: 14px; }
+        #catEgg .egg-title { font-size: 15px; font-weight: 600; color: #333; }
+        #catEgg .egg-title .count { color: #999; font-weight: 400; font-size: 13px; margin-left: 6px; }
+        #catEgg .egg-tip { margin-left: auto; font-size: 12px; color: #999; }
+        #catEgg .egg-bar { display: inline-block; width: 3px; height: 14px; background: #1890ff; border-radius: 2px; margin-right: 8px; vertical-align: -2px; }
+
+        /* ===== 业务分类页签（鸡蛋业务 / 其他业务） ===== */
+        .cat-tabs { display: flex; background: #fff; border-radius: 4px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+        .cat-tab { padding: 13px 22px; font-size: 14px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; }
+        .cat-tab:hover { color: #1890ff; }
+        .cat-tab.active { color: #1890ff; border-bottom-color: #1890ff; font-weight: 500; background: #f5faff; }
+        .cat-tab .ct-cnt { color: #999; font-size: 12px; font-weight: 400; margin-left: 6px; }
+        .cat-tab.active .ct-cnt { color: #1890ff; }
+        .cat-hidden { display: none !important; }
+</style>
+</head>
+<body>
+<script src="sidebar.js"></script>
+<div class="main-area">
+  <header class="top-nav">
+    <div class="breadcrumb"><a href="#">首页</a><span class="sep">/</span><span class="current">发货单</span></div>
+    <div class="top-actions"><span class="notice">♧<span class="badge">3</span></span><div class="user"><span class="avatar">管</span><span>超级管理员</span><span style="font-size:11px">⌄</span></div></div>
+  </header>
+  <main class="main">
+    <div class="page-banner">发货单</div>
+
+    <!-- 业务分类页签：鸡蛋业务（新增面板）/ 其他业务（原有内容，未改动） -->
+    <div class="cat-tabs">
+        <div class="cat-tab" id="catTabEgg" onclick="switchCat('egg')">鸡蛋业务<span class="ct-cnt">3</span></div>
+        <div class="cat-tab" id="catTabOther" onclick="switchCat('other')">其他业务</div>
+    </div>
+
+    <!-- 鸡蛋业务视图：筛选卡与表格卡均复用宿主页面类名，保证与其他业务视觉一致 -->
+    <div id="catEgg" style="display:none;">
+    <div class="filter-card">
+    <div class="filter-row">
+        <div class="filter-item"><label class="filter-label">发货单号</label><input class="filter-input" id="eggF0" placeholder="请输入发货单号" oninput="eggFilter()" /></div>
+                <div class="filter-item"><span class="filter-label">关联销售订单</span><input class="filter-input" id="drillEgg" data-drill="1" placeholder="请输入关联销售订单" oninput="drillApply(this.value)" /></div>
+        <div class="filter-item"><label class="filter-label">销售订单</label><select class="filter-select" id="eggF1" onchange="eggFilter()"><option>全部</option><option>EGG-SO-20260901002</option><option>EGG-SO-20260828003</option></select></div>
+        <div class="filter-item"><label class="filter-label">发货日期</label><input class="filter-input" id="eggF2" type="date" /></div>
+        <div class="filter-actions"><button class="btn btn-primary" onclick="eggFilter()">查询</button><button class="btn btn-default" onclick="eggReset()">重置</button></div>
+    </div>
+    </div>
+    <div class="table-card cat-egg">
+
+        <div class="table-wrap">
+            <table class="data-table"><thead><tr><th>序号</th><th>发货单号</th><th>关联销售订单</th><th>采购单位</th><th>供应单位</th><th>发货日期</th><th>实发总数量</th><th>状态</th><th>备注</th></tr></thead><tbody id="eggTbody"><tr style="cursor:pointer;" data-no="FH20260906001" data-status="" onclick="location.href='鸡蛋-发货确认单详情.html?no=FH20260906001&status=received'"><td>1</td><td>FH20260906001</td><td>EGG-SO-20260901002</td><td>焱丰（山东）供应链管理有限公司</td><td>平原县蛋鸡养殖合作社</td><td>2026年09月06日</td><td>1,314</td><td><span class="status status-received">已收货</span></td><td>—</td></tr><tr style="cursor:pointer;" data-no="FH20260905002" data-status="" onclick="location.href='鸡蛋-发货确认单详情.html?no=FH20260905002&status=sent'"><td>2</td><td>FH20260905002</td><td>EGG-SO-20260901002</td><td>焱丰（山东）供应链管理有限公司</td><td>夏津县绿源养殖专业合作社</td><td>2026年09月05日</td><td>860</td><td><span class="status status-sent">已发货</span></td><td>分两车发运</td></tr><tr style="cursor:pointer;" data-no="FH20260903003" data-status="" onclick="location.href='鸡蛋-发货确认单详情.html?no=FH20260903003&status=pending'"><td>3</td><td>FH20260903003</td><td>EGG-SO-20260828003</td><td>焱丰（山东）供应链管理有限公司</td><td>临邑县丰羽蛋鸡养殖场</td><td>2026年09月03日</td><td>420</td><td><span class="status status-pending">待发货</span></td><td>—</td></tr></tbody></table>
+        </div>
+
+        <div class="pagination"><span class="page-info" id="eggCount">共 3 条</span><button class="page-btn" disabled>‹</button><button class="page-btn active">1</button><button class="page-btn" disabled>›</button></div>
+    </div>
+    </div>
+
+    <section class="filter-card cat-other">
+      <div class="filter-row">
+        <div class="filter-item"><label class="filter-label">销售订单号</label><select class="filter-select" id="orderFilter"></select></div>
+        <div class="filter-item"><label class="filter-label">单据状态</label><select class="filter-select" id="statusFilter">
+          <option value="">全部状态</option>
+          <option value="pending">待发货</option>
+          <option value="sent">已发货</option>
+          <option value="received">已收货</option>
+        </select></div>
+        <div class="filter-item"><label class="filter-label">送货单号</label><input class="filter-input" id="keyword" placeholder="请输入送货单号" /></div>
+        <div class="filter-actions"><button class="btn btn-primary" onclick="applyFilter()">查询</button><button class="btn btn-default" onclick="resetFilter()">重置</button><button class="btn btn-default" onclick="resetAll()">恢复初始数据</button></div>
+      </div>
+    </section>
+
+    <section class="action-bar cat-other">
+      <div class="selection">已选择 <b id="selectedCount">0</b> 张送货单<span class="amount">合计发货数量：<b id="selectedQty">0</b></span><span class="amount">本次生成欠单：<b id="selectedOwing">0</b></span></div>
+      <button class="btn btn-primary" id="batchBtn" disabled onclick="openBatch()">多张送货单合并发货</button>
+    </section>
+
+    <section class="table-card cat-other">
+      <div class="table-head">
+        <div class="table-title">全部送货单<span id="tableCount">共 0 条</span><span class="hint">勾选待发货送货单可批量发货，已发货/已收货送货单不可勾选</span></div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th style="width:46px;"><input class="check" id="checkAll" type="checkbox" aria-label="全选" onchange="toggleAll(this.checked)" /></th>
+            <th>送货单号</th>
+            <th>销售订单号</th>
+            <th>客户名称</th>
+            <th>物料编码</th>
+            <th>产品名称</th>
+            <th>规格</th>
+            <th>品牌</th>
+            <th>订单数量</th>
+            <th>发货数量</th>
+            <th>状态</th>
+            <th>批量发货单号</th>
+          </tr></thead>
+          <tbody id="body"></tbody>
+        </table>
+      </div>
+      <div class="pagination"><span style="margin-right:10px">共 <b id="totalRows">0</b> 条</span><button class="page-btn" id="prevPage" onclick="goPage(page-1)">‹</button><span id="pageButtons"></span><button class="page-btn" id="nextPage" onclick="goPage(page+1)">›</button></div>
+    </section>
+
+  </main>
+</div>
+
+<div class="modal-mask" id="batchModal">
+  <div class="modal">
+    <div class="modal-head">批量发货<button class="close" onclick="closeBatch()" aria-label="关闭">×</button></div>
+    <div class="modal-body" id="batchBody"></div>
+    <div class="modal-foot"><button class="btn btn-default" onclick="closeBatch()">取消</button><button class="btn btn-primary" onclick="doBatch()">确认发货</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 全部送货单演示数据 =====
+// 覆盖三种状态组合，并包含跨销售订单场景
+// status: pending=待发货 / sent=已发货 / received=已收货
+// qty: 本次发货数量；remainQty: 欠单当前待补发数量；receivedQty: 客户已确认收货数量
+// batch: 同一批批量发货生成的送货单，共用批次号（客户端合并收货单对应此批次）
+// batchShip: 批量发货单号（点击可查看批量送货单详情）；单张发货时为空
+var DELIVERIES_INIT = [
+  { no:'DS202609001', order:'SO202609001', customer:'海赋（山东）数字产业发展有限公司', code:'AG-001', product:'大蒜', spec:'4.0', brand:'金乡', orderQty:8, qty:5, unit:'吨', arrange:'2026-09-18', status:'pending', receivedQty:0, batch:'', batchShip:'' },
+  { no:'DS202609002', order:'SO202609002', customer:'海赋（山东）数字产业发展有限公司', code:'ON-002', product:'洋葱', spec:'3.2', brand:'金乡', orderQty:12, qty:8, unit:'吨', arrange:'2026-09-18', status:'pending', receivedQty:0, batch:'', batchShip:'' },
+  { no:'DS202609003', order:'SO202608987', customer:'鲁供农产品集采中心', code:'AG-001', product:'大蒜', spec:'4.0', brand:'金乡', orderQty:6, qty:2, unit:'吨', arrange:'2026-09-17', status:'pending', receivedQty:0, batch:'', batchShip:'' },
+  { no:'DS202609004', order:'SO202608972', customer:'鲁供农产品集采中心', code:'ON-002', product:'洋葱', spec:'3.2', brand:'金乡', orderQty:4, qty:4, unit:'吨', arrange:'2026-09-17', status:'sent', receivedQty:0, batch:'PC20260901', batchShip:'DH202609004' },
+  { no:'DS202609005', order:'SO202608972', customer:'鲁供农产品集采中心', code:'GI-003', product:'生姜', spec:'一级', brand:'昌邑', orderQty:9, qty:9, unit:'吨', arrange:'2026-09-17', status:'sent', receivedQty:0, batch:'PC20260901', batchShip:'DH202609004' },
+  { no:'DS202609006', order:'SO202608956', customer:'海赋（山东）数字产业发展有限公司', code:'GI-003', product:'生姜', spec:'一级', brand:'昌邑', orderQty:9, qty:6, unit:'吨', arrange:'2026-09-19', status:'sent', receivedQty:0, batch:'PC20260902', batchShip:'DH202609003' },
+  { no:'DS202609007', order:'SO202608941', customer:'鲁供农产品集采中心', code:'TM-004', product:'番茄', spec:'一级', brand:'寿光', orderQty:9, qty:6, unit:'吨', arrange:'2026-09-20', status:'sent', receivedQty:0, batch:'PC20260902', batchShip:'DH202609003' },
+  { no:'DS202609008', order:'SO202608901', customer:'海赋（山东）数字产业发展有限公司', code:'AG-001', product:'大蒜', spec:'4.0', brand:'金乡', orderQty:8, qty:8, unit:'吨', arrange:'2026-09-15', status:'received', receivedQty:8, batch:'PC20260808', batchShip:'DH202608008' },
+  { no:'DS202609009', order:'SO202608880', customer:'鲁供农产品集采中心', code:'GI-003', product:'生姜', spec:'一级', brand:'昌邑', orderQty:9, qty:9, unit:'吨', arrange:'2026-09-14', status:'received', receivedQty:9, batch:'PC20260807', batchShip:'DH202608007' },
+  { no:'DS202609010O', order:'SO202608956', customer:'海赋（山东）数字产业发展有限公司', code:'GI-003', product:'生姜', spec:'一级', brand:'昌邑', orderQty:9, remainQty:3, qty:0, unit:'吨', arrange:'2026-09-19', status:'pending', receivedQty:0, batch:'', batchShip:'', owing:true, sourceNo:'DS202609006' }
+];
+var DELIVERIES = DELIVERIES_INIT.map(function(r){ return Object.assign({}, r); });
+try {
+  var savedDeliveries = JSON.parse(sessionStorage.getItem('supplier_all_deliveries') || 'null');
+  if(Array.isArray(savedDeliveries) && savedDeliveries.length) DELIVERIES = savedDeliveries;
+} catch(e){}
+// 回读单张详情页的发货结果，使左侧送货单列表与详情保持一致。
+DELIVERIES.forEach(function(r){
+  try {
+    if(localStorage.getItem('shipment_sent_' + r.order + '_' + r.no) === '1'){
+      r.status = 'sent';
+      var qtyMap = JSON.parse(localStorage.getItem('shipment_qty_' + r.order + '_' + r.no) || '{}');
+      if(qtyMap && qtyMap[r.code] != null) r.qty = Number(qtyMap[r.code]);
+    }
+  } catch(e){}
+});
+
+// ===== 单张送货单申请验收时按差额生成的欠单送货单 =====
+// 详情页按发货差额写入 supplier_owing_shipments；欠单与原单除送货单号、发货数量、剩余数量外字段完全一致
+// orderQty 与原送货单一致；remainQty 为欠单待发数量（承接的差额）
+function loadOwingShipments(){
+  var rows = [];
+  try { rows = JSON.parse(localStorage.getItem('supplier_owing_shipments') || '[]') || []; } catch(e){ rows = []; }
+  rows.forEach(function(r){
+    if(!r || !r.no || !Array.isArray(r.items) || !r.items.length) return;
+    // 同一张欠单不重复追加（例如详情页重复申请后再次进入列表）
+    if(DELIVERIES.some(function(x){ return x.no === r.no; })) return;
+    var sentRow = r.status === 'sent';
+    // 列表按单行展示：待发取首个仍有剩余数量的明细，已发完取首个明细
+    var first = (r.items.filter(function(it){ return Number(it.remain || 0) > 0; })[0]) || r.items[0];
+    var item = (r.items.filter(function(it){ return it.code === first.code; })[0]) || first;
+    var shippedQty = r.items.reduce(function(s, it){ return s + Number(it.shipped || 0); }, 0);
+    DELIVERIES.push({
+      no: r.no,
+      order: r.order,
+      customer: r.customer,
+      code: first.code,
+      product: first.name,
+      spec: first.spec,
+      brand: first.brand,
+      orderQty: Number(first.required || 0),
+      remainQty: sentRow ? 0 : Number(item.remain || 0),
+      qty: sentRow ? shippedQty : 0,
+      unit: first.unit,
+      arrange: '',
+      status: sentRow ? 'sent' : 'pending',
+      receivedQty: 0,
+      batch: '',
+      batchShip: '',
+      owing: true,
+      sourceNo: r.sourceNo || ''
+    });
+  });
+}
+loadOwingShipments();
+
+// 客户确认收货后创建的欠单同步为供应商待补发送货单；只读取客户端既有结果，不修改客户端页面。
+function loadCustomerCreatedOwings(){
+  var docs = [];
+  try { docs = JSON.parse(localStorage.getItem('haifu_supplier_owing_shipments') || '[]') || []; } catch(e){ docs = []; }
+  docs.forEach(function(doc){
+    if(!doc || !doc.delivery || DELIVERIES.some(function(r){ return r.no === doc.delivery; })) return;
+    var item = (doc.items || [])[0];
+    if(!item) return;
+    DELIVERIES.push({
+      no:doc.delivery, order:doc.order, customer:doc.customer || '海赋（山东）数字产业发展有限公司',
+      code:item.code, product:item.name, spec:item.spec || '—', brand:item.brand || '—',
+      orderQty:Number(item.orderQty || item.required || item.qty || 0), remainQty:Number(item.qty || item.quantity || 0),
+      qty:0, unit:item.unit || '', arrange:doc.arrangeDate || '', status:'pending', receivedQty:0,
+      batch:'', batchShip:'', owing:true, sourceNo:doc.sourceReceipt || doc.sourceNo || '',
+      owingSource:doc.sourceDocType === '平台收货单' ? '供应商补发欠单' : '客户收货欠单'
+    });
+  });
+  // 兼容客户端现有 customerOwingReceipts 数据结构。
+  var customerDocs = [];
+  try { customerDocs = JSON.parse(localStorage.getItem('customerOwingReceipts') || '[]') || []; } catch(e){ customerDocs = []; }
+  customerDocs.forEach(function(doc){
+    if(!doc || !doc.no || !doc.owing) return;
+    var no = 'DS-' + doc.no;
+    if(DELIVERIES.some(function(r){ return r.no === no; })) return;
+    var item = (doc.products || [])[0] || {};
+    var remain = Number(item.quantity || doc.owingQty || 0);
+    DELIVERIES.push({
+      no:no, order:doc.order || '—', customer:'海赋（山东）数字产业发展有限公司',
+      code:item.code || '—', product:item.name || '欠单补发商品', spec:item.spec || '—', brand:item.brand || '—',
+      orderQty:Number(item.orderQty || item.required || remain), remainQty:remain, qty:0, unit:item.unit || '',
+      arrange:doc.date || '', status:'pending', receivedQty:0, batch:'', batchShip:'', owing:true,
+      sourceNo:doc.sourceReceipt || '', owingSource:'客户收货欠单'
+    });
+  });
+}
+loadCustomerCreatedOwings();
+
+// ===== 销售订单 -> 送货单状态聚合（与 docs 开发说明一致）=====
+// 存在待发货（含确认收货后生成的欠单）→ 部分发货；全部已发货/已收货 → 已发货
+function orderShipStatus(orderNo){
+  var list = DELIVERIES.filter(function(r){ return r.order === orderNo; });
+  if(!list.length) return '';
+  var done = list.filter(function(r){ return r.status === 'sent' || r.status === 'received'; }).length;
+  if(done === list.length) return '已发货';
+  if(done > 0) return '部分发货';
+  return '待发货';
+}
+function orderStatusClass(text){
+  if(text === '已发货') return 'status-sent';
+  if(text === '部分发货') return 'status-pending';
+  return 'status-pending';
+}
+
+var state = { order:'', status:'', keyword:'', page:1, pageSize:5, selected:{} };
+
+function visibleRows(){
+  return DELIVERIES.filter(function(r){
+    if(state.order && r.order !== state.order) return false;
+    if(state.status && r.status !== state.status) return false;
+    if(state.keyword && r.no.toLowerCase().indexOf(state.keyword) < 0) return false;
+    return true;
+  });
+}
+
+var STATUS_TEXT = { pending:'待发货', sent:'已发货', received:'已收货' };
+var STATUS_CLS = { pending:'status-pending', sent:'status-sent', received:'status-received' };
+
+function currentPageRows(){
+  var list = visibleRows();
+  var start = (state.page - 1) * state.pageSize;
+  return list.slice(start, start + state.pageSize);
+}
+
+function render(){
+  var list = visibleRows();
+  var maxPage = Math.max(1, Math.ceil(list.length / state.pageSize));
+  if(state.page > maxPage) state.page = maxPage;
+  var rows = currentPageRows();
+  var body = document.getElementById('body');
+
+  if(!rows.length){
+    body.innerHTML = '<tr><td colspan="12" class="empty">暂无送货单数据</td></tr>';
+  } else {
+    body.innerHTML = rows.map(function(r){
+      var selectable = isSelectable(r);
+      var shipped = shippedQtyOf(r);
+      return '<tr>' +
+        '<td><input class="check" type="checkbox" ' + (selectable ? '' : 'disabled ') + (state.selected[r.no] ? 'checked ' : '') + 'onchange="toggleRow(\'' + r.no + '\',this.checked)" /></td>' +
+        '<td><span class="link" onclick="openDetail(\'' + r.no + '\')">' + r.no + '</span>' +
+          (r.owing ? '<span class="tag-owing">欠单送货单</span>' : '<span class="tag-normal">正常送货单</span>') + '</td>' +
+        '<td><span class="link" onclick="goOrder(\'' + r.order + '\')">' + r.order + '</span></td>' +
+        '<td>' + r.customer + '</td>' +
+        '<td class="muted">' + r.code + '</td>' +
+        '<td>' + r.product + '</td>' +
+        '<td>' + r.spec + '</td>' +
+        '<td>' + r.brand + '</td>' +
+        '<td class="muted">' + r.orderQty + ' ' + r.unit + '</td>' +
+        '<td class="qty">' + (r.status === 'pending' ? '<span class="muted">—</span>' : shipped + ' ' + r.unit) + '</td>' +
+        '<td><span class="status ' + STATUS_CLS[r.status] + '">' + STATUS_TEXT[r.status] + '</span></td>' +
+        '<td>' + (r.batchShip
+          ? '<span class="link" onclick="openBatchDetail(\'' + r.batchShip + '\')">' + r.batchShip + '</span>'
+          : '<span class="muted">—</span>') + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  document.getElementById('tableCount').textContent = '共 ' + list.length + ' 条';
+  document.getElementById('totalRows').textContent = list.length;
+  renderPager(maxPage);
+  syncSelection();
+}
+
+function renderPager(maxPage){
+  var html = '';
+  for(var i = 1; i <= maxPage; i++) html += '<button class="page-btn ' + (i === state.page ? 'active' : '') + '" onclick="goPage(' + i + ')">' + i + '</button>';
+  document.getElementById('pageButtons').innerHTML = html;
+  document.getElementById('prevPage').disabled = state.page === 1;
+  document.getElementById('nextPage').disabled = state.page === maxPage;
+
+  var pageChecks = currentPageRows().filter(isSelectable);
+  var allChecked = pageChecks.length > 0 && pageChecks.every(function(r){ return state.selected[r.no]; });
+  document.getElementById('checkAll').checked = allChecked;
+  document.getElementById('checkAll').disabled = pageChecks.length === 0;
+}
+
+function goPage(n){
+  var maxPage = Math.max(1, Math.ceil(visibleRows().length / state.pageSize));
+  state.page = Math.max(1, Math.min(maxPage, n));
+  render();
+}
+
+function toggleRow(no, checked){ state.selected[no] = checked; render(); }
+
+function toggleAll(checked){
+  currentPageRows().forEach(function(r){
+    if(isSelectable(r)) state.selected[r.no] = checked;
+  });
+  render();
+}
+
+// 仅待发货送货单可勾选批量发货；已发货/已收货不再提供供应商侧操作
+function isSelectable(r){ return r.status === 'pending'; }
+
+// 待发数量（本次发货上限）：欠单取承接的差额，普通送货单取订单数量
+function pendingCap(r){ return r.remainQty != null ? Number(r.remainQty) : Number(r.orderQty || 0); }
+
+// 可勾选送货单（用于勾选态清理与计数）
+function selectedRows(){
+  return DELIVERIES.filter(function(r){ return state.selected[r.no] && isSelectable(r); });
+}
+// 本次可批量发货的送货单（待发货）
+function selectedPendingRows(){ return selectedRows().filter(function(r){ return r.status === 'pending'; }); }
+
+// 发货数量：已发货/已收货取发货数量，待发货尚未发货（按 0 计）
+function shippedQtyOf(r){ return (r.status === 'pending') ? 0 : Number(r.qty || 0); }
+
+function syncSelection(){
+  var rows = selectedRows();
+  var pending = selectedPendingRows();
+  document.getElementById('selectedCount').textContent = rows.length;
+  // 未打开发货弹窗时，发货数量默认为待发数量（剩余数量），欠单差额为 0
+  var qty = pending.reduce(function(sum, r){ return sum + pendingCap(r); }, 0);
+  document.getElementById('selectedQty').textContent = qty + ' 吨';
+  document.getElementById('selectedOwing').textContent = '0';
+  document.getElementById('batchBtn').disabled = pending.length === 0;
+}
+
+function applyFilter(){
+  state.order = document.getElementById('orderFilter').value;
+  state.status = document.getElementById('statusFilter').value;
+  state.keyword = document.getElementById('keyword').value.trim();
+  state.page = 1;
+  render();
+  showToast('已按条件筛选，共 ' + visibleRows().length + ' 条送货单');
+}
+
+function resetFilter(){
+  document.getElementById('orderFilter').value = '';
+  document.getElementById('statusFilter').value = '';
+  document.getElementById('keyword').value = '';
+  state.order = ''; state.status = ''; state.keyword = ''; state.page = 1;
+  render();
+  showToast('筛选条件已重置');
+}
+
+// 恢复初始演示数据：清空勾选 / 筛选 / 批量发货与确认收货产生的全部变更
+function resetAll(){
+  // 清除详情页申请验收生成的欠单送货单及发货状态持久化，回到初始演示状态
+  try {
+    localStorage.removeItem('supplier_owing_shipments');
+    localStorage.removeItem('haifu_customer_incoming_receipts');
+    sessionStorage.removeItem('supplier_all_deliveries');
+    Object.keys(localStorage).forEach(function(k){
+      if(k.indexOf('shipment_sent_') === 0 || k.indexOf('shipment_qty_') === 0) localStorage.removeItem(k);
+    });
+  } catch(e){}
+  DELIVERIES = DELIVERIES_INIT.map(function(r){ return Object.assign({}, r); });
+  state.order = ''; state.status = ''; state.keyword = ''; state.page = 1; state.selected = {};
+  document.getElementById('orderFilter').value = '';
+  document.getElementById('statusFilter').value = '';
+  document.getElementById('keyword').value = '';
+  closeBatch();
+  render();
+  showToast('已恢复到操作前的初始数据');
+}
+
+// ===== 批量发货：按销售订单分组预览，生成新批次号 =====
+function batchNo(){
+  var stamp = '20260903';
+  var used = DELIVERIES.map(function(r){ return r.batch; }).filter(function(b){ return b.indexOf('PC2026090') === 0; });
+  var seq = used.length + 1;
+  while(('PC2026090' + seq).length > 10) seq = seq % 10 + 1;
+  return 'PC2026090' + seq;
+}
+
+function groupByOrder(rows){
+  var map = {};
+  rows.forEach(function(r){ (map[r.order] || (map[r.order] = [])).push(r); });
+  return map;
+}
+
+function openBatch(){
+  var rows = selectedPendingRows();
+  if(!rows.length){ showToast('请先勾选待发货的送货单'); return; }
+  var groups = groupByOrder(rows);
+  var orders = Object.keys(groups);
+  var html = '<div>本次将 <b>' + rows.length + '</b> 张送货单合并为 <b>1 个发货批次</b>（' + batchNo() + '），提交后：</div>' +
+    '<div class="batch-tip">' +
+    '1. 发货数量默认取剩余数量，可按实际发货情况修改，修改后不可超过剩余数量；<br />' +
+    '2. 发货数量小于剩余数量时，本单按实际数量发货（订单数量不变），差额自动生成一张 <b>欠单送货单</b>（待发货）；<br />' +
+    '3. 客户端将按本批次生成 <b>1 张合并收货单</b>（含全部明细行）；<br />' +
+    '4. 各销售订单状态按自身明细独立判定，不受是否与其他订单合并发货影响。</div>';
+
+  orders.forEach(function(order){
+    var list = groups[order];
+    var orderTotal = list.reduce(function(s, r){ return s + r.orderQty; }, 0);
+    html += '<div class="group">销售订单 ' + order + '<span>本次 ' + list.length + ' 张 · 订单数量 ' + orderTotal + ' 吨</span></div>';
+    html += '<table class="mini-table"><thead><tr><th>送货单号</th><th>产品名称</th><th>订单数量</th><th>发货数量</th><th>剩余数量</th><th>差异处理</th></tr></thead><tbody>' +
+      list.map(function(r, idx){
+        var cap = pendingCap(r);
+        return '<tr>' +
+          '<td>' + r.no + '</td>' +
+          '<td>' + r.product + '</td>' +
+          '<td class="muted">' + r.orderQty + ' ' + r.unit + '</td>' +
+          '<td><input class="mini-qty" type="number" min="0" max="' + cap + '" step="1" value="' + cap +
+            '" data-no="' + r.no + '" oninput="onQtyInput(this)" /></td>' +
+          '<td class="remain-cell" data-bremain="' + r.no + '">0</td>' +
+          '<td class="short-cell" data-cell="' + r.no + '">足额发货</td>' +
+        '</tr>';
+      }).join('') +
+      '</tbody></table>';
+  });
+  document.getElementById('batchBody').innerHTML = html;
+  document.getElementById('batchModal').classList.add('show');
+}
+
+function closeBatch(){ document.getElementById('batchModal').classList.remove('show'); }
+
+// 读取弹窗内某张送货单的本次发货数量（越界时收敛到 [0, 订单数量]）
+function batchQtyOf(no){
+  var input = document.querySelector('.mini-qty[data-no="' + no + '"]');
+  if(!input) return null;
+  var raw = Number(input.value);
+  if(!isFinite(raw) || raw < 0) raw = 0;
+  var max = Number(input.getAttribute('max'));
+  if(raw > max) raw = max;
+  return raw;
+}
+
+// 发货数量变化时实时刷新剩余数量（剩余数量 = 订单数量 - 发货数量）
+function onQtyInput(input){
+  var no = input.getAttribute('data-no');
+  var max = Number(input.getAttribute('max'));
+  var raw = Number(input.value);
+  input.classList.toggle('invalid', !isFinite(raw) || raw < 0 || raw > max);
+  var short = max - (isFinite(raw) && raw >= 0 ? Math.min(raw, max) : 0);
+  if(short < 0) short = 0;
+  var remainCell = document.querySelector('.remain-cell[data-bremain="' + no + '"]');
+  if(remainCell){
+    remainCell.textContent = short;
+    remainCell.className = 'remain-cell' + (short > 0 ? ' short' : '');
+  }
+  var cell = document.querySelector('.short-cell[data-cell="' + no + '"]');
+  if(cell){
+    if(short > 0){ cell.textContent = '差额 ' + short + ' → 生成欠单'; cell.className = 'short-cell short'; }
+    else { cell.textContent = '足额发货'; cell.className = 'short-cell'; }
+  }
+  syncBatchSummary();
+}
+
+function syncBatchSummary(){
+  var rows = selectedPendingRows();
+  var send = 0, owing = 0;
+  rows.forEach(function(r){
+    var cap = pendingCap(r);
+    var q = batchQtyOf(r.no);
+    if(q === null) q = cap;
+    send += q;
+    owing += Math.max(0, cap - q);
+  });
+  document.getElementById('selectedQty').textContent = send + ' 吨';
+  var extra = document.getElementById('selectedOwing');
+  if(extra) extra.textContent = owing;
+}
+
+function doBatch(){
+  var rows = selectedPendingRows();
+  if(!rows.length){ closeBatch(); return; }
+  // 先校验发货数量
+  for(var i = 0; i < rows.length; i++){
+    var input = document.querySelector('.mini-qty[data-no="' + rows[i].no + '"]');
+    var q = Number(input && input.value);
+    if(input && (!isFinite(q) || q < 0 || q > Number(input.getAttribute('max')))){
+      input.classList.add('invalid');
+      showToast('送货单 ' + rows[i].no + ' 的发货数量需在 0 ~ ' + pendingCap(rows[i]) + ' 之间');
+      return;
+    }
+  }
+  var shipmentTotal = rows.reduce(function(sum, r){
+    var qty = batchQtyOf(r.no);
+    return sum + Number(qty === null ? pendingCap(r) : qty);
+  }, 0);
+  if(shipmentTotal <= 0){ showToast('本次发货数量不能全部为0'); return; }
+
+  var no = batchNo();
+  var before = {};
+  rows.forEach(function(r){ if(before[r.order] === undefined) before[r.order] = orderShipStatus(r.order); });
+
+  var owingRows = [];
+  rows.forEach(function(r){
+    var cap = pendingCap(r);
+    var q = batchQtyOf(r.no);
+    if(q === null) q = cap;
+    var short = Math.max(0, cap - q);
+    // 发货数量小于剩余数量 → 本单按实际数量发货（订单数量不变），差额另生成一张欠单送货单
+    r.qty = q;
+    r.remainQty = 0;
+    r.receivedQty = 0;
+    r.status = 'sent';
+    r.batch = no;
+    r.batchShip = 'DH' + r.no.replace(/^DS/, '');
+    if(short > 0){
+      owingRows.push({
+        no: 'DS' + r.no.slice(2) + 'O',
+        order: r.order,
+        customer: r.customer,
+        code: r.code,
+        product: r.product,
+        spec: r.spec,
+        brand: r.brand,
+        orderQty: r.orderQty,
+        remainQty: short,
+        qty: 0,
+        unit: r.unit,
+        arrange: r.arrange,
+        status: 'pending',
+        receivedQty: 0,
+        batch: '',
+        batchShip: '',
+        owing: true,
+        sourceNo: r.no
+      });
+      r.owingNo = 'DS' + r.no.slice(2) + 'O';
+    }
+  });
+
+  if(owingRows.length) DELIVERIES = DELIVERIES.concat(owingRows);
+  createMergedCustomerReceipt(no, rows);
+  try { sessionStorage.setItem('supplier_all_deliveries', JSON.stringify(DELIVERIES)); } catch(e){}
+
+  var orders = Object.keys(before);
+  var msg = '批次 ' + no + ' 已发货：';
+  orders.forEach(function(order){
+    msg += order + '（' + before[order] + ' → ' + orderShipStatus(order) + '）；';
+  });
+  if(owingRows.length) msg += '生成 ' + owingRows.length + ' 张欠单送货单（待发货）';
+
+  state.selected = {};
+  closeBatch();
+  render();
+  showToast(msg);
+}
+
+// 多张送货单合并发货后，客户端只生成一张合并收货单，明细保留各销售订单和原送货单来源。
+function createMergedCustomerReceipt(batchNo, rows){
+  var key = 'haifu_customer_incoming_receipts', receipts = [];
+  try { receipts = JSON.parse(localStorage.getItem(key) || '[]') || []; } catch(e){ receipts = []; }
+  var sourceKey = 'batch_' + batchNo;
+  var receipt = {
+    no: 'SH' + batchNo.replace(/[^0-9A-Za-z]/g, '').replace(/^PC/i, ''),
+    sourceType: 'batch',
+    sourceKey: sourceKey,
+    sourceBatch: batchNo,
+    supplier: '海赋农产品供应商',
+    customer: rows[0] ? rows[0].customer : '',
+    date: new Date().toISOString().slice(0,10),
+    status: 'pending',
+    lines: rows.filter(function(r){ return Number(r.qty || 0) > 0; }).map(function(r){
+      return { order:r.order, shipment:r.no, code:r.code, product:r.product, spec:r.spec, unit:r.unit, ordered:r.orderQty, shipped:Number(r.qty || 0), received:0 };
+    })
+  };
+  receipts = receipts.filter(function(r){ return r && r.sourceKey !== sourceKey; });
+  if(receipt.lines.length) receipts.push(receipt);
+  try { localStorage.setItem(key, JSON.stringify(receipts)); } catch(e){}
+  return receipt.lines.length ? receipt : null;
+}
+
+function openDetail(no){
+  var row = DELIVERIES.filter(function(r){ return r.no === no; })[0];
+  if(row){
+    try { sessionStorage.setItem('supplier_delivery_detail_context', JSON.stringify(row)); } catch(e){}
+  }
+  location.href = '送货单详情.html?source=delivery-menu&shipment=' + encodeURIComponent(no) + (row ? '&order=' + encodeURIComponent(row.order) : '');
+}
+function openBatchDetail(batchNo){ location.href = '批量送货单详情.html?batch=' + encodeURIComponent(batchNo); }
+function goOrder(no){ location.href = '销售订单详情.html?order=' + encodeURIComponent(no); }
+
+function showToast(msg){
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(window.tt);
+  window.tt = setTimeout(function(){ el.classList.remove('show'); }, 2600);
+}
+
+// ===== 初始化：销售订单筛选下拉 =====
+(function init(){
+  var orders = [];
+  DELIVERIES.forEach(function(r){ if(orders.indexOf(r.order) < 0) orders.push(r.order); });
+  var sel = document.getElementById('orderFilter');
+  sel.innerHTML = '<option value="">全部销售订单</option>' + orders.map(function(o){ return '<option value="' + o + '">' + o + '</option>'; }).join('');
+
+  // 支持从其他页带 order 参数进入
+  var m = location.search.match(/[?&]order=([^&]*)/);
+  var preset = m ? decodeURIComponent(m[1]) : '';
+  if(preset && orders.indexOf(preset) >= 0){ sel.value = preset; state.order = preset; }
+
+  document.getElementById('batchModal').onclick = function(e){ if(e.target === this) closeBatch(); };
+  render();
+})();
+</script>
+
+<script>
+    // ===== 业务分类页签：只切换显隐，「其他业务」即原有页面内容，未做任何改动 =====
+    function switchCat(c) {
+        var isEgg = (c !== 'other');
+        var egg = document.getElementById('catEgg');
+        if (egg) egg.style.display = isEgg ? 'block' : 'none';
+        Array.prototype.forEach.call(document.querySelectorAll('.cat-other'), function (el) {
+            el.classList[isEgg ? 'add' : 'remove']('cat-hidden');
+        });
+        var te = document.getElementById('catTabEgg');
+        var to = document.getElementById('catTabOther');
+        if (te) te.classList.toggle('active', isEgg);
+        if (to) to.classList.toggle('active', !isEgg);
+        try {
+            var sp = new URLSearchParams(location.search);
+            sp.set('cat', isEgg ? 'egg' : 'other');
+            history.replaceState(null, '', location.pathname + '?' + sp.toString());
+        } catch (e) {}
+    }
+    (function () {
+        var m = location.search.match(/[?&]cat=(\w+)/);
+        switchCat(m && m[1] === 'other' ? 'other' : 'egg');
+    })();
+</script>
+
+<script>
+    // ===== 鸡蛋业务面板筛选：按单号模糊 + 状态下拉过滤 =====
+    function eggFilter() {
+        var kwEl = document.getElementById('eggF0'), selEl = document.getElementById('eggF1');
+        var kw = kwEl ? kwEl.value.trim().toLowerCase() : '';
+        var sel = selEl ? selEl.value : '';
+        var n = 0;
+        Array.prototype.forEach.call(document.querySelectorAll('#eggTbody tr'), function (tr) {
+            var no = (tr.getAttribute('data-no') || '').toLowerCase();
+            var st = tr.getAttribute('data-status') || '';
+            var hit = (!kw || no.indexOf(kw) >= 0) && (!sel || sel === '全部' || st === sel || !st);
+            tr.style.display = hit ? '' : 'none';
+            if (hit) n++;
+        });
+        var c = document.getElementById('eggCount');
+        if (c) c.textContent = '共 ' + n + ' 条';
+    }
+
+
+    // ===== 胶囊下钻：仅回填筛选值（不做数据过滤），切换页签与重置时保持/清空 =====
+    var DRILL = '';
+    function drillApply(v) {
+        DRILL = (v == null ? '' : String(v)).trim();
+        Array.prototype.forEach.call(document.querySelectorAll('[data-drill]'), function (el) {
+            if (el.value !== DRILL) el.value = DRILL;
+        });
+    }
+    (function () {
+        var params = ['so', 'order'];
+        var v = '';
+        for (var i = 0; i < params.length; i++) {
+            var m = location.search.match(new RegExp('[?&]' + params[i] + '=([^&]*)'));
+            if (m) { v = decodeURIComponent(m[1]); break; }
+        }
+        if (v) drillApply(v);
+    })();
+    function eggReset() {
+        drillApply('');
+        var kwEl = document.getElementById('eggF0'), selEl = document.getElementById('eggF1'), dEl = document.getElementById('eggF2');
+        if (kwEl) kwEl.value = '';
+        if (selEl) selEl.value = '全部';
+        if (dEl) dEl.value = '';
+        eggFilter();
+    }
+</script>
+</body>
+</html>

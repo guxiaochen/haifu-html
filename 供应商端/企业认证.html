@@ -44,8 +44,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
 .form-input,.form-select{flex:1;padding:7px 11px;border:1px solid #d9d9d9;border-radius:2px;font-size:13px;outline:none;background:#fff;font-family:inherit;transition:border-color .2s;height:32px}
 .form-input:focus,.form-select:focus{border-color:#1890ff;box-shadow:0 0 0 2px rgba(24,144,255,.2)}
 .form-input::placeholder{color:#bbb}
+.form-input[readonly]{background:#f5f5f5;color:#8c8c8c;cursor:not-allowed}
+.form-tip{font-size:12px;color:#999;margin-top:6px;line-height:1.6}
 .address-row{display:flex;gap:8px;flex:1}
 .address-row select{flex:1;padding:7px 11px;border:1px solid #d9d9d9;border-radius:2px;font-size:13px;background:#fff;height:32px}
+.branch-wrap{position:relative;flex:1;min-width:0}
+.branch-input{width:100%;padding-right:30px}
+.branch-arrow{position:absolute;right:12px;top:12px;width:7px;height:7px;border-right:1px solid #bfbfbf;border-bottom:1px solid #bfbfbf;transform:rotate(45deg);pointer-events:none;transition:transform .2s,top .2s}
+.branch-wrap.open .branch-arrow{transform:rotate(-135deg);top:15px}
+.branch-wrap.open .branch-input{border-color:#1890ff;box-shadow:0 0 0 2px rgba(24,144,255,.2)}
+.branch-dropdown{position:absolute;top:34px;left:0;right:0;background:#fff;border:1px solid #d9d9d9;border-radius:2px;box-shadow:0 2px 8px rgba(0,0,0,.12);max-height:200px;overflow-y:auto;z-index:60;display:none}
+.branch-option{padding:7px 11px;font-size:13px;color:#333;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;white-space:nowrap}
+.branch-option:hover,.branch-option.active{background:#f0f8ff;color:#1890ff}
+.branch-option.selected{background:#e6f4ff;color:#1890ff;font-weight:500}
+.branch-option.selected.active{background:#d6ecff}
+.branch-option-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.branch-option-name mark{background:transparent;color:#1890ff;font-weight:600}
+.branch-option-check{width:12px;flex-shrink:0;color:#1890ff;font-size:12px;text-align:right}
+.branch-option.empty{color:#999;cursor:default;white-space:normal}
+.branch-option.empty:hover{background:#fff;color:#999}
 .char-count{font-size:12px;color:#999;line-height:32px;margin-left:8px;white-space:nowrap}
 .radio-group{display:flex;gap:24px;align-items:center;flex:1;padding-top:7px}
 .radio-item{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px}
@@ -104,14 +121,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
 
 <div class="content-wrapper">
 <div class="audit-banner fail" id="auditBanner" style="display:none">
-<span>❌</span><span>认证审核未通过，请修改信息后重新提交。驳回原因：营业执照信息与填写的公司信息不一致</span>
+<span>❌</span><span>认证审核未通过，请修改信息后重新提交。驳回原因：银行卡信息有误，请核对账户类型与银行卡号后重新提交</span>
 </div>
 
 <div class="steps-container">
 <div class="steps-bar" id="stepsBar">
-<div class="step-item active" data-step="0"><div class="step-circle">1</div><div class="step-label"><div class="step-name">填写信息</div><div class="step-desc">企业信息</div></div></div>
+<div class="step-item active" data-step="0"><div class="step-circle">1</div><div class="step-label"><div class="step-name">基本信息</div><div class="step-desc">企业信息</div></div></div>
 <div class="step-line"></div>
-<div class="step-item" data-step="1"><div class="step-circle">2</div><div class="step-label"><div class="step-name">法人识别</div><div class="step-desc">人员信息</div></div></div>
+<div class="step-item" data-step="1"><div class="step-circle">2</div><div class="step-label"><div class="step-name">法人信息</div><div class="step-desc">人员信息</div></div></div>
 <div class="step-line"></div>
 <div class="step-item" data-step="2"><div class="step-circle">3</div><div class="step-label"><div class="step-name">审核中</div><div class="step-desc">人脸识别</div></div></div>
 <div class="step-line"></div>
@@ -122,50 +139,44 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
 <!-- 步骤1：企业信息 -->
 <div class="step-content active" id="step-0">
 <div class="card">
-<div class="section-title">注册信息</div>
+<div class="section-title">公司信息</div>
 <div class="form-grid">
-<div class="form-item"><label class="form-label"><span class="required">*</span>用户名</label><input class="form-input" id="f-username" placeholder="请输入用户名"></div>
-<div class="form-item"><label class="form-label"><span class="required">*</span>密码</label><input class="form-input" id="f-password" type="password" placeholder="请输入密码"></div>
-<div class="form-item"><label class="form-label"><span class="required">*</span>手机号</label><input class="form-input" id="f-phone" placeholder="请输入手机号"></div>
-<div class="form-item"><label class="form-label"><span class="required">*</span>注册类型</label>
-<div class="radio-group"><div class="radio-item" onclick="setRadio(this)"><div class="radio-circle checked"></div><span>供应商</span></div><div class="radio-item" onclick="setRadio(this)"><div class="radio-circle"></div><span>客户</span></div></div></div>
+<div class="form-item full-row"><label class="form-label"><span class="required">*</span>营业执照上传</label><div style="flex:1;max-width:294px"><div class="upload-box" onclick="document.getElementById('businessLicense').click()"><div class="upload-icon">📄</div><div class="upload-text">点击上传营业执照</div><div class="upload-hint">JPG/PNG格式，不超过5MB</div></div><input type="file" id="businessLicense" style="display:none" accept="image/*" onchange="onLicenseChange(this)"><div class="upload-preview" id="businessLicensePreview"></div></div></div>
+<div class="form-item"><label class="form-label"><span class="required">*</span>公司名称</label><input class="form-input" id="f-company" placeholder="请输入公司名称"></div>
+<div class="form-item"><label class="form-label"><span class="required">*</span>公司地址</label><input class="form-input" id="f-companyAddress" placeholder="请输入公司地址"></div>
+<div class="form-item"><label class="form-label"><span class="required">*</span>统一信用代码</label><input class="form-input" id="f-creditCode" placeholder="请输入统一信用代码"></div>
+<div class="form-item"><label class="form-label">紧急联系人电话</label><input class="form-input" id="f-emergencyPhone" placeholder="请输入紧急联系人电话"></div>
+<div class="form-item"><label class="form-label"><span class="required">*</span>注册类型</label><div class="radio-group"><div class="radio-item" onclick="setRadio(this)"><div class="radio-circle checked"></div><span>供应商</span></div><div class="radio-item" onclick="setRadio(this)"><div class="radio-circle"></div><span>客户</span></div></div></div>
 </div>
-<div class="section-title" style="margin-top:24px">公司信息</div>
+<div class="section-title" style="margin-top:24px">银行卡信息</div>
 <div class="form-grid">
-<div class="form-item full-row"><label class="form-label"><span class="required">*</span>公司名称</label><input class="form-input" id="f-company" placeholder="请输入公司全称"></div>
-<div class="form-item"><label class="form-label"><span class="required">*</span>统一社会信用代码</label><input class="form-input" id="f-creditCode" placeholder="请输入18位统一社会信用代码"></div>
-<div class="form-item"><label class="form-label">法定代表人</label><input class="form-input" id="f-legalPerson" placeholder="请输入法定代表人"></div>
-<div class="form-item"><label class="form-label"><span class="required">*</span>注册地址</label><div class="address-row"><select id="f-province"><option value="">省份</option><option>山东省</option><option>江苏省</option><option>广东省</option></select><select id="f-city"><option value="">城市</option><option>菏泽市</option><option>济南市</option><option>青岛市</option></select><select id="f-district"><option value="">区/县</option><option>牡丹区</option><option>历下区</option></select></div></div>
-<div class="form-item"><label class="form-label"><span class="required">*</span>详细地址</label><input class="form-input" id="f-address" placeholder="街道、门牌号等"></div>
-<div class="form-item"><label class="form-label">公司电话</label><input class="form-input" id="f-companyPhone" placeholder="请输入公司电话"></div>
-<div class="form-item"><label class="form-label">公司邮箱</label><input class="form-input" id="f-companyEmail" type="email" placeholder="请输入公司邮箱"></div>
+<div class="form-item full-row"><label class="form-label"><span class="required">*</span>账户类型</label><div class="radio-group" id="accountTypeGroup"><div class="radio-item" onclick="onAccountType(this,'public')"><div class="radio-circle checked"></div><span>对公</span></div><div class="radio-item" onclick="onAccountType(this,'private')"><div class="radio-circle"></div><span>对私</span></div></div></div>
 </div>
-<div class="section-title" style="margin-top:24px">开票信息</div>
 <div class="form-grid">
-<div class="form-item"><label class="form-label"><span class="required">*</span>开票类型</label><div class="radio-group"><div class="radio-item" onclick="setRadio(this)"><div class="radio-circle checked"></div><span>企业</span></div><div class="radio-item" onclick="setRadio(this)"><div class="radio-circle"></div><span>个人</span></div></div></div>
-<div class="form-item"><label class="form-label"><span class="required">*</span>纳税人识别号</label><input class="form-input" id="f-taxNumber" placeholder="请输入纳税人识别号"></div>
-<div class="form-item"><label class="form-label">开户银行</label><input class="form-input" id="f-bankName" placeholder="请输入开户银行"></div>
-<div class="form-item"><label class="form-label">银行账号</label><input class="form-input" id="f-bankAccount" placeholder="请输入银行账号"></div>
-<div class="form-item"><label class="form-label">开票地址</label><input class="form-input" id="f-invoiceAddress" placeholder="请输入开票地址"></div>
-<div class="form-item"><label class="form-label">开票电话</label><input class="form-input" id="f-invoicePhone" placeholder="请输入开票电话"></div>
+<div class="form-item"><label class="form-label"><span class="required">*</span>银行卡号</label><input class="form-input" id="f-bankCard" placeholder="请输入银行卡号"></div>
+<div class="form-item"><label class="form-label"><span class="required">*</span>开户行所在地</label><div class="address-row"><select id="f-bankProvince" onchange="onBankRegionChange()"><option value="">请选择省份</option><option>山东省</option><option>江苏省</option><option>广东省</option></select><select id="f-bankCity" onchange="onBankRegionChange()"><option value="">请选择城市</option><option>菏泽市</option><option>济南市</option><option>青岛市</option></select></div></div>
+<div class="form-item" id="itemBindPhone" style="display:none"><label class="form-label"><span class="required">*</span>绑定手机号</label><input class="form-input" id="f-bindPhone" placeholder="请输入银行卡绑定手机号"></div>
+</div>
+<div class="form-grid" id="groupBankInfo">
+<div class="form-item"><label class="form-label"><span class="required">*</span>开户支行名称</label><div class="branch-wrap"><input class="form-input branch-input" id="f-branchName" autocomplete="off" placeholder="请选择开户支行名称，可输入筛选" oninput="onBranchNameInput()" onfocus="onBranchNameFocus()" onclick="onBranchNameFocus()" onkeydown="onBranchNameKeydown(event)"><span class="branch-arrow"></span><div class="branch-dropdown" id="branchDropdown"></div></div></div>
+<div class="form-item"><label class="form-label"><span class="required">*</span>银行代码</label><input class="form-input" id="f-bankCode" placeholder="选择开户支行名称后自动回填" readonly></div>
+<div class="form-item"><label class="form-label"><span class="required">*</span>支行行号</label><input class="form-input" id="f-branchCode" placeholder="选择开户支行名称后自动回填" readonly></div>
 </div>
 </div>
 <div class="step-footer"><button class="btn btn-primary" onclick="nextStep(0)">下一步</button></div>
 </div>
 
-<!-- 步骤2：人员信息 -->
+<!-- 步骤2：法人信息 -->
 <div class="step-content" id="step-1">
 <div class="card">
-<div class="section-title">人员信息</div>
 <div class="form-grid">
-<div class="form-item"><label class="form-label"><span class="required">*</span>姓名</label><input class="form-input" id="p-name" placeholder="请输入姓名"></div>
-<div class="form-item"><label class="form-label"><span class="required">*</span>手机号</label><input class="form-input" id="p-phone" placeholder="请输入手机号"></div>
-<div class="form-item"><label class="form-label">邮箱</label><input class="form-input" id="p-email" type="email" placeholder="请输入邮箱"></div>
-<div class="form-item"><label class="form-label">职务</label><input class="form-input" id="p-position" placeholder="请输入职务"></div>
+<div class="form-item full-row"><label class="form-label"><span class="required">*</span>用户身份</label><div style="flex:1"><div class="radio-group"><div class="radio-item" onclick="setRadio(this)"><div class="radio-circle"></div><span>法人</span></div><div class="radio-item" onclick="setRadio(this)"><div class="radio-circle"></div><span>代理人</span></div></div></div></div>
 </div>
-<div class="section-title" style="margin-top:24px">身份证信息</div>
 <div class="form-grid">
-<div class="form-item full-row"><label class="form-label"><span class="required">*</span>身份证号</label><input class="form-input" id="p-idNumber" placeholder="请输入18位身份证号"></div>
+<div class="form-item"><label class="form-label"><span class="required">*</span>法人姓名</label><input class="form-input" id="p-name" placeholder="请输入法人姓名"></div>
+<div class="form-item"><label class="form-label"><span class="required">*</span>法人手机号</label><input class="form-input" id="p-phone" placeholder="请输入法人手机号"></div>
+<div class="form-item"><label class="form-label"><span class="required">*</span>证件类型</label><select class="form-select" id="p-idType"><option>身份证</option><option>护照</option><option>军官证</option><option>其他证件</option></select></div>
+<div class="form-item"><label class="form-label"><span class="required">*</span>法人身份证</label><input class="form-input" id="p-idNumber" placeholder="请输入18位身份证号"></div>
 </div>
 <div style="display:flex;gap:24px;margin-top:16px">
 <div style="flex:1">
@@ -267,6 +278,194 @@ function setRadio(el) {
     var group = el.parentElement;
     group.querySelectorAll('.radio-circle').forEach(function(c) { c.classList.remove('checked'); });
     el.querySelector('.radio-circle').classList.add('checked');
+}
+
+// ===== 银行卡信息：账户类型切换 =====
+// 对公、对私均需：银行卡号、开户行所在地（省／市）、开户支行名称、银行代码、支行行号
+// 仅对私需：绑定手机号
+function onAccountType(el, type) {
+    setRadio(el);
+    document.getElementById('itemBindPhone').style.display = (type === 'private') ? '' : 'none';
+}
+
+// 演示用银行数据：开户支行 → 银行代码 / 支行行号（支付行号）
+var BANK_LIST = [
+    {name:'中信银行', code:'302', branches:[
+        {name:'中信银行股份有限公司菏泽分行营业部', code:'302473000013', city:'菏泽市'},
+        {name:'中信银行股份有限公司济南分行营业部', code:'302451000010', city:'济南市'}]},
+    {name:'中国工商银行', code:'102', branches:[
+        {name:'中国工商银行股份有限公司菏泽牡丹支行', code:'102473000015', city:'菏泽市'}]},
+    {name:'中国农业银行', code:'103', branches:[
+        {name:'中国农业银行股份有限公司菏泽开发区支行', code:'103473000011', city:'菏泽市'}]},
+    {name:'中国建设银行', code:'105', branches:[
+        {name:'中国建设银行股份有限公司菏泽分行营业部', code:'105473000012', city:'菏泽市'}]},
+    {name:'中国银行', code:'104', branches:[
+        {name:'中国银行股份有限公司菏泽分行营业部', code:'104473000016', city:'菏泽市'}]},
+    {name:'招商银行', code:'308', branches:[
+        {name:'招商银行股份有限公司菏泽分行营业部', code:'308473000019', city:'菏泽市'}]},
+    {name:'中国邮政储蓄银行', code:'403', branches:[
+        {name:'中国邮政储蓄银行股份有限公司菏泽市分行', code:'403473000010', city:'菏泽市'}]}
+];
+
+// 扁平化：全部开户支行，便于按关键字模糊匹配
+var BRANCH_LIST = [];
+BANK_LIST.forEach(function(b) {
+    b.branches.forEach(function(br) {
+        BRANCH_LIST.push({name: br.name, code: br.code, bankName: b.name, bankCode: b.code, city: br.city});
+    });
+});
+
+var branchPicking = false; // 选中方案回填时，避免再次触发匹配
+var branchOptions = [];    // 当前下拉中展示的候选支行（已过滤）
+var branchActiveIndex = -1; // 键盘／鼠标高亮位置
+
+// 开户支行名称：输入即模糊匹配候选下拉
+function onBranchNameInput() {
+    if (branchPicking) return;
+    clearBankResult();
+    renderBranchDropdown(document.getElementById('f-branchName').value);
+}
+
+// 点击／聚焦即展开完整下拉列表（未输入关键字时展示全部支行）
+function onBranchNameFocus() {
+    if (branchPicking) return;
+    renderBranchDropdown(document.getElementById('f-branchName').value);
+}
+
+// 按关键字筛选开户支行（支持全称、关键字、去掉机构后缀的简称）；无关键字时返回全部
+function findBranches(keyword) {
+    var kw = (keyword || '').trim().replace(/\s/g, '');
+    if (!kw) return BRANCH_LIST.slice();
+    return BRANCH_LIST.filter(function(br) {
+        var shortName = br.name.replace(/股份有限公司|有限公司|银行|分行|支行|营业部|菏泽市|菏泽|济南市|济南/g, '');
+        return br.name.indexOf(kw) > -1 || shortName.indexOf(kw) > -1;
+    });
+}
+
+// 关键字高亮（命中片段标蓝加粗）
+function highlightBranchName(name, kw) {
+    if (!kw) return name;
+    var escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return name.replace(new RegExp(escaped, 'g'), '<mark>$&</mark>');
+}
+
+// 渲染下拉候选：按关键字过滤的结果列表
+function renderBranchDropdown(keyword) {
+    var drop = document.getElementById('branchDropdown');
+    var kw = (keyword || '').trim();
+    branchOptions = findBranches(kw);
+    branchActiveIndex = -1;
+    if (!branchOptions.length) {
+        drop.innerHTML = '<div class="branch-option empty">未匹配到开户支行，请检查名称</div>';
+        setBranchOpen(true);
+        return;
+    }
+    var current = document.getElementById('f-branchName').value;
+    drop.innerHTML = branchOptions.map(function(br, i) {
+        var cls = 'branch-option' + (br.name === current ? ' selected' : '');
+        return '<div class="' + cls + '" data-index="' + i + '" title="' + br.name + '" onmouseenter="hoverBranchOption(' + i + ')" onclick="selectBranch(' + i + ')">'
+            + '<span class="branch-option-name">' + highlightBranchName(br.name, kw) + '</span>'
+            + '<span class="branch-option-check">' + (br.name === current ? '✓' : '') + '</span></div>';
+    }).join('');
+    setBranchOpen(true);
+    var sel = drop.querySelector('.branch-option.selected');
+    if (sel) sel.scrollIntoView({ block: 'nearest' });
+}
+
+// 下拉展开／收起（同步箭头方向与输入框展开态）
+function setBranchOpen(open) {
+    var drop = document.getElementById('branchDropdown');
+    drop.style.display = open ? 'block' : 'none';
+    var wrap = document.querySelector('.branch-wrap');
+    if (wrap) wrap.classList.toggle('open', open);
+}
+
+// 键盘高亮：鼠标移入与上下键共用
+function hoverBranchOption(i) {
+    branchActiveIndex = i;
+    updateBranchActive();
+}
+
+function updateBranchActive() {
+    var drop = document.getElementById('branchDropdown');
+    drop.querySelectorAll('.branch-option').forEach(function(el) {
+        el.classList.toggle('active', Number(el.getAttribute('data-index')) === branchActiveIndex);
+    });
+    var active = drop.querySelector('.branch-option.active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+}
+
+// 键盘操作：↑↓ 移动、Enter 选中、Esc 收起
+function onBranchNameKeydown(e) {
+    var drop = document.getElementById('branchDropdown');
+    var opened = drop.style.display === 'block';
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (!opened) { renderBranchDropdown(document.getElementById('f-branchName').value); return; }
+        if (!branchOptions.length) return;
+        branchActiveIndex = (e.key === 'ArrowDown')
+            ? Math.min(branchActiveIndex + 1, branchOptions.length - 1)
+            : Math.max(branchActiveIndex - 1, 0);
+        updateBranchActive();
+    } else if (e.key === 'Enter') {
+        if (opened && branchOptions[branchActiveIndex]) {
+            e.preventDefault();
+            selectBranch(branchActiveIndex);
+        }
+    } else if (e.key === 'Escape') {
+        hideBranchDropdown();
+    }
+}
+
+// 选中开户支行：自动回填银行代码与支行行号
+function selectBranch(index) {
+    var br = branchOptions[index];
+    if (!br) return;
+    branchPicking = true;
+    document.getElementById('f-branchName').value = br.name;
+    document.getElementById('f-bankCode').value = br.bankCode;
+    document.getElementById('f-branchCode').value = br.code;
+    hideBranchDropdown();
+    setTimeout(function() { branchPicking = false; }, 0);
+}
+
+function hideBranchDropdown() {
+    var drop = document.getElementById('branchDropdown');
+    drop.style.display = 'none';
+    drop.innerHTML = '';
+    branchOptions = [];
+    branchActiveIndex = -1;
+    var wrap = document.querySelector('.branch-wrap');
+    if (wrap) wrap.classList.remove('open');
+}
+
+// 未最终选定开户支行时，清空回填的银行代码、支行行号
+function clearBankResult() {
+    document.getElementById('f-bankCode').value = '';
+    document.getElementById('f-branchCode').value = '';
+}
+
+// 开户行所在地变化：已选支行不属于新所在地时清空，避免省市与支行不一致
+function onBankRegionChange() {
+    var city = document.getElementById('f-bankCity').value;
+    var name = document.getElementById('f-branchName').value;
+    var selected = BRANCH_LIST.filter(function(br) { return br.name === name; })[0];
+    if (selected && city && selected.city !== city) {
+        document.getElementById('f-branchName').value = '';
+        clearBankResult();
+    }
+    hideBranchDropdown();
+}
+
+// 点击空白处收起候选下拉
+document.addEventListener('click', function(e) {
+    var wrap = document.querySelector('.branch-wrap');
+    if (wrap && !wrap.contains(e.target)) hideBranchDropdown();
+});
+
+// 营业执照上传：仅预览，不做自动识别回填
+function onLicenseChange(input) {
+    previewUpload(input, 'businessLicensePreview');
 }
 
 // 上传预览
@@ -382,6 +581,7 @@ function showToast(msg, type) {
     toast.className = 'toast show ' + (type || '');
     setTimeout(function() { toast.classList.remove('show'); }, 3000);
 }
+
 </script>
 </body>
 </html>

@@ -221,7 +221,29 @@
         .page-btn.active { background: #2BA471; color: #fff; border-color: #2BA471; }
         .page-btn:disabled { color: #ccc; cursor: not-allowed; }
         .page-info { font-size: 13px; color: #999; margin-right: 12px; }
-    </style>
+
+    
+        /* ===== 鸡蛋业务面板：状态小徽标（配色与宿主语义一致） ===== */
+        #catEgg .bg { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+        #catEgg .bg-green { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        #catEgg .bg-orange { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+        #catEgg .bg-blue { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+        #catEgg .bg-gray { background: #f5f5f5; color: #999; border: 1px solid #d9d9d9; }
+        #catEgg .egg-title-bar { display: flex; align-items: center; margin-bottom: 14px; }
+        #catEgg .egg-title { font-size: 15px; font-weight: 600; color: #333; }
+        #catEgg .egg-title .count { color: #999; font-weight: 400; font-size: 13px; margin-left: 6px; }
+        #catEgg .egg-tip { margin-left: auto; font-size: 12px; color: #999; }
+        #catEgg .egg-bar { display: inline-block; width: 3px; height: 14px; background: #2BA471; border-radius: 2px; margin-right: 8px; vertical-align: -2px; }
+
+        /* ===== 业务分类页签（鸡蛋业务 / 其他业务） ===== */
+        .cat-tabs { display: flex; background: #fff; border-radius: 4px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+        .cat-tab { padding: 13px 22px; font-size: 14px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; }
+        .cat-tab:hover { color: #2BA471; }
+        .cat-tab.active { color: #2BA471; border-bottom-color: #2BA471; font-weight: 500; background: #f7fdfa; }
+        .cat-tab .ct-cnt { color: #999; font-size: 12px; font-weight: 400; margin-left: 6px; }
+        .cat-tab.active .ct-cnt { color: #2BA471; }
+        .cat-hidden { display: none !important; }
+</style>
 </head>
 <body>
 
@@ -264,24 +286,46 @@
 
             <!-- 面包屑导航 -->
             <div class="breadcrumb-bar">
-                <a onclick="location.href='#'">采购订单</a>
-                <span class="sep">/</span>
-                <span class="current">采购订单列表</span>
+                <span class="current">采购订单</span>
             </div>
 
             <!-- 页面标题 + 新建按钮 -->
+            <!-- 业务分类页签：鸡蛋业务（新增面板）/ 其他业务（原有内容，未改动） -->
+            <div class="cat-tabs">
+                <div class="cat-tab" id="catTabEgg" onclick="switchCat('egg')">鸡蛋业务<span class="ct-cnt">3</span></div>
+                <div class="cat-tab" id="catTabOther" onclick="switchCat('other')">其他业务</div>
+            </div>
             <div class="page-header-bar">
                 <div class="page-title">采购订单列表</div>
-                <button class="btn btn-primary" onclick="goNew()">+ 新建采购订单</button>
+                <button class="cat-other btn btn-primary" onclick="goNew()">+ 新建采购订单</button>
             </div>
 
             <!-- 筛选区 -->
-            <div class="filter-card">
+            <!-- 鸡蛋业务视图：筛选卡与表格卡均复用宿主页面类名，保证与其他业务视觉一致 -->
+            <div id="catEgg" style="display:none;">
+    <div class="filter-card">
+            <div class="filter-row">
+                <div class="filter-item"><label class="filter-label">订单号</label><input class="filter-input" id="eggF0" placeholder="请输入订单号" oninput="eggFilter()" /></div>
+                <div class="filter-item"><span class="filter-label">订货单</span><input class="filter-input" id="drillEgg" data-drill="1" placeholder="请输入订货单" oninput="drillApply(this.value)" /></div>
+                <div class="filter-item"><label class="filter-label">订单状态</label><select class="filter-select" id="eggF1" onchange="eggFilter()"><option>全部</option><option>已确认</option><option>待确认</option></select></div>
+                <div class="filter-item"><label class="filter-label">订单日期</label><input class="filter-input" id="eggF2" type="date" /></div>
+                <div class="filter-actions"><button class="btn btn-primary" onclick="eggFilter()">查询</button><button class="btn btn-default" onclick="eggReset()">重置</button></div>
+            </div>
+    </div>
+    <div class="table-card cat-egg">
+
+<table class="data-table"><thead><tr><th>序号</th><th>采购单编号</th><th>公司名称</th><th>采购人员</th><th>订单日期</th><th>确认日期</th><th>供应商</th><th>订单金额</th><th>订单状态</th><th>收货状态</th><th>付款状态</th></tr></thead><tbody><tr style="cursor:pointer;" data-no="EGG-PO-20260905001" data-status="已确认" onclick="location.href='鸡蛋-采购订单详情.html?no=EGG-PO-20260905001&status=confirmed'"><td>1</td><td>EGG-PO-20260905001</td><td>aqtest薄眠（山东）数字产业发展有限公司</td><td>侯振鲁</td><td>2026-09-05</td><td>2026-09-06</td><td>焱丰（山东）供应链管理有限公司</td><td>128,587.20</td><td><span class="bg bg-green">已确认</span></td><td><span class="bg bg-orange">待收货</span></td><td><span class="bg bg-blue">部分付款</span></td></tr><tr style="cursor:pointer;" data-no="EGG-PO-20260901002" data-status="待确认" onclick="location.href='鸡蛋-采购订单详情.html?no=EGG-PO-20260901002&status=pending'"><td>2</td><td>EGG-PO-20260901002</td><td>aqtest薄眠（山东）数字产业发展有限公司</td><td>侯振鲁</td><td>2026-09-01</td><td>—</td><td>焱丰（山东）供应链管理有限公司</td><td>0.00</td><td><span class="bg bg-orange">待确认</span></td><td><span class="bg bg-orange">待发货</span></td><td><span class="bg bg-gray">待付款</span></td></tr><tr style="cursor:pointer;" data-no="EGG-PO-20260828003" data-status="已确认" onclick="location.href='鸡蛋-采购订单详情.html?no=EGG-PO-20260828003&status=done'"><td>3</td><td>EGG-PO-20260828003</td><td>aqtest薄眠（山东）数字产业发展有限公司</td><td>侯振鲁</td><td>2026-08-28</td><td>2026-08-29</td><td>焱丰（山东）供应链管理有限公司</td><td>196,465.72</td><td><span class="bg bg-green">已确认</span></td><td><span class="bg bg-green">已收货</span></td><td><span class="bg bg-green">全额付款</span></td></tr></tbody></table>
+                <div class="pagination"><span class="page-info" id="eggCount">共 3 条</span><button class="page-btn" disabled>‹</button><button class="page-btn active">1</button><button class="page-btn" disabled>›</button></div>
+    </div>
+            </div>
+
+            <div class="filter-card cat-other">
                 <div class="filter-row">
                     <div class="filter-item">
                         <span class="filter-label">采购单：</span>
                         <input class="filter-input" placeholder="请输入采购单编号">
-                    </div>
+                    </div><div class="filter-item"><span class="filter-label">订货单</span><input class="filter-input" data-drill="1" placeholder="请输入订货单" oninput="drillApply(this.value)" /></div>
+                
                     <div class="filter-item">
                         <span class="filter-label">采购单名称：</span>
                         <input class="filter-input" placeholder="请输入采购单名称">
@@ -311,7 +355,7 @@
             </div>
 
             <!-- 表格 -->
-            <div class="table-card">
+            <div class="table-card cat-other">
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -477,8 +521,79 @@
         }
         // status: draft=创建订单, pending=发起采购, confirmed=平台确认, completed=已完成, cancelled=已取消
         function goDetail(status) {
-            location.href = '采购订单详情.html?status=' + (status || 'pending');
+            location.href = '采购订单详情.html?source=order&status=' + (status || 'pending');
         }
     </script>
+
+<script>
+    // ===== 业务分类页签：只切换显隐，「其他业务」即原有页面内容，未做任何改动 =====
+    function switchCat(c) {
+        var isEgg = (c !== 'other');
+        var egg = document.getElementById('catEgg');
+        if (egg) egg.style.display = isEgg ? 'block' : 'none';
+        Array.prototype.forEach.call(document.querySelectorAll('.cat-other'), function (el) {
+            el.classList[isEgg ? 'add' : 'remove']('cat-hidden');
+        });
+        var te = document.getElementById('catTabEgg');
+        var to = document.getElementById('catTabOther');
+        if (te) te.classList.toggle('active', isEgg);
+        if (to) to.classList.toggle('active', !isEgg);
+        try {
+            var sp = new URLSearchParams(location.search);
+            sp.set('cat', isEgg ? 'egg' : 'other');
+            history.replaceState(null, '', location.pathname + '?' + sp.toString());
+        } catch (e) {}
+    }
+    (function () {
+        var m = location.search.match(/[?&]cat=(\w+)/);
+        switchCat(m && m[1] === 'other' ? 'other' : 'egg');
+    })();
+</script>
+
+<script>
+    // ===== 鸡蛋业务面板筛选：按单号模糊 + 状态下拉过滤 =====
+    function eggFilter() {
+        var kwEl = document.getElementById('eggF0'), selEl = document.getElementById('eggF1');
+        var kw = kwEl ? kwEl.value.trim().toLowerCase() : '';
+        var sel = selEl ? selEl.value : '';
+        var n = 0;
+        Array.prototype.forEach.call(document.querySelectorAll('#eggTbody tr'), function (tr) {
+            var no = (tr.getAttribute('data-no') || '').toLowerCase();
+            var st = tr.getAttribute('data-status') || '';
+            var hit = (!kw || no.indexOf(kw) >= 0) && (!sel || sel === '全部' || st === sel || !st);
+            tr.style.display = hit ? '' : 'none';
+            if (hit) n++;
+        });
+        var c = document.getElementById('eggCount');
+        if (c) c.textContent = '共 ' + n + ' 条';
+    }
+
+
+    // ===== 胶囊下钻：仅回填筛选值（不做数据过滤），切换页签与重置时保持/清空 =====
+    var DRILL = '';
+    function drillApply(v) {
+        DRILL = (v == null ? '' : String(v)).trim();
+        Array.prototype.forEach.call(document.querySelectorAll('[data-drill]'), function (el) {
+            if (el.value !== DRILL) el.value = DRILL;
+        });
+    }
+    (function () {
+        var params = ['dh'];
+        var v = '';
+        for (var i = 0; i < params.length; i++) {
+            var m = location.search.match(new RegExp('[?&]' + params[i] + '=([^&]*)'));
+            if (m) { v = decodeURIComponent(m[1]); break; }
+        }
+        if (v) drillApply(v);
+    })();
+    function eggReset() {
+        drillApply('');
+        var kwEl = document.getElementById('eggF0'), selEl = document.getElementById('eggF1'), dEl = document.getElementById('eggF2');
+        if (kwEl) kwEl.value = '';
+        if (selEl) selEl.value = '全部';
+        if (dEl) dEl.value = '';
+        eggFilter();
+    }
+</script>
 </body>
 </html>

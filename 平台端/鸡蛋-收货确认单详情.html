@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>收货确认单详情 - 运营管理平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+            background: #f5f7fa; color: #333; font-size: 14px; min-height: 100vh;
+        }
+
+        /* ===== 顶部导航 ===== */
+        .top-nav {
+            height: 56px; background: #fff; color: #333;
+            display: flex; align-items: center; padding: 0 20px;
+            border-bottom: 1px solid #f0f0f0;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .top-nav-left { display: flex; align-items: center; gap: 24px; }
+        .brand { display: flex; align-items: center; gap: 8px; }
+        .brand-logo {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #2BA471 0%, #5BC09F 100%);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px;
+        }
+        .brand-name { font-size: 16px; font-weight: 600; color: #333; }
+        .top-nav-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+        .top-nav-icon {
+            cursor: pointer; color: #666; position: relative;
+            font-size: 18px; padding: 6px; border-radius: 4px;
+        }
+        .top-nav-icon:hover { background: #f5f5f5; color: #2BA471; }
+        .top-nav-icon .badge {
+            position: absolute; top: 2px; right: 2px;
+            background: #ff4d4f; color: #fff; font-size: 11px;
+            min-width: 16px; height: 16px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 4px; line-height: 1;
+        }
+        .account {
+            display: flex; align-items: center; gap: 8px;
+            cursor: pointer; padding: 4px 10px; border-radius: 4px;
+            font-size: 13px; color: #333;
+        }
+        .account:hover { background: #f5f5f5; }
+        .account-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: linear-gradient(135deg, #2BA471, #5BC09F);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 500;
+        }
+        .account-name { font-size: 13px; }
+
+        /* ===== 左右分栏 ===== */
+        .layout { display: flex; min-height: calc(100vh - 56px); }
+
+        /* 右侧主内容 */
+        .main { flex: 1; padding: 16px 20px; overflow-x: auto; }
+
+        /* 面包屑 */
+        .breadcrumb {
+            font-size: 13px; color: #666; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .breadcrumb a { color: #2BA471; text-decoration: none; cursor: pointer; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb .sep { color: #d9d9d9; }
+        .breadcrumb .current { color: #333; }
+
+        /* 页面标题 */
+        .title-card {
+            background: #fff; padding: 14px 20px;
+            border-radius: 4px; margin-bottom: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        .title-card .page-title { font-size: 18px; font-weight: 600; color: #333; }
+        .title-card .page-title .order-no {
+            font-size: 14px; font-weight: 400; color: #999; margin-left: 10px;
+        }
+
+        /* 主内容卡片 */
+        .content-card {
+            background: #fff; padding: 20px 24px;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            margin-bottom: 12px;
+        }
+
+        /* 操作栏 + 步骤条 */
+        .action-bar {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .btn-action {
+            padding: 7px 20px; border: 1px solid #d9d9d9;
+            background: #fff; border-radius: 2px;
+            cursor: pointer; font-size: 13px; color: #666;
+            transition: all .15s;
+        }
+        .btn-action:hover { color: #2BA471; border-color: #2BA471; }
+        .btn-action.active { background: #2BA471; border-color: #2BA471; color: #fff; }
+        .btn-action.active:hover { background: #229963; border-color: #229963; color: #fff; }
+        .btn-action:disabled { background: #f5f5f5; border-color: #e0e0e0; color: #999; cursor: not-allowed; }
+        .steps-bar { margin-left: auto; display: flex; align-items: center; gap: 0; }
+        .step {
+            padding: 6px 18px; background: #f5f5f5;
+            color: #666; font-size: 13px;
+            clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%, 8px 50%);
+            margin-right: -8px;
+        }
+        .step:first-child { clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%); }
+        .step:last-child { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 8px 50%); margin-right: 0; }
+        .step.active { background: #2BA471; color: #fff; }
+        .step.done { background: #e8e8e8; color: #999; }
+
+        /* 左右两栏信息 */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 64px; margin-bottom: 8px; }
+        .section-title { font-size: 14px; font-weight: 600; color: #2BA471; margin: 4px 0 16px; padding-left: 10px; border-left: 3px solid #2BA471; }
+        .kv { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 14px; }
+        .kv .k { min-width: 100px; color: #666; font-size: 13px; flex-shrink: 0; text-align: right; }
+        .kv .v { flex: 1; color: #333; font-size: 13px; line-height: 1.6; }
+
+        /* 文件卡片 */
+        .file-card { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #fafafa; border: 1px solid #eee; border-radius: 6px; max-width: 360px; }
+        .file-ico { width: 34px; height: 34px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff; flex-shrink: 0; }
+        .file-ico.xls { background: #217346; }
+        .file-ico.img { background: #4aa3df; }
+        .file-meta { flex: 1; min-width: 0; }
+        .file-name { font-size: 13px; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .file-type { font-size: 11px; color: #999; }
+        .file-ops { display: inline-flex; gap: 10px; }
+        .file-ops a { color: #2BA471; cursor: pointer; font-size: 13px; text-decoration: none; }
+        .file-ops a:hover { text-decoration: underline; }
+
+        /* Tab 切换 */
+        .tab-bar { display: flex; gap: 0; margin-top: 30px; border-bottom: 1px solid #f0f0f0; }
+        .tab-btn {
+            padding: 10px 20px; cursor: pointer;
+            font-size: 14px; color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all .15s;
+        }
+        .tab-btn:hover { color: #2BA471; }
+        .tab-btn.active { color: #2BA471; border-bottom-color: #2BA471; font-weight: 500; }
+        .tab-content { display: none; padding-top: 16px; }
+        .tab-content.active { display: block; }
+
+        /* 明细表 */
+        .table-scroll { width: 100%; overflow-x: auto; }
+        table.items-table { width: 100%; min-width: 900px; border-collapse: collapse; font-size: 13px; }
+        table.items-table thead { background: #fafafa; }
+        table.items-table th {
+            padding: 10px 12px; text-align: left; color: #555;
+            font-weight: 500; border-bottom: 1px solid #f0f0f0; white-space: nowrap;
+        }
+        table.items-table td { padding: 12px; color: #333; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+        table.items-table tbody tr:hover { background: #fafdfb; }
+        .items-table th.col-num, .items-table td.col-num { width: 50px; text-align: center; color: #999; }
+        .items-table th.col-qty, .items-table td.col-qty { text-align: right; font-variant-numeric: tabular-nums; }
+        .items-table th.col-price, .items-table td.col-price { text-align: right; font-variant-numeric: tabular-nums; }
+        .empty-tip { text-align: center; padding: 40px 20px; color: #999; font-size: 13px; }
+
+        /* 分页条 */
+        .pager { display: flex; align-items: center; gap: 6px; margin-top: 14px; font-size: 13px; color: #666; flex-wrap: wrap; }
+        .pager .pg-info { margin-right: 8px; }
+        .pager .pg-btn {
+            min-width: 30px; height: 30px; padding: 0 10px;
+            border: 1px solid #d9d9d9; background: #fff; border-radius: 4px;
+            cursor: pointer; font-size: 13px; color: #333; transition: all .15s;
+        }
+        .pager .pg-btn:hover:not(:disabled) { color: #2BA471; border-color: #2BA471; }
+        .pager .pg-btn.active { background: #2BA471; border-color: #2BA471; color: #fff; }
+        .pager .pg-btn:disabled { color: #ccc; background: #fafafa; cursor: not-allowed; }
+
+        /* toast */
+        .bar-spacer { flex: 1; }
+        .recv-state { padding: 3px 10px; border-radius: 11px; font-size: 12px; background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
+        .recv-state.done { background: #f1fae9; color: #389e0d; border-color: #b7eb8f; }
+        .modal-mask { position: fixed; inset: 0; background: rgba(15,23,42,0.45); display: none; align-items: center; justify-content: center; z-index: 1200; }
+        .modal-mask.show { display: flex; }
+        .modal { width: 460px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.18); }
+        .modal-title { padding: 18px 20px 6px; font-size: 16px; font-weight: 600; color: #222; display: flex; align-items: center; }
+        .modal-title .modal-x { margin-left: auto; cursor: pointer; color: #999; font-weight: 400; }
+        .modal-title .modal-x:hover { color: #333; }
+        .modal-body { padding: 4px 20px 18px; color: #555; line-height: 1.8; font-size: 13px; }
+        .modal-body .hl { color: #d46b08; font-weight: 600; }
+        .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid #f0f0f0; background: #fafbfd; }
+
+        .toast { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); display: none; padding: 10px 18px; background: #f0faf5; border: 1px solid #b7e4cd; color: #1d6b46; border-radius: 6px; font-size: 13px; z-index: 1100; }
+        .toast.show { display: block; }
+
+        
+    </style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="top-nav">
+    <div class="top-nav-left">
+        <div class="brand">
+            <div class="brand-logo">叶</div>
+            <div class="brand-name">运营管理平台</div>
+        </div>
+    </div>
+    <div class="top-nav-right">
+        <div class="top-nav-icon" title="消息">🔔<span class="badge">13</span></div>
+        <div class="account">
+            <div class="account-avatar">A</div>
+            <div class="account-name">Administrator</div>
+        </div>
+    </div>
+</div>
+
+<div class="layout">
+
+    <!-- 左侧菜单（组件化） -->
+    <div id="sidebar-container"></div>
+
+    <!-- 右侧主内容 -->
+    <main class="main">
+
+        <!-- 面包屑 -->
+        <div class="breadcrumb">
+            <a onclick="location.href='入库单列表.html?cat=egg'">首页</a><span class="sep">/</span><a onclick="location.href='入库单列表.html?cat=egg'">收货单</a><span class="sep">/</span><span class="current">收货确认单详情</span>
+        </div>
+
+        <!-- 页面标题卡片 -->
+        <div class="title-card">
+            <div class="page-title">收货确认单详情<span class="order-no" id="receiptNo">FH20260906001</span></div>
+        </div>
+
+        <!-- 主内容卡片 -->
+        <div class="content-card">
+
+            <!-- 操作栏 + 步骤条 -->
+            <div class="action-bar">
+                <button class="btn-action active" id="confirmRecvBtn" onclick="openConfirmRecv()">确认收货</button>
+                    <button class="btn-action" id="stkBtn" type="button">盖章</button>  
+                    
+                <span class="bar-spacer"></span>
+                
+                <div class="steps-bar">
+                    <div class="step done">待收货</div>
+                    <div class="step active">已收货</div>
+                </div>
+            </div>
+
+            <!-- 左右两栏基本信息 -->
+            <div class="two-col">
+                <div>
+                    <div class="section-title">基本信息</div>
+                    <div class="kv"><span class="k">收货单号</span><span class="v">FH20260906001</span></div>
+                    <div class="kv"><span class="k">源采购单号</span><span class="v">EGG-PO-20260901002</span></div>
+                    <div class="kv"><span class="k">采购单位</span><span class="v">焱丰（山东）供应链管理有限公司</span></div>
+                    <!-- <div class="kv"><span class="k">收货人</span><span class="v">侯振鲁</span></div>
+                    <div class="kv"><span class="k">收货电话</span><span class="v">17505308090</span></div>
+                    <div class="kv"><span class="k">收货地址</span><span class="v">山东省济南市历下区经十路9999号 1号库</span></div> -->
+                    <div class="kv"><span class="k">供应单位</span><span class="v">平原县蛋鸡养殖合作社</span></div>
+                    <!-- <div class="kv"><span class="k">联系人</span><span class="v">王志远</span></div>
+                    <div class="kv"><span class="k">联系电话</span><span class="v">13905310001</span></div> -->
+                    <div class="kv"><span class="k">发货时间</span><span class="v">2026年09月06日 08:30</span></div>
+                    <div class="kv"><span class="k">收货时间</span><span class="v">2026年09月06日 14:00</span></div>
+                </div>
+                <div>
+                    <div class="section-title">结算与附件</div>
+                    <div class="kv"><span class="k">实发总数量(箱)</span><span class="v" id="sumShip">1,314 箱</span></div>
+                    <div class="kv"><span class="k">平均单价</span><span class="v">¥ 149.52 /箱</span></div>
+                    <div class="kv"><span class="k">结算金额</span><span class="v">¥ 196,465.72</span></div>
+                    <div class="kv"><span class="k">备注</span><span class="v">—</span></div>
+                    <div class="kv"><span class="k">收货确认单</span><span class="v"><div class="file-card"><span class="file-ico xls">X</span><span class="file-meta"><span class="file-name">收货确认单_20260906.xlsx</span><span class="file-type">XLSX</span></span><span class="file-ops"><a title="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" onclick="showToast('下载（演示）')">⬇</a></span></div><div style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px dashed #d9d9d9;border-radius:6px;cursor:pointer;color:#2BA471;font-size:13px;" onclick="showToast('上传收货确认单（演示）')">⬆ 上传收货确认单</div></span></div>
+                    <div class="kv"><span class="k">收货单（盖章）</span><span class="v"><div class="file-card" style="margin-bottom:8px;"><span class="file-ico img">🖼</span><span class="file-meta"><span class="file-name">收货单_盖章（系统）.png</span><span class="file-type">PDF</span></span><span class="file-ops"><a title="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" onclick="showToast('下载（演示）')">⬇</a></span></div><div class="file-card" style="margin-bottom:8px;"><span class="file-ico img">🖼</span><span class="file-meta"><span class="file-name">收货单_我上传.png</span><span class="file-type">PDF</span></span><span class="file-ops"><a title="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" onclick="showToast('下载（演示）')">⬇</a><a title="删除" style="color:#ff4d4f;" onclick="showToast('已删除（演示）')">✕</a></span></div><div style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px dashed #d9d9d9;border-radius:6px;cursor:pointer;color:#2BA471;font-size:13px;" onclick="showToast('上传收货单（盖章）（演示）')">⬆ 上传收货单（盖章）</div></span></div>
+                </div>
+            </div>
+
+            <!-- Tab 切换 -->
+            <div class="tab-bar">
+                <div class="tab-btn active" onclick="switchTab('detail', this)">合并规格明细</div>
+                <div class="tab-btn" onclick="switchTab('attach', this)">附件</div>
+            </div>
+
+            <!-- 合并规格明细 -->
+            <div class="tab-content active" id="tab-detail">
+                <div class="table-scroll">
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th>车牌号</th>
+                                <th>送货人</th>
+                                <th>司机电话</th>
+                                <th>产品</th>
+                                <th>净重规格</th>
+                                <th>单位</th>
+                                <th style="text-align:right;">均重（斤）</th>
+                                <th class="col-qty">总重(斤)</th>
+                                <th class="col-qty">实发数量</th>
+                                <th class="col-price">单价(含税.元)</th>
+                                <th class="col-price">总价</th>
+                                <th>装货地址</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailBody">
+                            <tr data-row="1"><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>38-39</td><td>箱</td><td class="col-qty">38.50</td><td class="col-qty">53,979.00</td><td class="col-qty">0</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="0" data-ship="0"></td><td class="col-price">0.00</td><td class="col-price">0.00</td><td>河南省濮阳市</td></tr>
+                            <tr data-row="1"><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>39-40</td><td>箱</td><td class="col-qty">39.50</td><td class="col-qty">53,979.00</td><td class="col-qty">1</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="1" data-ship="1"></td><td class="col-price">149.52</td><td class="col-price">149.52</td><td>河南省濮阳市</td></tr>
+                            <tr data-row="1"><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>40-41</td><td>箱</td><td class="col-qty">40.50</td><td class="col-qty">53,979.00</td><td class="col-qty">196</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="188" data-ship="196"></td><td class="col-price">149.52</td><td class="col-price">29,305.92</td><td>河南省濮阳市</td></tr>
+                            <tr data-row="1"><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>41-42</td><td>箱</td><td class="col-qty">41.50</td><td class="col-qty">53,979.00</td><td class="col-qty">813</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="813" data-ship="813"></td><td class="col-price">149.52</td><td class="col-price">121,559.76</td><td>河南省濮阳市</td></tr>
+                            <tr data-row="1"><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>42-43</td><td>箱</td><td class="col-qty">42.50</td><td class="col-qty">53,979.00</td><td class="col-qty">283</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="283" data-ship="283"></td><td class="col-price">149.52</td><td class="col-price">42,314.16</td><td>河南省濮阳市</td></tr>
+                            <tr data-row="1"><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>43-44</td><td>箱</td><td class="col-qty">43.50</td><td class="col-qty">53,979.00</td><td class="col-qty">2</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="2" data-ship="2"></td><td class="col-price">149.52</td><td class="col-price">299.04</td><td>河南省濮阳市</td></tr>
+                            <tr data-row="1"><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>≥46</td><td>箱</td><td class="col-qty">46.00</td><td class="col-qty">53,979.00</td><td class="col-qty">4</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="4" data-ship="4"></td><td class="col-price">149.52</td><td class="col-price">598.08</td><td>河南省濮阳市</td></tr>
+                            <tr data-row="1"><td>冀D1J679</td><td>张书兴</td><td>15232846960</td><td>[00000007] 鲜鸡蛋</td><td>38-39</td><td>箱</td><td class="col-qty">38.50</td><td class="col-qty">54,612.70</td><td class="col-qty">14</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="14" data-ship="14"></td><td class="col-price">151.48</td><td class="col-price">2,120.72</td><td>河北省邯郸市</td></tr>
+                            <tr data-row="1"><td>冀D1J679</td><td>张书兴</td><td>15232846960</td><td>[00000007] 鲜鸡蛋</td><td>40-41</td><td>箱</td><td class="col-qty">40.50</td><td class="col-qty">54,612.70</td><td class="col-qty">1</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="1" data-ship="1"></td><td class="col-price">151.48</td><td class="col-price">151.48</td><td>河北省邯郸市</td></tr>
+                            <tr data-row="1"><td>冀D3C079</td><td>王铁柱</td><td>13731005566</td><td>[00000007] 鲜鸡蛋</td><td>40-41</td><td>箱</td><td class="col-qty">40.50</td><td class="col-qty">55,204.50</td><td class="col-qty">327</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="327" data-ship="327"></td><td class="col-price">151.48</td><td class="col-price">49,533.96</td><td>河北省邯郸市</td></tr>
+                            <tr data-row="1"><td>冀D9H888</td><td>李占军</td><td>13932007788</td><td>[00000007] 鲜鸡蛋</td><td>41-42</td><td>箱</td><td class="col-qty">41.50</td><td class="col-qty">53,458.20</td><td class="col-qty">156</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="156" data-ship="156"></td><td class="col-price">151.48</td><td class="col-price">23,630.88</td><td>河北省邯郸市</td></tr>
+                            <tr data-row="1"><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>42-43</td><td>箱</td><td class="col-qty">42.50</td><td class="col-qty">53,979.00</td><td class="col-qty">489</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="489" data-ship="489"></td><td class="col-price">149.52</td><td class="col-price">73,115.28</td><td>河南省濮阳市</td></tr>
+                            <tr data-row="1"><td>冀D1J679</td><td>张书兴</td><td>15232846960</td><td>[00000007] 鲜鸡蛋</td><td>43-44</td><td>箱</td><td class="col-qty">43.50</td><td class="col-qty">54,612.70</td><td class="col-qty">75</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="75" data-ship="75"></td><td class="col-price">151.48</td><td class="col-price">11,361.00</td><td>河北省邯郸市</td></tr>
+                            <tr data-row="1"><td>冀D3C079</td><td>王铁柱</td><td>13731005566</td><td>[00000007] 鲜鸡蛋</td><td>≥46</td><td>箱</td><td class="col-qty">46.00</td><td class="col-qty">55,204.50</td><td class="col-qty">642</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="642" data-ship="642"></td><td class="col-price">151.48</td><td class="col-price">97,250.16</td><td>河北省邯郸市</td></tr>
+                            <tr data-row="1"><td>冀D9H888</td><td>李占军</td><td>13932007788</td><td>[00000007] 鲜鸡蛋</td><td>38-39</td><td>箱</td><td class="col-qty">38.50</td><td class="col-qty">53,458.20</td><td class="col-qty">238</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="238" data-ship="238"></td><td class="col-price">151.48</td><td class="col-price">36,052.24</td><td>河北省邯郸市</td></tr>
+                            <tr data-row="1"><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>39-40</td><td>箱</td><td class="col-qty">39.50</td><td class="col-qty">53,979.00</td><td class="col-qty">512</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="512" data-ship="512"></td><td class="col-price">149.52</td><td class="col-price">76,554.24</td><td>河南省濮阳市</td></tr>
+                            <tr data-row="1"><td>冀D1J679</td><td>张书兴</td><td>15232846960</td><td>[00000007] 鲜鸡蛋</td><td>40-41</td><td>箱</td><td class="col-qty">40.50</td><td class="col-qty">54,612.70</td><td class="col-qty">89</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="89" data-ship="89"></td><td class="col-price">151.48</td><td class="col-price">13,481.72</td><td>河北省邯郸市</td></tr>
+                            <tr data-row="1"><td>冀D3C079</td><td>王铁柱</td><td>13731005566</td><td>[00000007] 鲜鸡蛋</td><td>41-42</td><td>箱</td><td class="col-qty">41.50</td><td class="col-qty">55,204.50</td><td class="col-qty">730</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="730" data-ship="730"></td><td class="col-price">151.48</td><td class="col-price">110,580.40</td><td>河北省邯郸市</td></tr>
+                            <tr data-row="1"><td>冀D9H888</td><td>李占军</td><td>13932007788</td><td>[00000007] 鲜鸡蛋</td><td>42-43</td><td>箱</td><td class="col-qty">42.50</td><td class="col-qty">53,458.20</td><td class="col-qty">164</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="164" data-ship="164"></td><td class="col-price">151.48</td><td class="col-price">24,842.72</td><td>河北省邯郸市</td></tr>
+                            <tr data-row="1"><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>43-44</td><td>箱</td><td class="col-qty">43.50</td><td class="col-qty">53,979.00</td><td class="col-qty">595</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="595" data-ship="595"></td><td class="col-price">149.52</td><td class="col-price">88,964.40</td><td>河南省濮阳市</td></tr>
+                            <tr data-row="1"><td>冀D1J679</td><td>张书兴</td><td>15232846960</td><td>[00000007] 鲜鸡蛋</td><td>≥46</td><td>箱</td><td class="col-qty">46.00</td><td class="col-qty">54,612.70</td><td class="col-qty">43</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="43" data-ship="43"></td><td class="col-price">151.48</td><td class="col-price">6,513.64</td><td>河北省邯郸市</td></tr>
+                            <tr data-row="1"><td>冀D3C079</td><td>王铁柱</td><td>13731005566</td><td>[00000007] 鲜鸡蛋</td><td>38-39</td><td>箱</td><td class="col-qty">38.50</td><td class="col-qty">55,204.50</td><td class="col-qty">876</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="876" data-ship="876"></td><td class="col-price">151.48</td><td class="col-price">132,696.48</td><td>河北省邯郸市</td></tr>
+                            <tr data-row="1"><td>冀D9H888</td><td>李占军</td><td>13932007788</td><td>[00000007] 鲜鸡蛋</td><td>39-40</td><td>箱</td><td class="col-qty">39.50</td><td class="col-qty">53,458.20</td><td class="col-qty">210</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="210" data-ship="210"></td><td class="col-price">151.48</td><td class="col-price">31,810.80</td><td>河北省邯郸市</td></tr>
+                            <tr data-row="1"><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>40-41</td><td>箱</td><td class="col-qty">40.50</td><td class="col-qty">53,979.00</td><td class="col-qty">668</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="668" data-ship="668"></td><td class="col-price">149.52</td><td class="col-price">99,879.36</td><td>河南省濮阳市</td></tr>
+                            <tr data-row="1"><td>冀D1J679</td><td>张书兴</td><td>15232846960</td><td>[00000007] 鲜鸡蛋</td><td>41-42</td><td>箱</td><td class="col-qty">41.50</td><td class="col-qty">54,612.70</td><td class="col-qty">97</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="97" data-ship="97"></td><td class="col-price">151.48</td><td class="col-price">14,693.56</td><td>河北省邯郸市</td></tr>
+                            <tr data-row="1"><td>冀D3C079</td><td>王铁柱</td><td>13731005566</td><td>[00000007] 鲜鸡蛋</td><td>42-43</td><td>箱</td><td class="col-qty">42.50</td><td class="col-qty">55,204.50</td><td class="col-qty">451</td><td class="col-qty recv-cell"><input class="qty-input" type="number" step="1" min="0" value="451" data-ship="451"></td><td class="col-price">151.48</td><td class="col-price">68,317.48</td><td>河北省邯郸市</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pager" id="detailPager">
+                    <span class="pg-info">共 26 条 · 每页 20 条</span>
+                    <button type="button" class="pg-btn" id="pgPrev" onclick="goDetailPage(1)">上一页</button>
+                    <button type="button" class="pg-btn pg-num" data-page="1" onclick="goDetailPage(1)">1</button>
+                    <button type="button" class="pg-btn pg-num" data-page="2" onclick="goDetailPage(2)">2</button>
+                    <button type="button" class="pg-btn" id="pgNext" onclick="goDetailPage(2)">下一页</button>
+                </div>
+            </div>
+
+            <!-- 附件（按车牌号分组） -->
+            <div class="tab-content" id="tab-attach">
+                <table class="items-table" style="min-width:700px;">
+                    <thead><tr><th style="width:140px;">车牌号</th><th>附件</th></tr></thead>
+                    <tbody>
+                        <tr><td rowspan="4" style="vertical-align:top;font-weight:500;">豫J97319</td><td><div class="file-card" style="margin-bottom:6px;max-width:500px;"><span class="file-ico img">🖼</span><span class="file-meta"><span class="file-name">微信图片_20260130164850_52_33.jpg</span><span class="file-type">JPG</span></span><span class="file-ops"><a onclick="showToast('预览（演示）')">预览</a><a onclick="showToast('下载（演示）')">下载</a></span></div></td></tr>
+                        <tr><td><div class="file-card" style="margin-bottom:6px;max-width:500px;"><span class="file-ico img">🖼</span><span class="file-meta"><span class="file-name">微信图片_2026-01-31_090252_695.jpg</span><span class="file-type">JPG</span></span><span class="file-ops"><a onclick="showToast('预览（演示）')">预览</a><a onclick="showToast('下载（演示）')">下载</a></span></div></td></tr>
+                        <tr><td><div class="file-card" style="margin-bottom:6px;max-width:500px;"><span class="file-ico img">🖼</span><span class="file-meta"><span class="file-name">微信图片_2026-01-31_090245_983.jpg</span><span class="file-type">JPG</span></span><span class="file-ops"><a onclick="showToast('预览（演示）')">预览</a><a onclick="showToast('下载（演示）')">下载</a></span></div></td></tr>
+                        <tr><td><div class="file-card" style="margin-bottom:6px;max-width:500px;"><span class="file-ico xls">X</span><span class="file-meta"><span class="file-name">豫J97319.xlsx</span><span class="file-type">XLSX</span></span><span class="file-ops"><a onclick="showToast('预览（演示）')">预览</a><a onclick="showToast('下载（演示）')">下载</a></span></div></td></tr>
+                        <tr><td rowspan="4" style="vertical-align:top;font-weight:500;">冀D1J679</td><td><div class="file-card" style="margin-bottom:6px;max-width:500px;"><span class="file-ico img">🖼</span><span class="file-meta"><span class="file-name">微信图片_20260130164855_66_33.jpg</span><span class="file-type">JPG</span></span><span class="file-ops"><a onclick="showToast('预览（演示）')">预览</a><a onclick="showToast('下载（演示）')">下载</a></span></div></td></tr>
+                        <tr><td><div class="file-card" style="margin-bottom:6px;max-width:500px;"><span class="file-ico img">🖼</span><span class="file-meta"><span class="file-name">微信图片_2026-01-31_090216_743.jpg</span><span class="file-type">JPG</span></span><span class="file-ops"><a onclick="showToast('预览（演示）')">预览</a><a onclick="showToast('下载（演示）')">下载</a></span></div></td></tr>
+                        <tr><td><div class="file-card" style="margin-bottom:6px;max-width:500px;"><span class="file-ico img">🖼</span><span class="file-meta"><span class="file-name">微信图片_2026-01-31_090210_119.jpg</span><span class="file-type">JPG</span></span><span class="file-ops"><a onclick="showToast('预览（演示）')">预览</a><a onclick="showToast('下载（演示）')">下载</a></span></div></td></tr>
+                        <tr><td><div class="file-card" style="margin-bottom:6px;max-width:500px;"><span class="file-ico xls">X</span><span class="file-meta"><span class="file-name">冀D1J679.xlsx</span><span class="file-type">XLSX</span></span><span class="file-ops"><a onclick="showToast('预览（演示）')">预览</a><a onclick="showToast('下载（演示）')">下载</a></span></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<!-- toast -->
+<div class="toast" id="toast"></div>
+
+<!-- 左侧菜单组件 -->
+<script src="sidebar.js"></script>
+
+<script>
+    function getQuery(name) {
+        var m = location.search.match(new RegExp('[?&]' + name + '=([^&]*)'));
+        return m ? decodeURIComponent(m[1]) : '';
+    }
+    function switchTab(tab, btn) {
+        document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+        document.querySelectorAll('.tab-content').forEach(function (c) { c.classList.remove('active'); });
+        btn.classList.add('active');
+        document.getElementById('tab-' + tab).classList.add('active');
+    }
+    var toastTimer = null;
+    function showToast(msg) {
+        var t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2000);
+    }
+    function uploadStamped() { document.getElementById('stamped-up').style.display = 'flex'; showToast('已上传盖章文件（演示）'); }
+    function deleteStamped() { document.getElementById('stamped-up').style.display = 'none'; showToast('已删除上传内容'); }
+    (function () {
+        var no = getQuery('no') || 'FH20260906001';
+        document.getElementById('receiptNo').textContent = no;
+        document.getElementById('docNo').textContent = no;
+    })();
+</script>
+
+<script>
+(function(){var party='';try{party=new URLSearchParams(location.search).get('party')||''}catch(e){}
+if(party!=='sale')return;var B='aqtest薄眠（山东）数字产业发展有限公司',S='焱丰（山东）供应链管理有限公司';
+document.querySelectorAll('.kv').forEach(function(kv){var k=kv.querySelector('.k'),v=kv.querySelector('.v');if(!k||!v)return;var x=k.textContent.trim();if(x==='采购单位')v.textContent=B;else if(x==='供应单位')v.textContent=S;});})();
+</script>
+
+<script>
+    /* 车辆明细分页：仅对 tr[data-row] 数据行分页（每页 20 条），页外行隐藏；底部汇总/合计行不参与分页、始终显示 */
+    (function () {
+        var PAGE_SIZE = 20;
+        var rows = Array.prototype.slice.call(document.querySelectorAll('#detailBody tr[data-row]'));
+        var totalPages = Math.ceil(rows.length / PAGE_SIZE);
+        var current = 1;
+
+        function render() {
+            rows.forEach(function (tr, i) {
+                var page = Math.floor(i / PAGE_SIZE) + 1;
+                tr.style.display = (page === current) ? '' : 'none';
+            });
+            document.querySelectorAll('#detailPager .pg-num').forEach(function (b) {
+                b.classList.toggle('active', Number(b.getAttribute('data-page')) === current);
+            });
+            document.getElementById('pgPrev').disabled = (current <= 1);
+            document.getElementById('pgNext').disabled = (current >= totalPages);
+        }
+
+        window.goDetailPage = function (p) {
+            current = Math.min(Math.max(1, p), totalPages);
+            render();
+        };
+
+        render();
+    })();
+</script>
+
+<script>
+    // 发货单仅展示实发数据：移除静态演示明细中的原实收列。
+    Array.prototype.forEach.call(document.querySelectorAll('#detailBody tr'), function (tr) {
+        if (tr.cells[9]) tr.deleteCell(9);
+    });
+</script>
+<!-- 确认收货二次确认 -->
+<div class="modal-mask" id="confirmRecvMask">
+    <div class="modal">
+        <div class="modal-title">确认收货<span class="modal-x" onclick="closeConfirmRecv()">✕</span></div>
+        <div class="modal-body" id="confirmRecvBody"></div>
+        <div class="modal-foot">
+            <button class="btn-action" onclick="closeConfirmRecv()">取消</button>
+            <button class="btn-action active" onclick="doConfirmRecv()">确认收货</button>
+        </div>
+    </div>
+</div>
+<script>
+    function openConfirmRecv() {
+        document.getElementById('confirmRecvBody').innerHTML =
+            '确认后单据状态将变为「已收货」，是否继续？';
+        document.getElementById('confirmRecvMask').classList.add('show');
+    }
+    function closeConfirmRecv() { document.getElementById('confirmRecvMask').classList.remove('show'); }
+    function doConfirmRecv() {
+        closeConfirmRecv();
+        var tag = document.getElementById('recvState'), btn = document.getElementById('confirmRecvBtn');
+        if (tag) { tag.textContent = '已收货'; tag.classList.add('done'); }
+        if (btn) { btn.disabled = true; btn.classList.remove('active'); btn.textContent = '已收货'; }
+        showToast('已确认收货');
+    }
+    document.getElementById('confirmRecvMask').addEventListener('click', function (e) { if (e.target === this) closeConfirmRecv(); });
+</script>
+
+
+
+
+<script>
+    // 盖章：仅按钮态变化，无弹窗、不展示签署流程（演示）
+    (function () {
+        var btn = document.getElementById('stkBtn');
+        if (!btn) return;
+        btn.onclick = function () {
+            if (btn.getAttribute('data-done') === '1') { return; }
+            btn.setAttribute('data-done', '1');
+            btn.textContent = '已签章';
+            btn.disabled = true;
+            if (typeof showToast === 'function') showToast('已跳转第三方电子签章平台完成签章（演示）');
+        };
+    })();
+</script>
+</body>
+</html>

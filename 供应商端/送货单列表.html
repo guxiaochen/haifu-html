@@ -293,6 +293,18 @@
         height: 120px;
         color: #98a2b3;
       }
+      .owing-tag {
+        display: inline-block;
+        margin-left: 6px;
+        padding: 1px 6px;
+        border-radius: 3px;
+        font-size: 11px;
+        font-weight: 400;
+        color: #d46b08;
+        background: #fff7e6;
+        border: 1px solid #ffd591;
+        vertical-align: middle;
+      }
       .toast {
         position: fixed;
         top: 76px;
@@ -515,15 +527,40 @@
         });
         return { total: total, shipped: shipped, remain: total - shipped, done: total > 0 && shipped >= total };
       }
+      // 平台欠单送货单：平台收货单收货数量小于发货数量并创建欠单后，供应商端自动生成对应的欠单送货单
+      function supplierOwings(orderNo) {
+        var list = [];
+        try {
+          list = JSON.parse(localStorage.getItem("haifu_supplier_owing_shipments") || "[]") || [];
+        } catch (e) { list = []; }
+        return list.filter(function (o) { return o && o.order === orderNo; });
+      }
       function buildRows(order) {
-        if (!order || !SHIPMENT_DB[order]) return [];
-        // 深拷贝，避免污染原始字典
-        var list = SHIPMENT_DB[order].map(function (r) { return Object.assign({}, r); });
+        if (!order) return [];
+        // 深拷贝，避免污染原始字典（无内置送货单的订单仅展示平台欠单送货单）
+        var list = (SHIPMENT_DB[order] || []).map(function (r) { return Object.assign({}, r); });
         // 联动：该送货单已在详情页申请验收，则翻为已发货（按单号持久化）
         list.forEach(function (r) {
           var sentFlag = false;
           try { sentFlag = localStorage.getItem("shipment_sent_" + order + "_" + r.delivery) === "1"; } catch (e) {}
           if (sentFlag && r.status === "pending") { r.status = "sent"; r.label = "已发货"; }
+        });
+        // 追加平台欠单生成的欠单送货单（待发货，申请验收后同样翻为已发货）
+        supplierOwings(order).forEach(function (o) {
+          var r = {
+            sale: o.order,
+            delivery: o.delivery,
+            customer: o.customer,
+            orderDate: o.orderDate,
+            arrangeDate: o.arrangeDate,
+            status: "pending",
+            label: "待发货",
+            owing: true
+          };
+          var sentFlag = false;
+          try { sentFlag = localStorage.getItem("shipment_sent_" + order + "_" + o.delivery) === "1"; } catch (e) {}
+          if (sentFlag) { r.status = "sent"; r.label = "已发货"; }
+          list.push(r);
         });
         return list;
       }
@@ -532,7 +569,7 @@
       }
       function openDetail(order, no) {
         location.href =
-          "送货单详情.html?order=" +
+          "送货单详情.html?source=order&order=" +
           encodeURIComponent(order) +
           "&shipment=" +
           encodeURIComponent(no);
@@ -552,7 +589,9 @@
                   r.delivery +
                   "')\">" +
                   r.delivery +
-                  "</span></td><td>" +
+                  '</span>' +
+                  (r.owing ? '<span class="owing-tag">欠单补发</span>' : "") +
+                  "</td><td>" +
                   r.customer +
                   '</td><td class="muted">' +
                   r.orderDate +

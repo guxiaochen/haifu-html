@@ -78,6 +78,7 @@
             border-radius: 4px; margin-bottom: 12px;
             box-shadow: 0 1px 2px rgba(0,0,0,0.04);
             display: flex; align-items: center; justify-content: space-between;
+            position: relative;
         }
         .title-card-left { display: flex; align-items: center; gap: 8px; }
         .title-source-tag {
@@ -101,6 +102,24 @@
         .title-amount .currency { color: #999; font-size: 13px; }
         .title-amount .value { font-size: 18px; font-weight: 600; color: #2BA471; }
         .title-amount .count { color: #999; font-size: 13px; }
+
+        /* 收货单胶囊提醒（标题卡居中展示，对齐销售订单详情胶囊形态） */
+        .po-alert {
+            display: none;
+            align-items: center; gap: 8px;
+            padding: 6px 14px;
+            border: 1px solid #b7eb8f; border-radius: 18px;
+            background: #f0faf5; color: #2BA471;
+            font-size: 13px; cursor: pointer;
+            transition: all .15s;
+            position: absolute; left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .po-alert.show { display: inline-flex; }
+        .po-alert:hover { background: #e6f7ef; border-color: #2BA471; }
+        .po-alert .po-count { font-weight: 600; }
+        .po-alert .po-arrow { font-size: 14px; line-height: 1; }
+
         .title-pagination {
             display: flex; align-items: center; gap: 6px;
             font-size: 13px; color: #666;
@@ -354,6 +373,9 @@
             <div class="title-card-left">
                 <a class="title-source-tag" title="查看销售订单" onclick="location.href='销售订单详情.html?order=SO000205&status=confirm'">平台销售 / S0000205</a>
                 <span class="title-order-no" id="display-po-no">P0000138</span>
+                <div class="po-alert" id="receipt-alert" onclick="goReceiptList()">
+                    <span>收货单</span><span class="po-count" id="receipt-count">0</span><span class="po-arrow">›</span>
+                </div>
             </div>
             
         </div>
@@ -383,10 +405,10 @@
                
 
                 <div class="form-grid">
-                    <div class="form-item full">
+                    <!-- <div class="form-item full">
                         <label class="form-label">采购单</label>
                         <span class="form-value">P000015Z</span>
-                    </div>
+                    </div> -->
                     <div class="form-item">
                         <label class="form-label">供应商信息</label>
                         <span class="form-value">aqtest海赋（山东）数字产业发展有限公司HZ</span>
@@ -416,10 +438,7 @@
                     
                     <div class="form-item full">
                         <label class="form-label">交货方式</label>
-                        <div class="radio-group">
-                            <label class="radio-item"><input type="radio" name="delivery" value="customer" checked onchange="onDeliveryModeChange()"> 客户</label>
-                            <label class="radio-item"><input type="radio" name="delivery" value="platform" onchange="onDeliveryModeChange()"> 平台</label>
-                        </div>
+                        <span class="form-value" id="delivery-mode-result">客户</span>
                     </div>
                     <div class="form-item">
                         <label class="form-label">收货人</label>
@@ -547,6 +566,7 @@
 </div>
 
 
+<script src="库存演示数据.js"></script>
 <script>
     // Tab 切换
     function switchTab(tab, btn) {
@@ -604,7 +624,17 @@
     }
 
     function onDeliveryModeChange() {
-        var mode = document.querySelector('input[name="delivery"]:checked').value;
+        return;
+    }
+
+    function renderDeliveryModeResult() {
+        var source = getParam('order') || 'SO000205';
+        var mode = 'customer';
+        try {
+            var saved = JSON.parse(localStorage.getItem('deliveryInfo_' + source) || 'null');
+            if (saved && saved.mode) mode = saved.mode;
+        } catch (e) {}
+        document.getElementById('delivery-mode-result').textContent = mode === 'platform' ? '平台' : '客户';
         if (mode === 'platform') showPlatformDeliveryInfo();
         else showCustomerDeliveryInfo();
     }
@@ -776,9 +806,31 @@
         }
     }
 
+    // 收货单胶囊：展示该采购订单下的平台收货单（入库单）数量，点击跳转入库单列表并按采购订单号筛选
+    function renderReceiptAlert() {
+        var orderNo = getParam('order') || 'P0000138';
+        var count = 0;
+        try {
+            if (window.HaifuInventory) {
+                count = HaifuInventory.getReceipts().filter(function (row) {
+                    return (row.orderNo || '') === orderNo;
+                }).length;
+            }
+        } catch (e) {}
+        var alertEl = document.getElementById('receipt-alert');
+        document.getElementById('receipt-count').textContent = count;
+        alertEl.classList.toggle('show', count > 0);
+    }
+
+    function goReceiptList() {
+        var orderNo = getParam('order') || '';
+        location.href = '入库单列表.html' + (orderNo ? '?po=' + encodeURIComponent(orderNo) : '');
+    }
+
     fillPlatformReceiverOptions();
-    onDeliveryModeChange();
+    renderDeliveryModeResult();
     initByStatus();
+    renderReceiptAlert();
 </script>
 
 <!-- 左侧菜单组件 -->

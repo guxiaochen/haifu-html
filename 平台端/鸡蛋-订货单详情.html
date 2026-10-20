@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订货单详情 - 运营管理平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+            background: #f5f7fa; color: #333; font-size: 14px; min-height: 100vh;
+        }
+
+        /* ===== 顶部导航 ===== */
+        .top-nav {
+            height: 56px; background: #fff; color: #333;
+            display: flex; align-items: center; padding: 0 20px;
+            border-bottom: 1px solid #f0f0f0;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .top-nav-left { display: flex; align-items: center; gap: 24px; }
+        .brand { display: flex; align-items: center; gap: 8px; }
+        .brand-logo {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #2BA471 0%, #5BC09F 100%);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px;
+        }
+        .brand-name { font-size: 16px; font-weight: 600; color: #333; }
+        .main-menu { display: flex; align-items: center; gap: 4px; margin-left: 12px; }
+        .main-menu-item {
+            padding: 8px 14px; color: #666; cursor: pointer;
+            font-size: 14px; border-radius: 4px;
+            transition: all .15s;
+        }
+        .main-menu-item:hover { color: #2BA471; background: #f0faf5; }
+        .main-menu-item.active { color: #2BA471; font-weight: 500; }
+        .top-nav-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+        .top-nav-icon {
+            cursor: pointer; color: #666; position: relative;
+            font-size: 18px; padding: 6px; border-radius: 4px;
+        }
+        .top-nav-icon:hover { background: #f5f5f5; color: #2BA471; }
+        .top-nav-icon .badge {
+            position: absolute; top: 2px; right: 2px;
+            background: #ff4d4f; color: #fff; font-size: 11px;
+            min-width: 16px; height: 16px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 4px; line-height: 1;
+        }
+        .account {
+            display: flex; align-items: center; gap: 8px;
+            cursor: pointer; padding: 4px 10px; border-radius: 4px;
+            font-size: 13px; color: #333;
+        }
+        .account:hover { background: #f5f5f5; }
+        .account-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: linear-gradient(135deg, #2BA471, #5BC09F);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 500;
+        }
+
+        /* ===== 左右分栏 ===== */
+        .layout { display: flex; min-height: calc(100vh - 56px); }
+
+        /* 左侧菜单 */
+        .sidebar {
+            width: 200px; background: #fff;
+            border-right: 1px solid #f0f0f0;
+            flex-shrink: 0; padding: 12px 0;
+        }
+        .menu-item {
+            padding: 10px 24px 10px 48px; color: #666; cursor: pointer;
+            font-size: 13px; border-left: 3px solid transparent;
+            transition: all 0.15s;
+        }
+        .menu-item:hover { background: #f5f5f5; color: #2BA471; }
+        .menu-item.active {
+            color: #2BA471; border-left-color: #2BA471;
+            background: #f0faf5; font-weight: 500;
+        }
+        .menu-group-title {
+            padding: 10px 20px; color: #333;
+            font-size: 15px; font-weight: 600; margin-top: 8px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .menu-group-icon { font-size: 16px; width: 20px; text-align: center; }
+
+        /* 右侧主内容 */
+        .main { flex: 1; padding: 16px 20px; overflow-x: auto; position: relative; }
+
+        /* 面包屑 */
+        .breadcrumb {
+            font-size: 13px; color: #666; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .breadcrumb a { color: #2BA471; text-decoration: none; cursor: pointer; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb .sep { color: #d9d9d9; }
+        .breadcrumb .current { color: #333; }
+
+        /* 页面标题 */
+        .title-card {
+            background: #fff; padding: 14px 20px;
+            border-radius: 4px; margin-bottom: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            position: relative;
+        }
+        .title-card .page-title {
+            font-size: 18px; font-weight: 600; color: #333;
+        }
+
+        /* 主内容卡片（合并为一个卡片） */
+        .content-card {
+            background: #fff; padding: 20px 24px;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            margin-bottom: 12px;
+        }
+
+        /* 顶部居中胶囊（复用平台端已有胶囊/标签样式） */
+        .po-alert-card {
+            display: none;
+            align-items: center; gap: 6px;
+            padding: 5px 12px 5px 8px;
+            background: #f0faf5;
+            color: #2BA471; border: 1px solid #b7eb8f;
+            border-radius: 16px;
+            position: absolute;
+            left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            transition: all .2s;
+            width: fit-content;
+            font-size: 12px;
+        }
+        .po-alert-card:hover {
+            background: #e6f7ef;
+            border-color: #2BA471;
+        }
+        .po-alert-card .po-icon {
+            width: 22px; height: 22px;
+            display: flex; align-items: center; justify-content: center;
+            background: #2BA471; color: #fff;
+            border-radius: 50%;
+            font-size: 12px;
+        }
+        .po-alert-card .po-text {
+            font-weight: 500;
+        }
+        .po-alert-card .po-arrow {
+            font-size: 14px; line-height: 1;
+        }
+
+        /* 操作栏 */
+        .action-bar {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        /* 表单网格 */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px 80px;
+        }
+        .form-item { display: flex; align-items: center; gap: 30px; }
+        .form-item.full { grid-column: span 2; }
+        .form-label {
+            min-width: 80px; color: #666; font-size: 13px;
+            text-align: right; flex-shrink: 0;
+        }
+        .form-value { color: #333; font-size: 13px; }
+        .tag-hint {
+            display: inline-block; margin-left: 6px;
+            padding: 1px 6px; background: #fff7e6;
+            color: #d48806; border: 1px solid #ffd591;
+            font-size: 11px; border-radius: 2px;
+        }
+
+        /* ===== 双列信息区（订货单只读展示，复用 kv/section 双列样式） ===== */
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 64px; margin-bottom: 8px; }
+        /* 统一胶囊提醒（与平台端销售订单/采购订单详情同款） */
+        .title-pills {
+            position: absolute; left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+            display: flex; align-items: center; gap: 12px;
+        }
+        .po-alert-card {
+            display: none;
+            align-items: center; gap: 6px;
+            padding: 5px 12px 5px 8px;
+            background: #f0faf5;
+            color: #2BA471; border: 1px solid #b7eb8f;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+            font-size: 12px;
+        }
+        .po-alert-card:hover { background: #e6f7ef; border-color: #2BA471; }
+        .po-alert-card .po-icon {
+            width: 22px; height: 22px;
+            display: flex; align-items: center; justify-content: center;
+            background: #2BA471; color: #fff;
+            border-radius: 50%;
+            font-size: 12px;
+        }
+        .po-alert-card .po-text { font-weight: 500; }
+        .po-alert-card .po-arrow { font-size: 14px; line-height: 1; }
+        .section-title {
+            font-size: 14px; font-weight: 600; color: #2BA471;
+            margin: 4px 0 16px; padding-left: 10px;
+            border-left: 3px solid #2BA471;
+        }
+        .kv { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+        .kv.top { align-items: flex-start; }
+        .kv .k { min-width: 96px; color: #666; font-size: 13px; flex-shrink: 0; }
+        .kv .v { flex: 1; color: #333; font-size: 13px; line-height: 1.6; }
+        .file-card { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #fafafa; border: 1px solid #eee; border-radius: 6px; max-width: 360px; }
+        .file-ico { width: 34px; height: 34px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff; flex-shrink: 0; }
+        .file-ico.xls { background: #217346; }
+        .file-ico.img { background: #4aa3df; }
+        .file-meta { flex: 1; min-width: 0; }
+        .file-name { font-size: 13px; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .file-type { font-size: 11px; color: #999; }
+        .file-ops { display: inline-flex; gap: 10px; }
+        .file-ops a { color: #2BA471; cursor: pointer; font-size: 13px; text-decoration: none; }
+        .file-ops a:hover { text-decoration: underline; }
+
+        /* 状态标签 */
+        .order-status-tag { display: inline-block; padding: 3px 12px; border-radius: 11px; font-size: 12px; font-weight: 500; line-height: 1.5; }
+        .order-status-tag.st-completed { background: #f0faf5; color: #2BA471; }
+        .order-status-tag.st-pending { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+
+        /* Tab 切换 */
+        .tab-bar {
+            display: flex; gap: 0; margin-top: 30px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .tab-btn {
+            padding: 10px 20px; cursor: pointer;
+            font-size: 14px; color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all .15s;
+        }
+        .tab-btn:hover { color: #2BA471; }
+        .tab-btn.active { color: #2BA471; border-bottom-color: #2BA471; font-weight: 500; }
+
+        .tab-content { display: none; padding-top: 16px; }
+        .tab-content.active { display: block; }
+
+        /* 备注只读文本 */
+        .remark-box { padding: 14px 16px; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 4px; color: #666; font-size: 13px; line-height: 1.8; }
+
+        /* 空内容提示 */
+        .empty-tip {
+            text-align: center; padding: 40px 20px;
+            color: #999; font-size: 13px;
+        }
+
+        /* 明细表 */
+        table.items-table {
+            width: 100%; border-collapse: collapse; font-size: 13px;
+        }
+        table.items-table thead { background: #fafafa; }
+        table.items-table th {
+            padding: 10px 12px; text-align: left; color: #555;
+            font-weight: 500; border-bottom: 1px solid #f0f0f0;
+            white-space: nowrap;
+        }
+        table.items-table td {
+            padding: 12px; color: #333;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        table.items-table tbody tr:hover { background: #fafdfb; }
+        table.items-table th.col-qty, table.items-table td.col-qty { width: 120px; text-align: right; font-variant-numeric: tabular-nums; }
+
+        /* 底部金额 */
+        .footer-bar {
+            display: flex; align-items: flex-end; justify-content: space-between;
+            margin-top: 16px; padding-top: 12px;
+        }
+        .terms-link { font-size: 13px; color: #666; }
+        .terms-link a { color: #2BA471; text-decoration: none; }
+        .totals { text-align: right; }
+        .totals .row { display: flex; gap: 16px; font-size: 13px; margin-bottom: 4px; }
+        .totals .row .label { color: #666; min-width: 110px; text-align: right; }
+        .totals .row .value { color: #333; min-width: 100px; text-align: right; }
+        .totals .row.total .value { color: #2BA471; font-weight: 600; font-size: 15px; }
+
+        /* toast */
+        .toast { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); display: none; padding: 10px 18px; background: #f0faf5; border: 1px solid #b7e4cd; color: #1d6b46; border-radius: 6px; font-size: 13px; z-index: 1100; }
+        .toast.show { display: block; }
+
+        /* ===== 三方电子签章（按钮 / 弹窗 / 系统合同文件） ===== */
+        .file-ico.pdf { background: #d9534f; }
+        .file-card.stamp-contract { margin-bottom: 8px; }
+        .btn-action { padding: 7px 20px; border: 1px solid #d9d9d9; background: #fff; border-radius: 2px; cursor: pointer; font-size: 13px; color: #666; transition: all .15s; }
+        .btn-action:hover { color: #2BA471; border-color: #2BA471; }
+        .btn-action.primary { background: #2BA471; border-color: #2BA471; color: #fff; }
+        .btn-action.primary:hover { background: #229963; border-color: #229963; }
+        .action-bar .bar-spacer { flex: 1; }
+        .modal-mask { position: fixed; inset: 0; background: rgba(15,23,42,0.45); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-mask.show { display: flex; }
+        .modal { width: 480px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.18); }
+        .modal-title { padding: 18px 20px 6px; font-size: 16px; font-weight: 600; color: #222; display: flex; align-items: center; gap: 8px; }
+        .modal-title .modal-x { margin-left: auto; cursor: pointer; color: #999; font-size: 16px; font-weight: 400; }
+        .modal-title .modal-x:hover { color: #333; }
+        .modal-body { padding: 4px 20px 18px; color: #555; line-height: 1.7; font-size: 13px; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid #f0f0f0; background: #fafbfd; }
+        .stamp-rows { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; background: #fafbfd; border: 1px solid #f0f0f0; border-radius: 4px; margin-bottom: 10px; }
+        .stamp-rows .row { display: flex; gap: 10px; font-size: 13px; line-height: 1.6; }
+        .stamp-rows .row .k { color: #888; min-width: 64px; flex-shrink: 0; }
+        .stamp-rows .row .v { color: #333; flex: 1; min-width: 0; word-break: break-all; }
+        .stamp-note { font-size: 12px; color: #999; line-height: 1.7; }
+    </style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="top-nav">
+    <div class="top-nav-left">
+        <div class="brand">
+            <div class="brand-logo">叶</div>
+            <div class="brand-name">运营管理平台</div>
+        </div>
+    </div>
+    <div class="top-nav-right">
+        <div class="top-nav-icon">🔔<span class="badge">13</span></div>
+        <div class="account">
+            <div class="account-avatar">A</div>
+            <div>Administrator</div>
+        </div>
+    </div>
+</div>
+
+<div class="layout">
+
+    <!-- 左侧菜单（组件化） -->
+    <div id="sidebar-container"></div>
+
+    <!-- 右侧主内容 -->
+    <main class="main">
+
+        <!-- 面包屑 -->
+        <div class="breadcrumb">
+            <a onclick="location.href='鸡蛋-订货单列表.html'">首页</a><span class="sep">/</span><a id="crumb-list" onclick="location.href='鸡蛋-订货单列表.html'">订货单</a><span class="sep">/</span><span class="current" id="crumb-current">客户订货单详情</span>
+        </div>
+
+        <!-- 页面标题卡片 -->
+        <div class="title-card" style="position:relative;">
+            <div class="page-title" id="page-title">客户订货单详情</div>
+            <!-- 胶囊提醒：客户订货单 → 销售订单；供应商订货单 → 采购订单 -->
+            <div class="title-pills">
+                <div class="po-alert-card" id="dhPill" style="display:none;">
+                    <span class="po-icon" id="dhPillIcon">🧾</span>
+                    <span class="po-text" id="dhPillText">销售订单 × 4</span>
+                    <span class="po-arrow">›</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容卡片（只读展示） -->
+        <div class="content-card">
+
+            <!-- 只读提示条 -->
+            <div class="action-bar">
+                <!-- <span class="order-status-tag st-completed" id="order-status">已完成</span> -->
+                <span style="font-size:13px;color:#999;"> <b id="dh-no" style="color:#333;">DH20260901001</b></span>
+                <span class="bar-spacer"></span>
+                <button class="btn-action" id="stampBtn" onclick="openStampModal()">盖章</button>
+            </div>
+
+            <!-- 基本信息 | 地址信息 -->
+            <div class="two-col">
+                <div>
+                    <div class="section-title">基本信息</div>
+                    <div class="kv top"><span class="k">开单日期</span><span class="v" id="billDate">2026年09月01日</span></div>
+                    <div class="kv top"><span class="k">采购单位</span><span class="v" id="party-buyer">aqtest薄眠（山东）数字产业发展有限公司</span></div>
+                    <div class="kv top"><span class="k">供货单位</span><span class="v" id="party-seller">焱丰（山东）供应链管理有限公司</span></div>
+                </div>
+                <div>
+                    <div class="section-title">地址信息</div>
+                    <div class="kv top"><span class="k">送货地址</span><span class="v">山东省济南市历下区经十路9999号</span></div>
+                    <div class="kv top"><span class="k">收货地址</span><span class="v">自提</span></div>
+                    <div class="kv top"><span class="k">发货地址</span><span class="v">山东省德州市平原县鸡蛋产业园 3号仓</span></div>
+                </div>
+            </div>
+
+            <!-- 联系人信息（左右分栏） -->
+            <div class="section-title">联系人信息</div>
+            <div class="two-col">
+                <div>
+                    <div class="kv top"><span class="k">发货联系人</span><span class="v">王志远</span></div>
+                    <div class="kv top"><span class="k">职务</span><span class="v">/</span></div>
+                    <div class="kv top"><span class="k">提货人电话</span><span class="v">13905310001</span></div>
+                </div>
+                <div>
+                    <div class="kv top"><span class="k">收货联系人</span><span class="v">侯振鲁</span></div>
+                    <div class="kv top"><span class="k">职务</span><span class="v">/</span></div>
+                    <div class="kv top"><span class="k">提货人电话</span><span class="v">17505308090</span></div>
+                </div>
+            </div>
+
+            <!-- 数量信息 | 订货单 -->
+            <div class="two-col">
+                <div>
+                    <div class="section-title">数量信息</div>
+                    <div class="kv top"><span class="k">预定数量（箱）</span><span class="v" id="planQty">1,200</span></div>
+                    <div class="kv top"><span class="k">总重（斤）</span><span class="v" id="totalWeight">36,000</span></div>
+                </div>
+                <div>
+                    <div class="section-title">订货单</div>
+                    <div class="kv top"><span class="k">订货单</span><span class="v">
+                        <div class="file-card">
+                            <span class="file-ico xls">X</span>
+                            <span class="file-meta"><span class="file-name">订货单_20260901.xlsx</span><span class="file-type">XLSX</span></span>
+                            <span class="file-ops"><a title="预览" aria-label="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" aria-label="下载" onclick="showToast('下载（演示）')">⬇</a></span>
+                        </div>
+                    </span></div>
+                    <div class="kv top"><span class="k">订单合同</span><span class="v">
+                        <div class="file-card" style="margin-bottom:8px;">
+                            <span class="file-ico img">🖼</span>
+                            <span class="file-meta"><span class="file-name">双方订货单合同（盖章）.pdf</span><span class="file-type">PDF</span></span>
+                            <span class="file-ops"><a title="预览" aria-label="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" aria-label="下载" onclick="showToast('下载（演示）')">⬇</a></span>
+                        </div>
+                        <div class="file-card" id="dh-contract-2" style="margin-bottom:8px;">
+                            <span class="file-ico img">🖼</span>
+                            <span class="file-meta"><span class="file-name">订货单合同_补充协议.pdf</span><span class="file-type">PDF</span></span>
+                            <span class="file-ops"><a title="预览" aria-label="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" aria-label="下载" onclick="showToast('下载（演示）')">⬇</a><a title="删除" aria-label="删除" style="color:#ff4d4f;" onclick="deleteDhContract2()">✕</a></span>
+                        </div>
+                        <div class="file-card" id="dh-contract-up" style="display:none;margin-bottom:8px;">
+                            <span class="file-ico img">🖼</span>
+                            <span class="file-meta"><span class="file-name">订单合同_我上传.pdf</span><span class="file-type">PDF</span></span>
+                            <span class="file-ops"><a title="预览" aria-label="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" aria-label="下载" onclick="showToast('下载（演示）')">⬇</a><a title="删除" aria-label="删除" style="color:#ff4d4f;" onclick="deleteDhContract()">✕</a></span>
+                        </div>
+                        <div class="file-card stamp-contract" id="stampContract" style="display:none;">
+                            <span class="file-ico pdf">PDF</span>
+                            <span class="file-meta"><span class="file-name" id="stampContractName">订单合同_三方已签章.pdf</span><span class="file-type">PDF · 系统生成</span></span>
+                            <span class="file-ops"><a title="预览" aria-label="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" aria-label="下载" onclick="showToast('下载（演示）')">⬇</a></span>
+                        </div>
+                        <div style="display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border:1px dashed #d9d9d9;border-radius:6px;cursor:pointer;color:#2BA471;font-size:13px;" onclick="uploadDhContract()">⬆ 上传订单合同</div>
+                    </span></div>
+                </div>
+            </div>
+
+            <!-- Tab 切换 -->
+            <div class="tab-bar">
+                <div class="tab-btn active" onclick="switchTab('detail', this)">订单明细</div>
+                <div class="tab-btn" onclick="switchTab('remark', this)">备注</div>
+            </div>
+
+            <!-- 订单明细 -->
+            <div class="tab-content active" id="tab-detail">
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>发货时间</th>
+                            <th>货品名称</th>
+                            <th>净重规格</th>
+                            <th>单位</th>
+                            <th class="col-qty">数量（箱/天）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>2026年09月02日</td><td>鲜鸡蛋</td><td>30斤/箱</td><td>箱</td><td class="col-qty">240</td></tr>
+                        <tr><td>2026年09月03日</td><td>鲜鸡蛋</td><td>30斤/箱</td><td>箱</td><td class="col-qty">240</td></tr>
+                        <tr><td>2026年09月04日</td><td>鲜鸡蛋</td><td>30斤/箱</td><td>箱</td><td class="col-qty">240</td></tr>
+                        <tr><td>2026年09月05日</td><td>鲜鸡蛋</td><td>30斤/箱</td><td>箱</td><td class="col-qty">240</td></tr>
+                        <tr><td>2026年09月06日</td><td>鲜鸡蛋</td><td>30斤/箱</td><td>箱</td><td class="col-qty">240</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="footer-bar">
+                    <div class="totals" style="margin-left:auto;">
+                        <div class="row"><span class="label">预定数量合计:</span><span class="value" id="sumQty">1,200 箱</span></div>
+                        <div class="row total"><span class="label">总重合计:</span><span class="value" id="sumWeight">36,000 斤</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 备注（只读） -->
+            <div class="tab-content" id="tab-remark">
+                <div class="remark-box">参照实际发货日码单及结算单上的实际结算价格为准，统一精品包装，收货地址以双方约定地址为准。</div>
+            </div>
+
+        </div>
+
+    </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 三方电子签章确认（跳转第三方签章服务，不展示签署流程） -->
+<div class="modal-mask" id="stampGoModal">
+    <div class="modal">
+        <div class="modal-title"><span>三方电子签章</span><span class="modal-x" onclick="closeModal('stampGoModal')">✕</span></div>
+        <div class="modal-body">
+            <div class="stamp-rows">
+                <div class="row"><span class="k">签章文件</span><span class="v" id="stampFileText">订货单_DH20260901001.pdf</span></div>
+                <div class="row"><span class="k">签章主体</span><span class="v" id="stampPartyText">采购单位 · 供货单位 · 第三方电子签章平台</span></div>
+                <div class="row"><span class="k">签章结果</span><span class="v">盖章后的订货单自动生成为「订单合同」</span></div>
+            </div>
+            <div class="stamp-note">确认后将跳转至第三方电子签章平台完成签署，签署结果自动回传并回写至本页「订单合同」。</div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-action" onclick="closeModal('stampGoModal')">取消</button>
+            <button class="btn-action primary" onclick="confirmStamp()">确认并跳转签章</button>
+        </div>
+    </div>
+</div>
+
+<!-- 左侧菜单组件 -->
+<script src="sidebar.js"></script>
+
+<script>
+    function goTypeList() {
+        var no = (location.search.match(/[?&]no=([^&]*)/) || [])[1];
+        no = no ? decodeURIComponent(no) : '';
+        var page = (window.__dhType === 'supplier') ? '采购订单列表.html' : '销售订单列表.html';
+        location.href = page + '?cat=egg' + (no ? '&dh=' + encodeURIComponent(no) : '');
+    }
+
+    // Tab 切换
+    function switchTab(tab, btn) {
+        document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+        document.querySelectorAll('.tab-content').forEach(function (c) { c.classList.remove('active'); });
+        btn.classList.add('active');
+        document.getElementById('tab-' + tab).classList.add('active');
+    }
+
+    // 解析 URL 参数
+    function getParam(name) {
+        var reg = new RegExp('[?&]' + name + '=([^&]*)');
+        var m = location.search.match(reg);
+        return m ? decodeURIComponent(m[1]) : '';
+    }
+
+    var toastTimer = null;
+    function showToast(msg) {
+        var t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2000);
+    }
+    function uploadDhContract() {
+        document.getElementById('dh-contract-up').style.display = 'flex';
+        showToast('已上传订单合同（演示）');
+    }
+    function deleteDhContract() {
+        document.getElementById('dh-contract-up').style.display = 'none';
+        showToast('已删除上传内容');
+    }
+    function deleteDhContract2() {
+        var el = document.getElementById('dh-contract-2');
+        if (el) el.remove();
+        showToast('已删除：订货单合同_补充协议.pdf');
+    }
+
+    // ===== 三方电子签章：跳转第三方签章服务，原型不展示签署流程 =====
+    function txt(id) { var el = document.getElementById(id); return el ? el.textContent.trim() : ''; }
+    function openStampModal() {
+        var no = txt('dh-no') || 'DH20260901001';
+        document.getElementById('stampFileText').textContent = '订货单_' + no + '.pdf';
+        document.getElementById('stampPartyText').textContent =
+            (txt('party-buyer') || '采购单位') + ' · ' + (txt('party-seller') || '供货单位') + ' · 第三方电子签章平台';
+        document.getElementById('stampGoModal').classList.add('show');
+    }
+    function confirmStamp() {
+        closeModal('stampGoModal');
+        var no = txt('dh-no') || 'DH20260901001';
+        var box = document.getElementById('stampContract');
+        if (box) box.style.display = 'flex';
+        document.getElementById('stampContractName').textContent = '订单合同_三方已签章_' + no + '.pdf';
+        var btn = document.getElementById('stampBtn');
+        if (btn) btn.textContent = '已签章，重新盖章';
+        showToast('已跳转第三方电子签章平台，三方签章完成，订单合同已生成');
+    }
+    function closeModal(id) { var m = document.getElementById(id); if (m) m.classList.remove('show'); }
+    document.querySelectorAll('.modal-mask').forEach(function (m) {
+        m.addEventListener('click', function (e) { if (e.target === m) m.classList.remove('show'); });
+    });
+
+    // 各订货单示例数据（平台端只读展示）
+    var dhData = {
+        'DH20260905002': { date: '2026年09月05日', days: 4, qty: '800',   weight: '24,000',  fileDate: '20260905' },
+        'DH20260901001': { date: '2026年09月01日', days: 5, qty: '1,200', weight: '36,000',  fileDate: '20260901' },
+        'DH20260828003': { date: '2026年08月28日', days: 6, qty: '1,500', weight: '45,000',  fileDate: '20260828' }
+    };
+
+    // 依据 ?status 决定状态标签：draft → 待提交，其余 → 已完成
+    (function init() {
+        var no = getParam('no') || 'DH20260901001';
+        var status = getParam('status') || 'completed';
+        var d = dhData[no] || dhData['DH20260901001'];
+
+        document.getElementById('dh-no').textContent = no;
+        document.getElementById('billDate').textContent = d.date;
+        document.getElementById('planQty').textContent = d.qty;
+        document.getElementById('totalWeight').textContent = d.weight;
+        document.getElementById('sumQty').textContent = d.qty + ' 箱';
+        document.getElementById('sumWeight').textContent = d.weight + ' 斤';
+
+        // 单据类型：customer=客户订货单（薄眠→焱丰，胶囊跳销售订单）；supplier=供应商订货单（焱丰→合作社，胶囊跳采购订单）
+        var type = getParam('type') || 'customer';
+        var YANFENG = '焱丰（山东）供应链管理有限公司';
+        var KEHU = 'aqtest薄眠（山东）数字产业发展有限公司';
+        var SUPPLIER_OF = {
+            'DH20260905002': '平原县蛋鸡养殖合作社',
+            'DH20260901001': '平原县蛋鸡养殖合作社',
+            'DH20260828003': '夏津县绿源养殖专业合作社',
+            'DH20260820004': '临邑县丰羽蛋鸡养殖场'
+        };
+        var isSupplierDoc = type === 'supplier';
+        document.getElementById('party-buyer').textContent = isSupplierDoc ? YANFENG : KEHU;
+        document.getElementById('party-seller').textContent = isSupplierDoc ? (SUPPLIER_OF[no] || '平原县蛋鸡养殖合作社') : YANFENG;
+        var docName = isSupplierDoc ? '供应商订货单' : '客户订货单';
+        document.getElementById('page-title').textContent = docName + '详情';
+        document.getElementById('crumb-current').textContent = docName + '详情';
+        // 订货单类型胶囊：客户订货单 → 销售订单；供应商订货单 → 采购订单
+        window.__dhType = isSupplierDoc ? 'supplier' : 'customer';
+        // 返回时回到列表对应页签
+        document.getElementById('crumb-list').setAttribute('onclick', "location.href='鸡蛋-订货单列表.html?type=" + type + "'");
+
+        // 胶囊提醒：客户订货单 → 销售订单列表；供应商订货单 → 采购订单列表
+        var pill = document.getElementById('dhPill');
+        document.getElementById('dhPillIcon').textContent = isSupplierDoc ? '📋' : '🧾';
+        document.getElementById('dhPillText').textContent = (isSupplierDoc ? '采购订单' : '销售订单') + ' × 4';
+        pill.onclick = function () { location.href = isSupplierDoc ? '采购订单列表.html?cat=egg' : '销售订单列表.html?cat=egg'; };
+        pill.style.display = 'flex';
+
+        // // 状态标签
+        // var tag = document.getElementById('order-status');
+        // if (status === 'draft') {
+        //     tag.textContent = '待提交';
+        //     tag.className = 'order-status-tag st-pending';
+        // } else {
+        //     tag.textContent = '已完成';
+        //     tag.className = 'order-status-tag st-completed';
+        // }
+
+        document.title = docName + '详情 ' + no + ' - 运营管理平台';
+    })();
+</script>
+
+</body>
+</html>

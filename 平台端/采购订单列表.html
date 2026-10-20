@@ -158,6 +158,7 @@
         /* 收货状态 */
         .receive-status {
             display: inline-block; padding: 2px 10px;
+            min-width: 68px; text-align: center; white-space: nowrap;
             border-radius: 10px; font-size: 12px; font-weight: 500;
         }
         .receive-none { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
@@ -203,7 +204,37 @@
             width: 40px; padding: 4px 6px; border: 1px solid #d9d9d9;
             border-radius: 2px; margin: 0 4px; text-align: center;
         }
-    </style>
+
+        /* ===== 业务分类页签（鸡蛋业务 / 其他业务） ===== */
+        .cat-tabs { display: flex; background: #fff; border-radius: 4px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+        .cat-tab { padding: 13px 22px; font-size: 14px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; }
+        .cat-tab:hover { color: #2BA471; }
+        .cat-tab.active { color: #2BA471; border-bottom-color: #2BA471; font-weight: 500; background: #f7fdfa; }
+        .cat-tab .ct-cnt { color: #999; font-size: 12px; font-weight: 400; margin-left: 6px; }
+        .cat-tab.active .ct-cnt { color: #2BA471; }
+        .cat-hidden { display: none !important; }
+        .cat-egg-head { display: flex; align-items: center; margin-bottom: 14px; }
+        .cat-egg-title { font-size: 15px; font-weight: 600; color: #333; }
+        .cat-egg-title .count { color: #999; font-weight: 400; font-size: 13px; margin-left: 6px; }
+        .cat-egg-tip { margin-left: auto; font-size: 12px; color: #999; }
+
+        /* ===== 鸡蛋业务面板：状态小徽标（配色与宿主语义一致） ===== */
+        #catEgg .bg { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+        #catEgg .bg-green { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        #catEgg .bg-orange { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+        #catEgg .bg-blue { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+        #catEgg .bg-gray { background: #f5f5f5; color: #999; border: 1px solid #d9d9d9; }
+        #catEgg .egg-title-bar { display: flex; align-items: center; margin-bottom: 14px; }
+        #catEgg .egg-title { font-size: 15px; font-weight: 600; color: #333; }
+        #catEgg #eggBatchCreateDh { margin-left: auto; min-width: 132px; height: 34px; }
+        #catEgg .egg-title .count { color: #999; font-weight: 400; font-size: 13px; margin-left: 6px; }
+        #catEgg .egg-tip { margin-left: auto; font-size: 12px; color: #999; }
+        #catEgg .egg-bar { display: inline-block; width: 3px; height: 14px; background: #2BA471; border-radius: 2px; margin-right: 8px; vertical-align: -2px; }
+        #catEgg .egg-check { width: 16px; height: 16px; accent-color: #2BA471; }
+        #catEgg .batch-hint { margin: -2px 0 12px; color: #888; font-size: 12px; }
+        #catEgg .batch-hint.ready { color: #2BA471; }
+        #catEgg .btn:disabled { color: #bbb; border-color: #e5e5e5; background: #f7f7f7; cursor: not-allowed; }
+</style>
 </head>
 <body>
 
@@ -246,7 +277,38 @@
         </div>
 
         <!-- 搜索筛选区 -->
-        <div class="filter-card">
+        <!-- 业务分类页签：鸡蛋业务 / 其他业务（其他业务为原有内容，未改动） -->
+        <div class="cat-tabs">
+            <div class="cat-tab" id="catTabEgg" onclick="switchCat('egg')">鸡蛋业务<span class="ct-cnt">5</span></div>
+            <div class="cat-tab" id="catTabOther" onclick="switchCat('other')">其他业务<span class="ct-cnt">9</span></div>
+        </div>
+        <!-- 鸡蛋业务视图：筛选卡与表格卡均复用宿主页面类名，保证与其他业务视觉一致 -->
+        <div id="catEgg" style="display:none;">
+    <div class="filter-card">
+        <div class="filter-row">
+            <div class="filter-item"><label>订单号</label><input id="eggF0" placeholder="请输入订单号" oninput="invalidateEggQuery()" /></div>
+            <div class="filter-item"><label>订货单号</label><input id="drillEgg" data-drill="1" list="eggCustomerOrderOptions" placeholder="请输入订货单号" oninput="drillApply(this.value);invalidateEggQuery()"><datalist id="eggCustomerOrderOptions"><option value="DH20260905002"></option><option value="DH20260901001"></option><option value="DH20260828003"></option></datalist></div>
+            <div class="filter-item"><label>供应商</label><select id="eggSupplier" onchange="invalidateEggQuery()"><option value="">请选择供应商</option><option>平原县蛋鸡养殖合作社</option><option>夏津县绿源养殖专业合作社</option><option>临邑县丰羽蛋鸡养殖场</option></select></div>
+            <div class="filter-item"><label>订单状态</label><select id="eggF1" onchange="invalidateEggQuery()"><option>全部</option><option>已确认</option><option>待确认</option></select></div>
+            <div class="filter-item"><label>订单日期</label><input id="eggF2" type="date" onchange="invalidateEggQuery()" /></div>
+            <div class="filter-actions"><button class="btn btn-primary" onclick="eggQuery()">查询</button><button class="btn" onclick="eggReset()">重置</button></div>
+        </div>
+    </div>
+    <div class="table-card">
+            <div class="egg-title-bar"><div class="egg-title"><span class="egg-bar"></span>鸡蛋采购订单</div><button class="btn btn-primary" id="eggBatchCreateDh" type="button" disabled onclick="batchCreateSupplierOrders()">批量生成订货单</button></div>
+            <div class="batch-hint" id="eggBatchHint">请先选择订货单号和供应商并查询。</div>
+            <table><thead><tr><th>序号</th><th>采购单号</th><th>源销售单</th><th>客户订货单号</th><th>供应商</th><th>采购员</th><th>金额</th><th>收货状态</th><th>付款状态</th><th>开票状态</th></tr></thead><tbody id="eggTbody">
+                <tr class="clickable" data-no="EGG-PO-20260905001" data-status="已确认" data-customer-order="DH20260905002" data-supplier="平原县蛋鸡养殖合作社" onclick="location.href='鸡蛋-采购订单详情.html?no=EGG-PO-20260905001'"><td>1</td><td>EGG-PO-20260905001</td><td>EGG-SO-20260905001</td><td>DH20260905002</td><td>平原县蛋鸡养殖合作社</td><td>徐白雪</td><td>128,587.20</td><td><span class="receive-status receive-partial">部分收货</span></td><td><span class="status status-confirm">部分付款</span></td><td><span class="status status-pending">未开票</span></td></tr>
+                <tr class="clickable" data-no="EGG-PO-20260901002" data-status="已确认" data-customer-order="DH20260901001" data-supplier="夏津县绿源养殖专业合作社" onclick="location.href='鸡蛋-采购订单详情.html?no=EGG-PO-20260901002'"><td>2</td><td>EGG-PO-20260901002</td><td>EGG-SO-20260901002</td><td>DH20260901001</td><td>夏津县绿源养殖专业合作社</td><td>徐白雪</td><td>0.00</td><td><span class="receive-status receive-none">待收货</span></td><td><span class="status status-pending">待付款</span></td><td><span class="status status-pending">待开票</span></td></tr>
+                <tr class="clickable" data-no="EGG-PO-20260828003" data-status="已确认" data-customer-order="DH20260828003" data-supplier="平原县蛋鸡养殖合作社" onclick="location.href='鸡蛋-采购订单详情.html?no=EGG-PO-20260828003'"><td>3</td><td>EGG-PO-20260828003</td><td>EGG-SO-20260828003</td><td>DH20260828003</td><td>平原县蛋鸡养殖合作社</td><td>徐白雪</td><td>196,465.72</td><td><span class="receive-status receive-all">已收货</span></td><td><span class="status status-done">全额付款</span></td><td><span class="status status-done">已开票</span></td></tr>
+                <tr class="clickable" data-no="EGG-PO-20260906004" data-status="已确认" data-customer-order="DH20260905002" data-supplier="临邑县丰羽蛋鸡养殖场" onclick="location.href='鸡蛋-采购订单详情.html?no=EGG-PO-20260906004'"><td>4</td><td>EGG-PO-20260906004</td><td>EGG-SO-20260905001</td><td>DH20260905002</td><td>临邑县丰羽蛋鸡养殖场</td><td>徐白雪</td><td>42,300.00</td><td><span class="receive-status receive-all">已收货</span></td><td><span class="status status-done">全额付款</span></td><td><span class="status status-done">已开票</span></td></tr>
+                <tr class="clickable" data-no="EGG-PO-20260907005" data-status="已确认" data-customer-order="DH20260901001" data-supplier="平原县蛋鸡养殖合作社" onclick="location.href='鸡蛋-采购订单详情.html?no=EGG-PO-20260907005'"><td>5</td><td>EGG-PO-20260907005</td><td>EGG-SO-20260901002</td><td>DH20260901001</td><td>平原县蛋鸡养殖合作社</td><td>徐白雪</td><td>86,400.00</td><td><span class="receive-status receive-none">待收货</span></td><td><span class="status status-pending">待付款</span></td><td><span class="status status-pending">待开票</span></td></tr>
+            </tbody></table>
+            <div class="pagination"><span class="page-info" id="eggCount">共 5 条 · 鸡蛋业务</span></div>
+        </div>
+    </div>
+
+        <div class="filter-card cat-other">
             <div class="filter-row">
                 <div class="filter-item">
                     <label>源单据</label>
@@ -277,7 +339,7 @@
         </div>
 
         <!-- 表格 -->
-        <div class="table-card">
+        <div class="table-card cat-other">
             <div class="table-toolbar">
                 <div class="table-title">
                     采购订单列表
@@ -532,5 +594,209 @@
     appendWorkflowOrders();
 </script>
 
+
+<script>
+    // ===== 业务分类页签：只切换显隐，「其他业务」即原有页面内容，未做任何改动 =====
+    function switchCat(c) {
+        var isEgg = (c !== 'other');
+        var egg = document.getElementById('catEgg');
+        if (egg) egg.style.display = isEgg ? 'block' : 'none';
+        Array.prototype.forEach.call(document.querySelectorAll('.cat-other'), function (el) {
+            el.classList[isEgg ? 'add' : 'remove']('cat-hidden');
+        });
+        var te = document.getElementById('catTabEgg');
+        var to = document.getElementById('catTabOther');
+        if (te) te.classList.toggle('active', isEgg);
+        if (to) to.classList.toggle('active', !isEgg);
+        try {
+            var sp = new URLSearchParams(location.search);
+            sp.set('cat', isEgg ? 'egg' : 'other');
+            history.replaceState(null, '', location.pathname + '?' + sp.toString());
+        } catch (e) {}
+    }
+    (function () {
+        var m = location.search.match(/[?&]cat=(\w+)/);
+        switchCat(m && m[1] === 'other' ? 'other' : 'egg');
+    })();
+</script>
+
+<script>
+    // ===== 鸡蛋业务面板筛选：必须同时选择订货单号、供应商并执行查询 =====
+    var eggQueryReady = false;
+
+    function invalidateEggQuery() {
+        eggQueryReady = false;
+        var button = document.getElementById('eggBatchCreateDh');
+        if (button) button.disabled = true;
+        var hint = document.getElementById('eggBatchHint');
+        if (hint) hint.textContent = '请先选择订货单号和供应商并查询。';
+    }
+
+    function eggQuery() {
+        var customerOrderNo = (document.getElementById('drillEgg').value || '').trim();
+        var supplier = document.getElementById('eggSupplier').value || '';
+        if (!customerOrderNo || !supplier) {
+            invalidateEggQuery();
+            alert('请先选择订货单号和供应商并查询。');
+            return;
+        }
+        eggQueryReady = true;
+        eggFilter();
+    }
+
+    function eggFilter() {
+        var kwEl = document.getElementById('eggF0'), selEl = document.getElementById('eggF1');
+        var customerOrderEl = document.getElementById('drillEgg');
+        var supplierEl = document.getElementById('eggSupplier');
+        var kw = kwEl ? kwEl.value.trim().toLowerCase() : '';
+        var sel = selEl ? selEl.value : '';
+        var customerOrderNo = customerOrderEl ? customerOrderEl.value.trim() : '';
+        var supplier = supplierEl ? supplierEl.value : '';
+        var n = 0;
+        Array.prototype.forEach.call(document.querySelectorAll('#eggTbody tr'), function (tr) {
+            var no = (tr.getAttribute('data-no') || '').toLowerCase();
+            var st = tr.getAttribute('data-status') || '';
+            var rowCustomerOrderNo = tr.getAttribute('data-customer-order') || '';
+            var rowSupplier = tr.getAttribute('data-supplier') || '';
+            var hit = (!kw || no.indexOf(kw) >= 0) &&
+                (!sel || sel === '全部' || st === sel || !st) &&
+                (!customerOrderNo || rowCustomerOrderNo === customerOrderNo) &&
+                (!supplier || rowSupplier === supplier);
+            tr.style.display = hit ? '' : 'none';
+            if (hit) n++;
+        });
+        var c = document.getElementById('eggCount');
+        if (c) c.textContent = '共 ' + n + ' 条';
+        updateEggBatchState();
+    }
+
+    function getGeneratedSupplierOrders() {
+        try {
+            var list = JSON.parse(localStorage.getItem('haifu_egg_supplier_orders') || '[]');
+            return Array.isArray(list) ? list : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function markGeneratedPurchaseOrders() {
+        var generated = {};
+        getGeneratedSupplierOrders().forEach(function (doc) {
+            (doc.purchaseNos || []).forEach(function (no) { generated[no] = true; });
+        });
+        Array.prototype.forEach.call(document.querySelectorAll('#eggTbody tr'), function (tr) {
+            var hasGenerated = !!generated[tr.getAttribute('data-no')];
+            tr.setAttribute('data-generated', hasGenerated ? 'true' : 'false');
+            tr.title = hasGenerated ? '该采购订单已生成供应商订货单' : '';
+        });
+    }
+
+    function updateEggBatchState() {
+        var customerOrderEl = document.getElementById('drillEgg');
+        var customerOrderNo = customerOrderEl ? customerOrderEl.value.trim() : '';
+        var supplierEl = document.getElementById('eggSupplier');
+        var supplier = supplierEl ? supplierEl.value : '';
+        var selected = Array.prototype.filter.call(document.querySelectorAll('#eggTbody tr'), function (tr) {
+            return eggQueryReady && !!customerOrderNo && !!supplier && tr.style.display !== 'none' && tr.getAttribute('data-generated') !== 'true';
+        });
+        var suppliers = {};
+        selected.forEach(function (tr) {
+            suppliers[tr.getAttribute('data-supplier') || '未指定供应商'] = true;
+        });
+        var button = document.getElementById('eggBatchCreateDh');
+        if (button) button.disabled = !eggQueryReady || !customerOrderNo || !supplier || selected.length === 0;
+        var hint = document.querySelector('#catEgg .batch-hint');
+        if (!hint) return;
+        if (!eggQueryReady || !customerOrderNo || !supplier) {
+            hint.textContent = '请先选择订货单号和供应商并查询。';
+        } else if (!selected.length) {
+            hint.textContent = '当前筛选条件下没有可生成的订单。';
+        } else {
+            hint.textContent = '已纳入当前筛选结果中的 ' + selected.length + ' 条采购订单，将生成 1 张供应商订货单。';
+        }
+    }
+
+    function nextSupplierOrderNo(existing, offset) {
+        var now = new Date();
+        var date = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+        var prefix = 'DH' + date;
+        var max = 0;
+        existing.forEach(function (doc) {
+            if ((doc.no || '').indexOf(prefix) !== 0) return;
+            var seq = parseInt((doc.no || '').slice(prefix.length), 10);
+            if (!isNaN(seq)) max = Math.max(max, seq);
+        });
+        return prefix + String(max + offset + 1).padStart(3, '0');
+    }
+
+    function batchCreateSupplierOrders() {
+        var customerOrderEl = document.getElementById('drillEgg');
+        var customerOrderNo = customerOrderEl ? customerOrderEl.value.trim() : '';
+        var supplier = document.getElementById('eggSupplier').value || '';
+        if (!eggQueryReady || !customerOrderNo || !supplier) {
+            alert('请先选择订货单号和供应商并查询。');
+            return;
+        }
+        var selectedRows = Array.prototype.filter.call(document.querySelectorAll('#eggTbody tr'), function (tr) {
+            return tr.style.display !== 'none' && tr.getAttribute('data-generated') !== 'true';
+        });
+        if (!selectedRows.length) {
+            alert('当前筛选条件下没有可生成的订单。');
+            return;
+        }
+        var groups = {};
+        selectedRows.forEach(function (tr) {
+            var supplier = tr.getAttribute('data-supplier') || '未指定供应商';
+            if (!groups[supplier]) groups[supplier] = [];
+            groups[supplier].push(tr.getAttribute('data-no'));
+        });
+        var existing = getGeneratedSupplierOrders();
+        var today = new Date();
+        var dateText = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+        Object.keys(groups).forEach(function (supplier) {
+            existing.unshift({
+                no: nextSupplierOrderNo(existing, 0),
+                supplier: supplier,
+                date: dateText,
+                status: 'draft',
+                purchaseNos: groups[supplier],
+                customerOrderNo: customerOrderNo
+            });
+        });
+        localStorage.setItem('haifu_egg_supplier_orders', JSON.stringify(existing));
+        alert('已生成 ' + Object.keys(groups).length + ' 张供应商订货单草稿，共关联 ' + selectedRows.length + ' 条采购订单。');
+        location.href = '鸡蛋-订货单列表.html?type=supplier';
+    }
+
+    // ===== 胶囊下钻：回填客户订货单号筛选值 =====
+    var DRILL = '';
+    function drillApply(v) {
+        DRILL = (v == null ? '' : String(v)).trim();
+        Array.prototype.forEach.call(document.querySelectorAll('[data-drill]'), function (el) {
+            if (el.value !== DRILL) el.value = DRILL;
+        });
+    }
+    (function () {
+        var params = ['dh'];
+        var v = '';
+        for (var i = 0; i < params.length; i++) {
+            var m = location.search.match(new RegExp('[?&]' + params[i] + '=([^&]*)'));
+            if (m) { v = decodeURIComponent(m[1]); break; }
+        }
+        if (v) drillApply(v);
+    })();
+    function eggReset() {
+        drillApply('');
+        var kwEl = document.getElementById('eggF0'), selEl = document.getElementById('eggF1'), dEl = document.getElementById('eggF2'), supplierEl = document.getElementById('eggSupplier');
+        if (kwEl) kwEl.value = '';
+        if (selEl) selEl.value = '全部';
+        if (dEl) dEl.value = '';
+        if (supplierEl) supplierEl.value = '';
+        invalidateEggQuery();
+        eggFilter();
+    }
+    markGeneratedPurchaseOrders();
+    eggFilter();
+</script>
 </body>
 </html>

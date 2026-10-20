@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>商家入驻 - 供应商端</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f0f2f5;color:#262626;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif}.main-area{margin-left:200px;min-height:100vh}.top-nav{height:50px;background:#fff;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:10}.breadcrumb{color:#666}.breadcrumb strong{color:#262626;font-weight:500}.user{margin-left:auto;color:#666}.main{max-width:980px;margin:0 auto;padding:22px 20px 48px}.demo-bar{background:#fff;padding:12px 16px;border-radius:4px;margin-bottom:14px;display:flex;gap:8px;align-items:center;box-shadow:0 1px 2px rgba(0,0,0,.04)}.demo-bar span{color:#8c8c8c;font-size:13px;margin-right:4px}.demo-btn{border:1px solid #d9d9d9;background:#fff;color:#666;border-radius:2px;padding:5px 10px;font:inherit;cursor:pointer}.demo-btn.active{border-color:#1890ff;color:#1890ff;background:#e6f7ff}.card{background:#fff;border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.04);padding:44px 52px}.status-layout{display:flex;gap:36px;align-items:flex-start}.status-icon{width:68px;height:68px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;flex:none}.icon-warn{background:#fff7e6;color:#fa8c16}.icon-blue{background:#e6f7ff;color:#1890ff}.icon-green{background:#f6ffed;color:#52c41a}.icon-red{background:#fff1f0;color:#ff4d4f}.status-content{flex:1}.status-content h1{margin:4px 0 12px;font-size:20px}.status-content p{margin:0;color:#666;line-height:1.8}.status-detail{margin-top:20px;background:#fafafa;border-radius:3px;padding:15px 18px;line-height:2;color:#595959}.status-detail b{color:#262626;font-weight:500}.actions{margin-top:26px;display:flex;gap:12px}.btn{height:34px;padding:0 22px;border-radius:2px;border:1px solid #d9d9d9;background:#fff;color:#595959;font:inherit;cursor:pointer}.btn:hover{border-color:#1890ff;color:#1890ff}.btn-primary{background:#1890ff;border-color:#1890ff;color:#fff}.btn-primary:hover{background:#40a9ff;color:#fff}.progress{display:flex;margin-top:30px;padding-top:22px;border-top:1px solid #f0f0f0}.progress-item{flex:1;position:relative;color:#8c8c8c;font-size:13px;text-align:center}.progress-item:before{content:"";display:block;width:20px;height:20px;margin:0 auto 8px;border-radius:50%;border:1px solid #d9d9d9;background:#fff}.progress-item:not(:last-child):after{content:"";position:absolute;left:55%;right:-45%;top:10px;height:1px;background:#d9d9d9}.progress-item.done:before{background:#52c41a;border-color:#52c41a;box-shadow:inset 0 0 0 5px #fff}.progress-item.active:before{background:#1890ff;border-color:#1890ff;box-shadow:inset 0 0 0 5px #fff}.progress-item.done,.progress-item.active{color:#262626}@media(max-width:720px){.main-area{margin-left:0}.sidebar{display:none}.card{padding:28px 22px}.status-layout{gap:18px}.demo-bar{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<script src="sidebar.js"></script>
+<div class="main-area"><header class="top-nav"><div class="breadcrumb">首页　/　<strong>商家入驻</strong></div><div class="user">🔔　超级管理员 ▾</div></header><main class="main">
+  <div class="demo-bar"><span>演示状态：</span><button class="demo-btn" data-status="ready" onclick="changeStatus('ready')">待填写开店信息</button><button class="demo-btn" data-status="reviewing" onclick="changeStatus('reviewing')">开店审核中</button><button class="demo-btn" data-status="approved" onclick="changeStatus('approved')">开店审核通过</button><button class="demo-btn" data-status="rejected" onclick="changeStatus('rejected')">开店审核驳回</button></div>
+  <section class="card" id="statusCard"></section>
+</main></div>
+<script>
+var status=decodeURIComponent(new URLSearchParams(location.search).get('status')||'uncertified');
+var config={
+//  uncertified:{icon:'!',iconClass:'icon-warn',title:'尚未完成企业认证',text:'完成企业认证后，才可提交开店申请。',detail:'当前企业状态：<b>未认证</b>',action:'立即认证',url:'企业认证.html',step:0},
+ ready:{icon:'✓',iconClass:'icon-green',title:'已具备开店资格',text:'企业认证已通过，您可以填写店铺经营信息并提交开店申请。',detail:'企业认证状态：<b>认证通过</b><br>开店申请状态：<b>未提交</b>',action:'填写开店信息',url:'企业开店.html',step:1},
+ reviewing:{icon:'◷',iconClass:'icon-blue',title:'开店申请审核中',text:'您的开店申请已提交，平台正在审核，请耐心等待。',detail:'店铺名称：<b>海赋农产品供应店</b><br>提交时间：<b>2026-09-17 10:30</b><br>开店申请状态：<b>审核中</b>',action:'查看已提交信息',url:'企业开店详情.html?status=reviewing',step:2},
+ approved:{icon:'✓',iconClass:'icon-green',title:'开店审核已通过',text:'您的店铺已开通，可查看已填写的店铺信息。',detail:'店铺名称：<b>海赋农产品供应店</b><br>开店申请状态：<b>审核通过</b>',action:'查看开店信息',url:'企业开店详情.html?status=approved',step:3},
+ rejected:{icon:'×',iconClass:'icon-red',title:'开店申请审核驳回',text:'请根据驳回意见修改开店信息后重新提交。',detail:'驳回意见：<b>店铺分类与主营类目不符，请修改后重新提交。</b>',action:'修改开店信息',url:'企业开店.html?mode=edit',step:2}
+};
+function render(){var c=config[status]||config.uncertified;document.querySelectorAll('.demo-btn').forEach(function(b){b.classList.toggle('active',b.dataset.status===status)});var steps=['企业认证','填写开店信息','平台审核','开店完成'];document.getElementById('statusCard').innerHTML='<div class="status-layout"><div class="status-icon '+c.iconClass+'">'+c.icon+'</div><div class="status-content"><h1>'+c.title+'</h1><p>'+c.text+'</p><div class="status-detail">'+c.detail+'</div><div class="actions"><button class="btn btn-primary" onclick="location.href=\''+c.url+'\'">'+c.action+'</button></div></div></div><div class="progress">'+steps.map(function(s,i){return '<div class="progress-item '+(i<c.step?'done':i===c.step?'active':'')+'">'+s+'</div>'}).join('')+'</div>'}
+function changeStatus(next){status=next;history.replaceState(null,'','商家入驻.html?status='+encodeURIComponent(next));render()}
+render();
+</script>
+</body>
+</html>

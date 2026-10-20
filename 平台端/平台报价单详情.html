@@ -72,10 +72,10 @@
     <div id="sidebar-container"></div>
     <main>
       <nav class="breadcrumb" aria-label="面包屑">
-        <a href="报价单列表.html">报价单列表</a><span class="sep">/</span><span>BJ20260825062</span>
+        <a href="报价单列表.html">报价单列表</a><span class="sep">/</span><span id="quoteCrumb">BJ20260825062</span>
       </nav>
       <section class="card title-card">
-        <h1>平台报价单 BJ20260825062 <span class="tag wait" id="stateTag">待确认</span></h1>
+        <h1>平台报价单 <span id="quoteTitleNo">BJ20260825062</span> <span class="tag wait" id="stateTag">待审核</span></h1>
         <span class="role-hint" id="roleHint"></span>
       </section>
       <section class="card content">
@@ -104,9 +104,9 @@
           </section>
         </div>
         <div class="detail-title">报价明细 <small>共 2 条</small></div>
-        <div class="table-wrap"><table><thead><tr><th>序号</th><th>客户确认状态</th><th>产品名称</th><th>产品图片</th><th>品牌</th><th>规格</th><th>单位</th><th class="money">订购数量</th><th>期望交期</th><th>期望税率</th><th>备注</th><th>已采用供应商</th><th class="money">采购单价</th><th>承诺交期</th><th>实际税率</th><th class="money">平台销售单价</th><th class="money">税额</th><th class="money">未税金额</th><th class="money">含税总价</th><th>价格有效期</th></tr></thead><tbody>
-          <tr><td>100</td><td class="customer-state"><span class="tag wait">待确认</span></td><td>大蒜</td><td>📦</td><td>金乡</td><td>4.0</td><td>吨</td><td class="money">5</td><td>2026-08-31</td><td>13%</td><td>需冷链运输</td><td>aqtest海赋供应链</td><td class="money">2,000.00</td><td>4天</td><td>13%</td><td class="money"><input value="2,352.94"></td><td class="money">1,529.41</td><td class="money">11,764.70</td><td class="money">13,294.11</td><td>2026-08-31 23:59</td></tr>
-          <tr><td>101</td><td class="customer-state"><span class="tag wait">待确认</span></td><td>洋葱</td><td>📦</td><td>金乡</td><td>3.2</td><td>吨</td><td class="money">8</td><td>2026-09-02</td><td>5%</td><td>—</td><td>天津市思睿贸易</td><td class="money">1,115.00</td><td>5天</td><td>5%</td><td class="money"><input value="1,307.06"></td><td class="money">522.82</td><td class="money">10,456.48</td><td class="money">10,979.30</td><td>2026-08-30 23:59</td></tr>
+        <div class="table-wrap"><table><thead><tr><th>序号</th><th>客户确认状态</th><th>产品名称</th><th>产品图片</th><th>品牌</th><th>规格</th><th>单位</th><th class="money">订购数量</th><th>期望交期</th><th>备注</th><th>已采用供应商</th><th class="money">采购单价</th><th>承诺交期</th><th>税率</th><th class="money">平台销售单价</th><th class="money">税额</th><th class="money">未税金额</th><th class="money">含税总价</th><th>价格有效期</th></tr></thead><tbody>
+          <tr><td>100</td><td class="customer-state"><span class="tag wait">待确认</span></td><td>大蒜</td><td>📦</td><td>金乡</td><td>4.0</td><td>吨</td><td class="money">5</td><td>2026-08-31</td><td>需冷链运输</td><td>aqtest海赋供应链</td><td class="money">2,000.00</td><td>4天</td><td>13%</td><td class="money"><input value="2,352.94"></td><td class="money">1,529.41</td><td class="money">11,764.70</td><td class="money">13,294.11</td><td>2026-08-31 23:59</td></tr>
+          <tr><td>101</td><td class="customer-state"><span class="tag wait">待确认</span></td><td>洋葱</td><td>📦</td><td>金乡</td><td>3.2</td><td>吨</td><td class="money">8</td><td>2026-09-02</td><td>—</td><td>天津市思睿贸易</td><td class="money">1,115.00</td><td>5天</td><td>5%</td><td class="money"><input value="1,307.06"></td><td class="money">522.82</td><td class="money">10,456.48</td><td class="money">10,979.30</td><td>2026-08-30 23:59</td></tr>
         </tbody></table></div>
         <div class="totals"><span>未税金额：¥ 22,221.18</span><span>税额：¥ 2,052.23</span><b>合计：¥ 24,273.41</b></div>
       </section>
@@ -115,45 +115,80 @@
   <div class="toast" id="toast"></div>
   <script>
     const query = new URLSearchParams(window.location.search);
-    const rawQuoteStatus = query.get('status') || '待确认';
-    // 报价单对外状态只保留“待确认、已完成”；旧链接的待审核/待客户确认统一映射为待确认。
-    const quoteStatus = rawQuoteStatus === '已完成' ? '已完成' : '待确认';
+    const rawQuoteStatus = query.get('status') || '待报价';
+    // 平台报价单主状态统一为待报价、待审核、已完成；兼容旧页面的待确认链接。
+    let quoteStatus = rawQuoteStatus === '已完成' ? '已完成' : (rawQuoteStatus === '待审核' || rawQuoteStatus === '待确认' ? '待审核' : '待报价');
     const quoteNo = query.get('quote') || query.get('fromQuote') || 'BJ20260825062';
-    const sourceInquiry = query.get('sourceInquiry') || (quoteNo === 'BJ20260821018' ? 'XJ2026080058' : 'XJ2026080062');
+    try { if (sessionStorage.getItem('platformQuoteClientConfirmed_' + quoteNo) === '1') quoteStatus = '已完成'; } catch (e) {}
+    const sourceInquiry = query.get('sourceInquiry') || query.get('inquiry') || (quoteNo === 'BJ20260821018' ? 'XJ2026080058' : 'XJ2026080062');
     const requoteRequested = query.get('requote') === '1';
     const rejectedLines = query.get('rejectedLines') || (requoteRequested ? '1' : '');
     const isManager = query.get('role') === 'manager';
+    let auditResult = query.get('audit') || '';
+    try { auditResult = auditResult || sessionStorage.getItem('platformQuoteAudit_' + quoteNo) || ''; } catch (e) {}
     const actions = document.getElementById('actions');
     const roleHint = document.getElementById('roleHint');
     const stateTag = document.getElementById('stateTag');
     const inputs = document.querySelectorAll('table input');
+    document.getElementById('quoteCrumb').textContent = quoteNo;
+    document.getElementById('quoteTitleNo').textContent = quoteNo;
+    const auditStageText = auditResult === 'passed' ? '审核通过' : (auditResult === 'rejected' ? '审核驳回' : '待审核');
+    const displayStatus = quoteStatus === '待审核' ? auditStageText : quoteStatus;
     const flow = {
-      '待确认': '<span class="step active">待确认</span><span class="step">已完成</span>',
-      '已完成': '<span class="step done">待确认</span><span class="step active">已完成</span>'
+      '待报价': '<span class="step active">待报价</span><span class="step">待审核</span><span class="step">已完成</span>',
+      '待审核': '<span class="step done">待报价</span><span class="step active">' + auditStageText + '</span><span class="step">已完成</span>',
+      '已完成': '<span class="step done">待报价</span><span class="step done">审核通过</span><span class="step active">已完成</span>'
     };
-    stateTag.textContent = quoteStatus;
-    stateTag.className = quoteStatus === '已完成' ? 'tag done' : 'tag wait';
-    if (isManager) {
+    stateTag.textContent = displayStatus;
+    stateTag.className = quoteStatus === '已完成' ? 'tag done' : (quoteStatus === '待报价' ? 'tag audit' : (auditResult === 'rejected' ? 'tag audit' : 'tag wait'));
+    if (isManager && quoteStatus === '待审核' && !auditResult) {
       roleHint.textContent = '经理审核';
-      actions.innerHTML = '<button class="btn primary" onclick="notify(\'审核已通过，报价单将推送客户\')">审核通过</button><button class="btn" onclick="notify(\'请填写驳回原因后退回业务人员修改\')">审核驳回</button><div class="steps">' + flow['待确认'] + '</div>';
+      actions.innerHTML = '<button class="btn primary" onclick="auditPass()">审核通过</button><button class="btn" onclick="auditReject()">审核驳回</button><div class="steps">' + flow['待审核'] + '</div>';
       inputs.forEach(function(input) { input.disabled = true; });
-    } else if (quoteStatus === '待确认') {
-      roleHint.textContent = '客户确认中，报价明细已锁定';
-      actions.innerHTML = '<div class="steps">' + flow[quoteStatus] + '</div>';
+    } else if (quoteStatus === '待报价') {
+      roleHint.textContent = '请维护平台报价金额后提交审核';
+      actions.innerHTML = '<button class="btn primary" onclick="submitAudit()">提交审核</button><div class="steps">' + flow['待报价'] + '</div>';
+    } else if (quoteStatus === '待审核' && auditResult === 'rejected') {
+      roleHint.textContent = '审核驳回，请修改报价金额后重新提交审核';
+      actions.innerHTML = '<button class="btn primary" onclick="submitAudit()">重新提交审核</button><div class="steps">' + flow['待审核'] + '</div>';
+    } else if (quoteStatus === '待审核' && auditResult === 'passed') {
+      roleHint.textContent = '审核通过，已生成客户端平台报价单，等待客户确认';
+      actions.innerHTML = '<button class="btn primary" onclick="openClientQuote()">查看客户端报价单</button><div class="steps">' + flow['待审核'] + '</div>';
       inputs.forEach(function(input) { input.disabled = true; });
     } else if (quoteStatus === '已完成') {
       roleHint.textContent = requoteRequested ? '客户已请求重新报价，请处理未接受或已失效明细' : '报价已完成，报价明细已锁定';
       actions.innerHTML = (requoteRequested ? '<button class="btn primary" onclick="openRequoteInquiry()">对未接受明细发起二次询价</button>' : '') + '<div class="steps">' + flow[quoteStatus] + '</div>';
       inputs.forEach(function(input) { input.disabled = true; });
     } else {
-      actions.innerHTML = '<button class="btn primary" onclick="notify(\'报价单已提交经理审核\')">提交审核</button><div class="steps">' + flow['待确认'] + '</div>';
+      roleHint.textContent = '已提交审核，等待审核结果';
+      actions.innerHTML = '<div class="steps">' + flow['待审核'] + '</div>';
+      inputs.forEach(function(input) { input.disabled = true; });
     }
     const requoteIndexes = rejectedLines.split(',').filter(function(value) { return value !== ''; }).map(Number);
     document.querySelectorAll('.customer-state').forEach(function(cell, index) {
-      if (quoteStatus === '待确认') { cell.innerHTML = '<span class="tag wait">待确认</span>'; return; }
+      if (quoteStatus === '待报价') { cell.innerHTML = '<span class="tag audit">未生成</span>'; return; }
+      if (quoteStatus === '待审核') { cell.innerHTML = auditResult === 'passed' ? '<span class="tag wait">待客户确认</span>' : '<span class="tag audit">—</span>'; return; }
       if (requoteRequested && requoteIndexes.indexOf(index) >= 0) { cell.innerHTML = '<span class="tag audit">请求重新报价</span>'; return; }
       cell.innerHTML = '<span class="tag done">已接受</span>';
     });
+    function currentQuoteUrl(status, audit) {
+      var url = '平台报价单详情.html?status=' + encodeURIComponent(status) + '&quote=' + encodeURIComponent(quoteNo) + '&inquiry=' + encodeURIComponent(sourceInquiry);
+      if (audit) url += '&audit=' + encodeURIComponent(audit);
+      return url;
+    }
+    function submitAudit() {
+      try { sessionStorage.removeItem('platformQuoteAudit_' + quoteNo); } catch (e) {}
+      location.href = currentQuoteUrl('待审核');
+    }
+    function auditPass() {
+      try { sessionStorage.setItem('platformQuoteAudit_' + quoteNo, 'passed'); } catch (e) {}
+      location.href = currentQuoteUrl('待审核', 'passed');
+    }
+    function auditReject() {
+      try { sessionStorage.setItem('platformQuoteAudit_' + quoteNo, 'rejected'); } catch (e) {}
+      location.href = currentQuoteUrl('待审核', 'rejected');
+    }
+    function openClientQuote() { location.href = '../客户端/平台报价单详情.html?quote=' + encodeURIComponent(quoteNo) + '&status=confirm&inquiry=' + encodeURIComponent(sourceInquiry); }
     function openRequoteInquiry() {
       const sourceLines = [
         { name: '大蒜', brand: '金乡', spec: '4.0', unit: '吨', qty: '5', delivery: '2026-08-31', tax: '13%', note: '需冷链运输' },

@@ -299,6 +299,168 @@
         border-color: #ffe7ba;
         color: #a65d00;
       }
+      .logistics-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .logistics-tip {
+        color: #8b96a3;
+        font-size: 12px;
+      }
+      .logistics-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .logistics-card {
+        padding: 16px;
+        border: 1px solid #e7edf3;
+        border-radius: 7px;
+        background: #fbfdff;
+      }
+      .logistics-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .logistics-card-title {
+        color: #253142;
+        font-weight: 600;
+      }
+      .logistics-card-meta {
+        color: #98a2b3;
+        font-size: 12px;
+        margin-left: 8px;
+      }
+      .logistics-card-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .logistics-save-hint {
+        color: #d46b08;
+        font-size: 12px;
+      }
+      .logistics-fields {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px 20px;
+      }
+      .logistics-field label {
+        display: block;
+        margin-bottom: 5px;
+        color: #667382;
+        font-size: 12px;
+      }
+      .logistics-field input {
+        width: 100%;
+        height: 34px;
+        padding: 0 10px;
+        border: 1px solid #d8dee6;
+        border-radius: 4px;
+        color: #344054;
+        outline: none;
+      }
+      .logistics-field input:focus {
+        border-color: #1890ff;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, .12);
+      }
+      .logistics-files {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .file-upload-box {
+        min-height: 92px;
+        padding: 12px;
+        border: 1px dashed #b7dcff;
+        border-radius: 6px;
+        background: #f5fbff;
+      }
+      .file-upload-box h4 {
+        margin: 0 0 8px;
+        color: #52606f;
+        font-size: 12px;
+      }
+      .file-upload-box input[type="file"] {
+        width: 100%;
+        font-size: 12px;
+        color: #667382;
+      }
+      .file-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 8px;
+      }
+      .file-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        max-width: 100%;
+        padding: 4px 8px;
+        border: 1px solid #d8e7f5;
+        border-radius: 4px;
+        background: #fff;
+        color: #52606f;
+        font-size: 12px;
+      }
+      .file-chip a { color: #1677d2; text-decoration: none; }
+      .file-chip button {
+        border: 0;
+        padding: 0;
+        background: transparent;
+        color: #ff4d4f;
+        cursor: pointer;
+      }
+      .empty-logistics {
+        padding: 38px 0;
+        color: #98a2b3;
+        text-align: center;
+        border: 1px dashed #d8dee6;
+        border-radius: 6px;
+      }
+      .file-preview-mask {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: rgba(15, 23, 42, .55);
+      }
+      .file-preview-mask.show { display: flex; }
+      .file-preview-modal {
+        width: min(860px, 100%);
+        max-height: calc(100vh - 48px);
+        overflow: hidden;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 18px 60px rgba(15, 23, 42, .25);
+      }
+      .file-preview-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px 18px;
+        border-bottom: 1px solid #edf0f4;
+        color: #253142;
+        font-weight: 600;
+      }
+      .file-preview-close { border: 0; background: transparent; color: #667382; font-size: 22px; cursor: pointer; }
+      .file-preview-body { max-height: calc(100vh - 130px); overflow: auto; padding: 22px; background: #f7f9fb; text-align: center; }
+      .file-preview-body img, .file-preview-body video { max-width: 100%; max-height: 64vh; border-radius: 6px; background: #111; }
+      .preview-sheet { width: 100%; border-collapse: collapse; background: #fff; text-align: left; font-size: 13px; }
+      .preview-sheet th, .preview-sheet td { padding: 10px 12px; border: 1px solid #e5e7eb; }
+      .preview-sheet th { background: #f0f5fa; color: #52606f; }
+      .preview-empty { padding: 42px 0; color: #667382; }
       .product-table {
         width: 100%;
         border-collapse: separate;
@@ -345,7 +507,7 @@
         margin-top: 3px;
       }
       .qty-input {
-        width: 76px;
+        width: 86px;
         height: 30px;
         border: 1px solid #d8dee6;
         border-radius: 5px;
@@ -358,9 +520,41 @@
         outline: none;
         box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.12);
       }
-      .qty-input:disabled {
-        background: #f5f6f7;
-        color: #99a4a8;
+      .qty-input.invalid {
+        border-color: #ff4d4f;
+        box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.12);
+      }
+          .qty-input:disabled {
+            background: #f5f6f7;
+            color: #99a4a8;
+          }
+          /* 只读展示的发货数量：与订单数量保持同一视觉口径，不使用灰底只读样式 */
+          .qty-static {
+            display: inline-block;
+            width: 86px;
+            height: 30px;
+            line-height: 30px;
+            padding: 0 8px;
+            border: 1px solid #d8dee6;
+            border-radius: 5px;
+            background: #fff;
+            color: #344054;
+            font-variant-numeric: tabular-nums;
+          }
+      .remain-cell {
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        color: #389e0d;
+      }
+      .remain-cell.short {
+        color: #d46b08;
+      }
+      .remain-note {
+        display: block;
+        margin-top: 3px;
+        color: #d46b08;
+        font-size: 11px;
+        font-weight: 400;
       }
       .tax {
         display: inline-block;
@@ -616,13 +810,14 @@
         .product-table th, .product-table td { border: 1px solid #999; padding: 6px; }
         body.print-without-price .print-price { display: none; }
       }
+        
     </style>
   </head>
   <body>
     <script src="sidebar.js"></script>
     <div class="main-area">
       <header class="top-nav">
-        <div class="breadcrumb">
+        <div class="breadcrumb" id="breadcrumb">
           <a onclick="backOrderList()">销售订单</a><span class="sep">/</span
           ><a id="breadOrder" onclick="backOrderList()">PO000026</a><span class="sep">/</span
           ><a onclick="backList()">送货单</a><span class="sep">/</span
@@ -647,11 +842,11 @@
             </span></span
           >
         </div>
-        <section class="content">
+<section class="content">
           <div class="info-section">
             <div class="buttons" id="actionButtons" style="display:flex;justify-content:flex-start">
               <button class="btn btn-primary" id="shipBtn" onclick="submitShipment()">申请验收</button>
-              <button class="btn" id="printBtn" onclick="openPrintModal()">打印</button>
+              <button class="btn" id="printBtn" onclick="openPrintModal()">打印送货单</button>
             </div>
             <div class="info-column">
               <div class="info-title">送货单信息</div>
@@ -661,45 +856,46 @@
               </div>
               <div class="info-item">
                 <span class="label">订单日期</span
-                ><span class="value">2025年12月18日</span>
+                ><span class="value" id="orderDate">2025年12月18日 14:35:20</span>
               </div>
               <div class="info-item">
-                <span class="label">安排日期</span
-                ><span class="value">2025年12月20日</span>
-              </div>
-              <div class="info-item">
-                <span class="label">创建时间</span
-                ><span class="value">2025年12月18日 14:35</span>
+                <span class="label">送货日期</span
+                ><span class="value" id="arrangeDate">2025年12月20日 09:20:00</span>
               </div>
             </div>
             <div class="info-column">
               <div class="info-title">客户信息</div>
               <div class="info-item">
-                <span class="label">客户名称</span
-                ><span class="value">元象（山东）数字产业发展有限公司</span>
+                <span class="label">客户平台</span
+                ><span class="value" id="custName">元象（山东）数字产业发展有限公司</span>
               </div>
               <div class="info-item">
                 <span class="label">联系人</span
-                ><span class="value">侯振鲁</span>
+                ><span class="value" id="custContact">侯振鲁</span>
               </div>
               <div class="info-item">
-                <span class="label">电话</span
-                ><span class="value">17505308090</span>
+                <span class="label">联系电话</span
+                ><span class="value" id="custPhone">17505308090</span>
               </div>
               <div class="info-item">
-                <span class="label">送货地址</span
-                ><span class="value">274000 山东省菏泽市兰州路66号</span>
+                <span class="label">收货人</span
+                ><span class="value" id="receiverName">侯振鲁</span>
+              </div>
+              <div class="info-item">
+                <span class="label">收货电话</span
+                ><span class="value" id="receiverPhone">17505308090</span>
+              </div>
+              <div class="info-item">
+                <span class="label">收货地址</span
+                ><span class="value" id="custAddress">274000 山东省菏泽市兰州路66号</span>
               </div>
             </div>
           </div>
           <div class="tabs">
-            <div class="tab active">产品清单</div>
-            <!-- <div class="tab">其他信息</div> -->
+            <div class="tab active" data-tab="products" onclick="switchTab('products')">产品清单</div>
+            <div class="tab" data-tab="logistics" onclick="switchTab('logistics')">附件</div>
           </div>
-          <div class="tab-content">
-            <div class="notice" id="notice">
-              发货前可以修改送货数量，点击“申请验收”后送货单将变为已发货且不可修改。
-            </div>
+          <div class="tab-content" id="productsTab">
             <table class="product-table">
               <thead>
                 <tr>
@@ -710,9 +906,9 @@
                   <th>规格</th>
                   <th>品牌</th>
                   <th>订单数量</th>
+                  <th>剩余数量</th>
                   <th>发货数量</th>
                   <th>单位</th>
-                  <th>已接收</th>
                   <th class="print-price">单价</th>
                   <th>税项</th>
                   <th class="print-price">不含税金额</th>
@@ -723,10 +919,23 @@
             <div class="bottom" id="footNote">
             </div>
           </div>
+          <div class="tab-content" id="logisticsTab" style="display:none">
+            <div class="logistics-toolbar">
+              <div class="logistics-tip">一张送货单可关联多条物流信息；车牌号、司机姓名、司机手机号为必填，附件均为非必填。</div>
+              <button class="btn btn-primary" type="button" onclick="addLogistics()">新增</button>
+            </div>
+            <div class="logistics-list" id="logisticsList"></div>
+          </div>
         </section>
       </main>
     </div>
     <div class="toast" id="toast"></div>
+    <div class="file-preview-mask" id="filePreviewMask" onclick="closeFilePreview(event)">
+      <div class="file-preview-modal">
+        <div class="file-preview-head"><span id="filePreviewTitle">文件预览</span><button class="file-preview-close" type="button" onclick="closeFilePreview()">×</button></div>
+        <div class="file-preview-body" id="filePreviewBody"></div>
+      </div>
+    </div>
     <div class="modal-mask" id="printModal">
       <div class="modal">
         <div class="modal-title">选择打印模板</div>
@@ -757,7 +966,7 @@
       <div class="modal">
         <div class="modal-title"><span class="warn-icon">!</span>确认申请验收</div>
         <div class="modal-body">
-          提交后送货单状态将变为<b>已发货</b>，发货数量将被锁定无法修改。<br />是否确认提交？
+          提交后送货单状态将变为<b>已发货</b>，发货数量将被锁定无法修改。<br />若存在剩余数量，将按差额生成欠单送货单。<br />是否确认提交？
         </div>
         <div class="modal-footer">
           <button class="btn" onclick="closeShipModal()">取消</button>
@@ -794,31 +1003,71 @@
           "DS/00003": { "00000002": 3, "00000003": 1 }
         }
       };
+      // 订单日期（含时分秒，按销售订单号）
+      var ORDER_CREATED = {
+        PO000015: "2025-12-18 14:35:20",
+        PO000019: "2025-12-19 10:12:08",
+        PO000023: "2025-12-20 16:48:35",
+        PO000026: "2025-12-21 09:05:46"
+      };
+      // 送货日期（含时分秒，按销售订单号 + 送货单号）
+      var SHIP_ARRANGE = {
+        PO000015: { "DS/00001": "2025-12-20 09:20:00" },
+        PO000019: { "DS/00001": "2025-12-21 15:40:12" },
+        PO000023: { "DS/00001": "2025-12-22 11:18:30" },
+        PO000026: {
+          "DS/00001": "2025-12-22 08:30:00",
+          "DS/00002": "2025-12-23 13:05:40",
+          "DS/00003": "2025-12-24 10:26:15"
+        }
+      };
       var order = getParam("order") || "PO000015",
-        delivery = getParam("shipment") || "DS/00001",
-        // 依据订单号 + 送货单号查询该单自身状态
-        meta = (SHIPMENT_DB[order] || []).filter(function (r) { return r.delivery === delivery; })[0] || { status: "pending" };
+        delivery = getParam("shipment") || "DS/00001";
+      var detailSource = getParam("source");
+      var menuContext = null;
+      if (detailSource === "delivery-menu") {
+        try {
+          var savedContext = JSON.parse(sessionStorage.getItem("supplier_delivery_detail_context") || "null");
+          if (savedContext && savedContext.no === delivery) menuContext = savedContext;
+        } catch (e) { menuContext = null; }
+        if (menuContext && menuContext.order) order = menuContext.order;
+      }
+      // ===== 欠单送货单（申请验收差额生成）：按单号在存储中查找，命中后按欠单数据渲染 =====
+      var owingRows = [];
+      try { owingRows = JSON.parse(localStorage.getItem("supplier_owing_shipments") || "[]") || []; } catch (e) { owingRows = []; }
+      var selfOwing = owingRows.filter(function (r) { return r && r.no === delivery; })[0] || null;
+      if (selfOwing && selfOwing.order) order = selfOwing.order;
+      // 依据订单号 + 送货单号查询该单自身状态
+      var meta = menuContext || (SHIPMENT_DB[order] || []).filter(function (r) { return r.delivery === delivery; })[0] || { status: "pending" };
       // 该送货单自身是否已申请验收（按单号持久化，供订单页回读）
       var accepted = false;
       try { accepted = localStorage.getItem("shipment_sent_" + order + "_" + delivery) === "1"; } catch (e) {}
       var initStatus = meta.status;
       if (accepted && initStatus === "pending") initStatus = "sent";
-      // 已收货那张单标记为欠单展示（DS/00003），其余为正常单
-      isOwing = delivery === "DS/00003",
+      // 平台欠单送货单：平台收货不足创建欠单后自动生成（haifu_supplier_owing_shipments），按订单号+送货单号匹配
+      var platformOwing = null;
+      try {
+        platformOwing = (JSON.parse(localStorage.getItem("haifu_supplier_owing_shipments") || "[]") || [])
+          .filter(function (o) { return o && o.order === order && o.delivery === delivery; })[0] || null;
+      } catch (e) { platformOwing = null; }
+      var isOwing = delivery === "DS/00003" || !!platformOwing || !!selfOwing || !!(menuContext && menuContext.owing),
         sent = initStatus === "sent" || initStatus === "received";
-      // 本单发货数量（按 code）
+      // 本单差额已生成欠单送货单：原单保留欠发数量并标记“已转欠单”，用于追溯数量关系。
+      var owingTransferred = owingRows.some(function (r) { return r && r.sourceNo === delivery; });
+      // 本单累计发货数量（按 code）：优先读取申请验收时持久化的数量
       var shipQtyOfDelivery = (SHIP_QTY[order] && SHIP_QTY[order][delivery]) || {};
-      var products = [
+      try {
+        var savedShipQty = JSON.parse(localStorage.getItem("shipment_qty_" + order + "_" + delivery) || "null");
+        if (savedShipQty) shipQtyOfDelivery = savedShipQty;
+      } catch (e) {}
+      // 产品明细：required=订单数量；shipped=本单累计已发货；remain=剩余数量（未发完部分）
+      // 发货数量（本次）默认等于剩余数量，由 render 渲染输入框
+      var PRODUCT_DB = [
         {
           code: "00000002",
           name: "锂电池电钻",
           spec: "18V",
           brand: "博世",
-          required: 15,
-          normal: 6,
-          owing: 9,
-          received: 0,
-          settled: 15,
           price: "500.00",
           amount: "¥ 6,637.17",
           unit: "台",
@@ -828,22 +1077,113 @@
           name: "接近开关",
           spec: "IM18-05BD...",
           brand: "施克",
-          required: 5,
-          normal: 2,
-          owing: 3,
-          received: 0,
-          settled: 5,
           price: "500.00",
           amount: "¥ 2,212.39",
           unit: "个",
         },
       ];
+      var products = PRODUCT_DB.map(function (p) {
+        var orderItem = (ORDER_PRODUCTS[order] || []).filter(function (it) { return it.code === p.code; })[0];
+        var required = Number(orderItem ? orderItem.required : 0);
+        // 累计已发货：已发货/已收货取实际发货数量（含申请验收时持久化的回读）；待发货为 0
+        var shipped = sent ? Number(shipQtyOfDelivery[p.code] || 0) : 0;
+        // 剩余数量（未发完）：已收货为终结状态、差额已生成欠单时均为 0；其余 = 订单数量 - 累计已发货
+        var remain = 0;
+        if (initStatus !== "received") remain = Math.max(0, required - shipped);
+        return {
+          code: p.code,
+          name: p.name,
+          spec: p.spec,
+          brand: p.brand,
+          required: required,
+          shipped: shipped,
+          remain: remain,
+          price: p.price,
+          amount: p.amount,
+          unit: p.unit,
+        };
+      });
+      // 欠单送货单（申请验收差额生成）：除送货单号、发货数量、剩余数量外，其余字段与原送货单完全一致
+      if (selfOwing) {
+        products = (selfOwing.items || []).map(function (it) {
+          return {
+            code: it.code,
+            name: it.name,
+            spec: it.spec,
+            brand: it.brand,
+            required: Number(it.required || 0),
+            shipped: Number(it.shipped || 0),
+            remain: Number(it.remain || 0),
+            price: it.price,
+            amount: it.amount,
+            unit: it.unit,
+          };
+        });
+      }
+      // 平台欠单送货单：产品明细替换为待补发明细（订单数量=原采购订单数量，剩余数量=待补发数量）
+      if (platformOwing) {
+        products = platformOwing.items.map(function (it) {
+          var amount = Number(it.price || 0) * Number(it.qty || 0);
+          return {
+            code: it.code,
+            name: it.name,
+            spec: it.spec,
+            brand: it.brand,
+            required: Number(it.orderQty || 0),
+            shipped: 0,
+            remain: Number(it.qty || 0),
+            price: Number(it.price || 0).toFixed(2),
+            amount: "¥ " + amount.toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            unit: it.unit,
+          };
+        });
+      }
+      // 从左侧“送货单”入口进入时，详情使用全部列表中被点击单据的数据。
+      if (menuContext) {
+        var menuRequired = Number(menuContext.orderQty || 0);
+        var menuShipped = initStatus === "pending" ? 0 : Number(menuContext.qty || 0);
+        var menuRemain = menuContext.owing
+          ? Math.max(0, Number(menuContext.remainQty || 0) - menuShipped)
+          : Math.max(0, menuRequired - menuShipped);
+        products = [{
+          code: menuContext.code,
+          name: menuContext.product,
+          spec: menuContext.spec,
+          brand: menuContext.brand,
+          required: menuRequired,
+          shipped: menuShipped,
+          remain: menuRemain,
+          price: "500.00",
+          amount: "¥ " + (menuRequired * 500).toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+          unit: menuContext.unit
+        }];
+      }
       function getParam(n) {
         var m = location.search.match(new RegExp("[?&]" + n + "=([^&]*)"));
         return m ? decodeURIComponent(m[1]) : "";
       }
+      // ===== 面包屑来源判定 =====
+      // 从销售订单进入（带 order 参数，或来源页为销售订单列表/详情）→ 销售订单/销售订单号/送货单/送货单号
+      // 从送货单菜单（全部送货单列表）进入 → 送货单/送货单号，点击「送货单」返回全部送货单列表
+      var fromOrder = detailSource === "order" || (!detailSource && (!!getParam("order") || /销售订单/.test(document.referrer || "")));
       function backList() {
-        location.href = "送货单列表.html?order=" + encodeURIComponent(order);
+        location.href = fromOrder
+          ? "送货单列表.html?order=" + encodeURIComponent(order)
+          : "送货单列表（全部）.html";
+      }
+      function renderBreadcrumb() {
+        var box = document.getElementById("breadcrumb");
+        if (fromOrder) {
+          box.innerHTML =
+            '<a onclick="backOrderList()">销售订单</a><span class="sep">/</span>' +
+            '<a id="breadOrder" onclick="backOrderList()">' + order + '</a><span class="sep">/</span>' +
+            '<a onclick="backList()">送货单</a><span class="sep">/</span>' +
+            '<span class="current" id="breadNo">' + delivery + '</span>';
+        } else {
+          box.innerHTML =
+            '<a onclick="backList()">送货单</a><span class="sep">/</span>' +
+            '<span class="current" id="breadNo">' + delivery + '</span>';
+        }
       }
       function toast(msg) {
         var e = document.getElementById("toast");
@@ -855,9 +1195,10 @@
         }, 2000);
       }
       function render() {
+        // 列序：订单数量 / 剩余数量 / 发货数量；发货数量（本次）默认等于剩余数量，剩余数量为 0 时锁定并展示累计已发
         document.getElementById("products").innerHTML = products
           .map(function (p, index) {
-            var qty = isOwing ? p.owing : p.normal;
+            var editable = !sent && p.remain > 0;
             return (
               '<tr><td class="muted">' +
               (index + 1) +
@@ -870,16 +1211,15 @@
               '</td><td>' +
               p.brand +
               '</td><td class="muted">' + p.required +
-              '</td><td><input class="qty-input" type="number" min="0" max="' +
-              (isOwing ? p.owing : p.required) +
-              '" value="' +
-              qty.toFixed(2) +
-              '" ' +
-              (sent ? "disabled" : "") +
-              '></td><td>' +
-              p.unit +
+              '</td><td class="remain-cell' + (p.remain > 0 ? " short" : "") + '">' + p.remain +
+              (sent && p.remain > 0 ? '<span class="remain-note">已转欠单</span>' : '') +
               '</td><td>' +
-              p.received.toFixed(2) +
+              (editable
+                ? '<input class="qty-input" type="number" min="0" max="' + p.remain +
+                  '" value="' + p.remain + '" data-code="' + p.code + '" oninput="onShipQtyInput(this)">'
+                : '<span class="qty-static">' + p.shipped + '</span>') +
+              '</td><td>' +
+              p.unit +
               '</td><td class="print-price">' +
               p.price +
               '</td><td><span class="tax">13% 进项税</span></td><td class="print-price">' +
@@ -888,6 +1228,12 @@
             );
           })
           .join("");
+      }
+      // 发货数量校验：本次发货数量需在 0 ~ 剩余数量之间
+      function onShipQtyInput(input) {
+        var max = Number(input.getAttribute("max"));
+        var raw = Number(input.value);
+        input.classList.toggle("invalid", !isFinite(raw) || raw < 0 || raw > max);
       }
       function setFlow(status) {
         var steps = document.querySelectorAll("#statusFlow .step-tab");
@@ -939,10 +1285,13 @@
       function buildPreview() {
         var showPrice = selectedPrintTemplate === "with-price";
         var rows = products.map(function (p, index) {
-          var qty = isOwing ? p.owing : p.normal;
-          return '<tr><td>' + (index + 1) + '</td><td>' + p.code + '</td><td>' + p.name + '</td><td>' + p.spec + '</td><td>' + p.brand + '</td><td>' + p.required + '</td><td>' + qty.toFixed(2) + '</td><td>' + p.unit + '</td><td>' + p.received.toFixed(2) + '</td>' + (showPrice ? '<td>' + p.price + '</td>' : '') + '<td>13% 进项税</td>' + (showPrice ? '<td>' + p.amount + '</td>' : '') + '</tr>';
+          // 发货数量：可编辑时取输入框实时值，锁定后取累计已发
+          var input = document.querySelector('.qty-input[data-code="' + p.code + '"]');
+          var qty = input ? Number(input.value) : p.shipped;
+          if (!isFinite(qty) || qty < 0) qty = 0;
+          return '<tr><td>' + (index + 1) + '</td><td>' + p.code + '</td><td>' + p.name + '</td><td>' + p.spec + '</td><td>' + p.brand + '</td><td>' + p.required + '</td><td>' + p.remain + '</td><td>' + qty + '</td><td>' + p.unit + '</td>' + (showPrice ? '<td>' + p.price + '</td>' : '') + '<td>13% 进项税</td>' + (showPrice ? '<td>' + p.amount + '</td>' : '') + '</tr>';
         }).join('');
-        return '<div class="print-preview-page"><div class="preview-brand"><strong>元象</strong><span class="preview-company">元象（山东）数字产业发展有限公司</span></div><div class="preview-title">送货单</div><div class="preview-info-wrap"><div class="preview-info"><div><b>编号：</b>' + delivery + '</div><div><b>客户：</b>元象（山东）数字产业发展有限公司</div><div><b>联系人：</b>侯振鲁</div><div><b>收货地址：</b>274000 山东省菏泽市兰州路66号</div></div><img class="preview-qr" alt="收货确认二维码" src="' + buildQrDataUrl() + '" /></div><table class="preview-table"><thead><tr><th>No.</th><th>物料编码</th><th>产品名称</th><th>规格</th><th>品牌</th><th>订单数量</th><th>发货数量</th><th>单位</th><th>已接收</th>' + (showPrice ? '<th>单价</th>' : '') + '<th>税项</th>' + (showPrice ? '<th>不含税金额</th>' : '') + '</tr></thead><tbody>' + rows + '</tbody></table><div class="preview-footer"><span>打印日期：' + formatPrintDate(new Date()) + '</span><span>收货人：侯振鲁</span></div></div>';
+        return '<div class="print-preview-page"><div class="preview-brand"><strong>元象</strong><span class="preview-company">元象（山东）数字产业发展有限公司</span></div><div class="preview-title">送货单</div><div class="preview-info-wrap"><div class="preview-info"><div><b>编号：</b>' + delivery + '</div><div><b>客户：</b>元象（山东）数字产业发展有限公司</div><div><b>联系人：</b>侯振鲁</div><div><b>收货地址：</b>274000 山东省菏泽市兰州路66号</div></div><img class="preview-qr" alt="收货确认二维码" src="' + buildQrDataUrl() + '" /></div><table class="preview-table"><thead><tr><th>No.</th><th>物料编码</th><th>产品名称</th><th>规格</th><th>品牌</th><th>订单数量</th><th>剩余数量</th><th>发货数量</th><th>单位</th>' + (showPrice ? '<th>单价</th>' : '') + '<th>税项</th>' + (showPrice ? '<th>不含税金额</th>' : '') + '</tr></thead><tbody>' + rows + '</tbody></table><div class="preview-footer"><span>打印日期：' + formatPrintDate(new Date()) + '</span><span>收货人：侯振鲁</span></div></div>';
       }
       function previewShipment() {
         selectedPrintTemplate = getPrintTemplate();
@@ -973,44 +1322,357 @@
       function closeShipModal() {
         document.getElementById("shipModal").classList.remove("show");
       }
+      // 收集产品清单中录入的本次发货数量（越界视为校验失败）
+      function collectShipQty() {
+        var values = {};
+        var ok = true;
+        document.querySelectorAll(".qty-input").forEach(function (input) {
+          var code = input.getAttribute("data-code");
+          var max = Number(input.getAttribute("max"));
+          var raw = Number(input.value);
+          if (!isFinite(raw) || raw < 0 || raw > max) { ok = false; return; }
+          values[code] = raw;
+        });
+        return ok ? values : null;
+      }
+      // 剩余数量合计：剩余 > 0 时可继续申请验收
+      function totalRemain() {
+        return products.reduce(function (sum, p) { return sum + Number(p.remain || 0); }, 0);
+      }
+      // 供应商确认发货后生成客户端待收货单数据；客户端现有确认收货与创建欠单流程继续独立处理。
+      function createCustomerReceipt(values) {
+        var key = "haifu_customer_incoming_receipts";
+        var receipts = [];
+        try { receipts = JSON.parse(localStorage.getItem(key) || "[]") || []; } catch (e) { receipts = []; }
+        var sourceKey = order + "_" + delivery;
+        var receiptNo = "SH" + String(delivery).replace(/[^0-9A-Za-z]/g, "").replace(/^DS/i, "");
+        var receipt = {
+          no: receiptNo,
+          sourceType: "single",
+          sourceKey: sourceKey,
+          sourceDelivery: delivery,
+          order: order,
+          supplier: "海赋农产品供应商",
+          customer: (document.getElementById("custName") || {}).textContent || "",
+          receiverName: (document.getElementById("custContact") || {}).textContent || "",
+          receiverPhone: (document.getElementById("custPhone") || {}).textContent || "",
+          address: (document.getElementById("custAddress") || {}).textContent || "",
+          logistics: (logisticsRecords || []).map(function (item) { return Object.assign({}, item); }),
+          date: new Date().toISOString().slice(0, 10),
+          status: "pending",
+          lines: products.map(function (p) {
+            return {
+              order: order,
+              shipment: delivery,
+              code: p.code,
+              product: p.name,
+              spec: p.spec,
+              unit: p.unit,
+              ordered: p.required,
+              shipped: Number(values[p.code] || 0),
+              received: 0
+            };
+          }).filter(function (line) { return line.shipped > 0; })
+        };
+        receipts = receipts.filter(function (r) { return r && r.sourceKey !== sourceKey; });
+        if (receipt.lines.length) receipts.push(receipt);
+        try { localStorage.setItem(key, JSON.stringify(receipts)); } catch (e) {}
+        return receipt.lines.length ? receipt : null;
+      }
+      // 申请验收：本单按发货数量发货，发货数量小于剩余数量的差额真实生成欠单送货单
+      // 欠单与原单除送货单号、发货数量、剩余数量外，其余字段完全一致
       function confirmShipment() {
+        var values = collectShipQty();
+        if (!values) {
+          toast("发货数量需在 0 ~ 剩余数量之间");
+          return;
+        }
+        var hasShipment = Object.keys(values).some(function (code) { return Number(values[code] || 0) > 0; });
+        if (!hasShipment) {
+          toast("本次发货数量不能全部为0");
+          return;
+        }
         closeShipModal();
         sent = true;
         // 持久化该送货单已发货状态，供销售订单页回显「已发货」
         try { localStorage.setItem("shipment_sent_" + order + "_" + delivery, "1"); } catch (e) {}
+        // 更新累计发货与剩余数量：差额（剩余数量 - 发货数量）生成欠单明细
+        var owingItems = [];
+        products.forEach(function (p) {
+          var f = Number(values[p.code] || 0);
+          p.shipped += f;
+          var left = Math.max(0, p.remain - f);
+          if (left > 0) {
+            owingItems.push({
+              code: p.code,
+              name: p.name,
+              spec: p.spec,
+              brand: p.brand,
+              unit: p.unit,
+              price: p.price,
+              amount: p.amount,
+              required: p.required,
+              remain: left,
+              shipped: 0
+            });
+          }
+          p.remain = left;
+        });
+        // 持久化本单累计发货数量，刷新后按实际数量回显（订单数量保持不变）
+        var qtyMap = {};
+        products.forEach(function (p) { qtyMap[p.code] = p.shipped; });
+        try { localStorage.setItem("shipment_qty_" + order + "_" + delivery, JSON.stringify(qtyMap)); } catch (e) {}
+        var customerReceipt = createCustomerReceipt(values);
+        // 真实生成欠单送货单（待发货），写入存储供送货单列表展示与本页打开
+        var created = buildOwingRows(owingItems);
+        // 本单自身为欠单送货单时，同步更新存储中的欠单记录（状态与数量）
+        if (selfOwing) updateSelfOwingRecord();
+        owingTransferred = created.length > 0;
         setFlow("sent");
-        document.getElementById("shipBtn").disabled = true;
-        document.getElementById("shipBtn").textContent = "已申请验收";
+        syncShipButton();
         document.getElementById("actionButtons").style.display = "flex";
-        document.getElementById("notice").textContent =
-          "送货单已发货，数量不可修改。客户端已生成对应收货单。";
-        document.getElementById("footNote").textContent = isOwing
-          ? "欠单已补发，等待客户确认欠单收货。"
-          : "正常送货单已发货，等待客户确认收货。";
+        document.getElementById("footNote").textContent = created.length
+          ? "本单已发货，差额已生成欠单送货单 " + created[0].no + "（待发货），可在送货单列表中查看补发。"
+          : (isOwing ? "欠单送货单已补发，等待客户确认欠单收货。" : "送货单已发货，等待客户确认收货。");
         render();
-        toast(isOwing ? "欠单送货单已发货" : "送货单已发货，客户收货单已生成");
+        toast(created.length
+          ? "已生成客户收货单 " + (customerReceipt ? customerReceipt.no : "") + " 和欠单送货单 " + created[0].no
+          : (isOwing ? "欠单送货单已发货，客户收货单已生成" : "送货单已发货，客户收货单已生成"));
+      }
+      // 按差额明细生成欠单送货单并持久化：复制本单全部字段，仅送货单号、发货数量、剩余数量不同
+      function buildOwingRows(owingItems) {
+        if (!owingItems.length) return [];
+        var doc = {
+          no: delivery + "-O1",
+          order: order,
+          sourceNo: delivery,
+          status: "pending",
+          customer: (document.getElementById("custName") || {}).textContent || "",
+          contact: (document.getElementById("custContact") || {}).textContent || "",
+          phone: (document.getElementById("custPhone") || {}).textContent || "",
+          receiverName: (document.getElementById("receiverName") || {}).textContent || "",
+          receiverPhone: (document.getElementById("receiverPhone") || {}).textContent || "",
+          address: (document.getElementById("custAddress") || {}).textContent || "",
+          orderDate: (document.getElementById("orderDate") || {}).textContent || "",
+          arrangeDate: (document.getElementById("arrangeDate") || {}).textContent || "",
+          items: owingItems
+        };
+        // 同一张送货单重复申请时覆盖旧的欠单记录，避免重复生成
+        owingRows = owingRows.filter(function (r) { return r && r.sourceNo !== delivery; }).concat([doc]);
+        try { localStorage.setItem("supplier_owing_shipments", JSON.stringify(owingRows)); } catch (e) {}
+        return [doc];
+      }
+      // 本单自身为欠单送货单时，发货后更新存储记录（状态已发货、数量同步）
+      function updateSelfOwingRecord() {
+        owingRows = owingRows.map(function (r) {
+          if (!r || r.no !== delivery) return r;
+          return Object.assign({}, r, {
+            status: "sent",
+            items: (r.items || []).map(function (it) {
+              var p = products.filter(function (x) { return x.code === it.code; })[0];
+              return p ? Object.assign({}, it, { shipped: p.shipped, remain: p.remain }) : it;
+            })
+          });
+        });
+        try { localStorage.setItem("supplier_owing_shipments", JSON.stringify(owingRows)); } catch (e) {}
       }
       function backOrderList() {
         location.href = "销售订单详情.html?order=" + encodeURIComponent(order);
       }
+      var LOGISTICS_KEY = "shipmentLogistics_" + order + "_" + delivery;
+      var logisticsRecords = [];
+      try { logisticsRecords = JSON.parse(localStorage.getItem(LOGISTICS_KEY) || "[]"); } catch (e) { logisticsRecords = []; }
+      function persistLogistics() {
+        localStorage.setItem(LOGISTICS_KEY, JSON.stringify(logisticsRecords));
+      }
+      function getLogistics(id) {
+        return logisticsRecords.find(function (record) { return record.id === id; });
+      }
+      function hasRequiredLogistics(item) {
+        return item && item.plate.trim() && item.driver.trim() && item.phone.trim();
+      }
+      function saveLogistics(id) {
+        var item = getLogistics(id);
+        if (!hasRequiredLogistics(item)) {
+          toast("请填写车牌号、司机姓名和司机手机号");
+          return;
+        }
+        item.saved = true;
+        persistLogistics();
+        renderLogistics();
+        toast("物流信息已保存");
+      }
+      function switchTab(name) {
+        var isProducts = name === "products";
+        document.getElementById("productsTab").style.display = isProducts ? "block" : "none";
+        document.getElementById("logisticsTab").style.display = isProducts ? "none" : "block";
+        document.querySelectorAll(".tabs .tab").forEach(function (tab) {
+          tab.classList.toggle("active", tab.getAttribute("data-tab") === name);
+        });
+        if (!isProducts) renderLogistics();
+      }
+      function addLogistics() {
+        logisticsRecords.push({ id: Date.now(), plate: "", driver: "", phone: "", headPhoto: [], tailPhoto: [], video: [], excel: [], saved: false });
+        switchTab("logistics");
+        renderLogistics();
+      }
+      function removeLogistics(id) {
+        if (!confirm("删除后，该条物流信息及其全部照片、视频和 Excel 将一起删除，是否继续？")) return;
+        logisticsRecords = logisticsRecords.filter(function (item) { return item.id !== id; });
+        persistLogistics();
+        renderLogistics();
+        toast("物流信息及附件已删除");
+      }
+      function updateLogistics(id, field, value) {
+        var item = getLogistics(id);
+        if (!item) return;
+        item[field] = value;
+        item.saved = false;
+      }
+      function fileRule(type) {
+        return type === "video" ? { accept: ".mp4,.mov", max: 200 * 1024 * 1024 } :
+          type === "excel" ? { accept: ".xls,.xlsx", max: 20 * 1024 * 1024 } :
+          { accept: ".jpg,.jpeg,.png", max: 10 * 1024 * 1024 };
+      }
+      function addFiles(id, type, input) {
+        var item = logisticsRecords.find(function (record) { return record.id === id; });
+        if (!item) return;
+        var rule = fileRule(type);
+        var selected = Array.from(input.files || []);
+        selected.forEach(function (file) {
+          var ext = file.name.toLowerCase().slice(file.name.lastIndexOf("."));
+          if (rule.accept.split(",").indexOf(ext) === -1) return toast("文件格式不支持：" + file.name);
+          if (file.size > rule.max) return toast("文件超过大小限制：" + file.name);
+          item[type].push({ name: file.name, size: file.size, url: URL.createObjectURL(file) });
+        });
+        input.value = "";
+        item.saved = false;
+        renderLogistics();
+      }
+      function removeFile(id, type, index) {
+        var item = getLogistics(id);
+        if (!item) return;
+        item[type].splice(index, 1);
+        item.saved = false;
+        renderLogistics();
+      }
+      function previewFile(file, type) {
+        var title = document.getElementById("filePreviewTitle");
+        var body = document.getElementById("filePreviewBody");
+        title.textContent = "在线预览 · " + file.name;
+        var ext = file.name.toLowerCase().slice(file.name.lastIndexOf("."));
+        if (file.url && [".jpg", ".jpeg", ".png"].indexOf(ext) !== -1) {
+          body.innerHTML = '<img src="' + file.url + '" alt="' + file.name + '">';
+        } else if (file.url && [".mp4", ".mov"].indexOf(ext) !== -1) {
+          body.innerHTML = '<video controls autoplay src="' + file.url + '"></video>';
+        } else if ([".xls", ".xlsx"].indexOf(ext) !== -1) {
+          body.innerHTML = '<table class="preview-sheet"><thead><tr><th>文件名</th><th>工作表</th><th>预览说明</th></tr></thead><tbody><tr><td>' + file.name + '</td><td>运输明细</td><td>原型预览：Excel 文件可在线查看，完整内容以下载文件为准</td></tr></tbody></table>';
+        } else {
+          body.innerHTML = '<div class="preview-empty">当前文件暂无在线预览内容</div>';
+        }
+        document.getElementById("filePreviewMask").classList.add("show");
+      }
+      function closeFilePreview(event) {
+        if (event && event.target && event.target.id !== "filePreviewMask") return;
+        var video = document.querySelector("#filePreviewBody video");
+        if (video) video.pause();
+        document.getElementById("filePreviewMask").classList.remove("show");
+      }
+      function fileChips(item, type, label) {
+        var files = item[type] || [];
+        return '<div class="file-upload-box"><h4>' + label + '</h4>' +
+          '<input type="file" ' + (type === "video" ? 'accept=".mp4,.mov" multiple' : type === "excel" ? 'accept=".xls,.xlsx" multiple' : 'accept=".jpg,.jpeg,.png"') + ' onchange="addFiles(' + item.id + ',\'' + type + '\',this)">' +
+          '<div class="file-list">' + files.map(function (file, index) {
+            var action = type === "video" ? '播放' : type === "excel" ? '预览' : '预览';
+            return '<span class="file-chip"><a href="#" onclick="previewFile(' + JSON.stringify(file).replace(/"/g, '&quot;') + ',\'' + type + '\');return false">' + action + ' · ' + file.name + '</a><button type="button" onclick="removeFile(' + item.id + ',\'' + type + '\',' + index + ')">删除</button></span>';
+          }).join("") + '</div></div>';
+      }
+      function renderLogistics() {
+        var list = document.getElementById("logisticsList");
+        if (!logisticsRecords.length) {
+          list.innerHTML = '<div class="empty-logistics">暂无物流信息，请点击“新增物流信息”</div>';
+          return;
+        }
+        list.innerHTML = logisticsRecords.map(function (item, index) {
+          return '<article class="logistics-card"><div class="logistics-card-head"><div><span class="logistics-card-title">物流信息 ' + (index + 1) + '</span><span class="logistics-card-meta">车辆与司机信息必填</span></div><div class="logistics-card-actions">' + (!item.saved ? '<span class="logistics-save-hint">未保存</span><button class="btn btn-primary" type="button" onclick="saveLogistics(' + item.id + ')">保存</button>' : '<span class="logistics-card-meta">已保存</span>') + '<button class="btn" type="button" onclick="removeLogistics(' + item.id + ')">删除</button></div></div>' +
+            '<div class="logistics-fields"><div class="logistics-field"><label>车牌号 *</label><input value="' + item.plate + '" onchange="updateLogistics(' + item.id + ',\'plate\',this.value)" placeholder="请输入车牌号"></div><div class="logistics-field"><label>司机姓名 *</label><input value="' + item.driver + '" onchange="updateLogistics(' + item.id + ',\'driver\',this.value)" placeholder="请输入司机姓名"></div><div class="logistics-field"><label>司机手机号 *</label><input value="' + item.phone + '" onchange="updateLogistics(' + item.id + ',\'phone\',this.value)" placeholder="请输入司机手机号"></div></div>' +
+            '<div class="logistics-files">' + fileChips(item, "headPhoto", "车辆车头照片（可选）") + fileChips(item, "tailPhoto", "车辆车尾照片（可选）") + fileChips(item, "video", "视频（可选，MP4/MOV，≤200MB）") + fileChips(item, "excel", "Excel（可选，XLS/XLSX，≤20MB）") + '</div></article>';
+        }).join("");
+      }
       document.getElementById("orderNo").textContent = order;
       document.getElementById("shipmentNo").textContent = delivery;
-      document.getElementById("breadOrder").textContent = order;
-      document.getElementById("breadNo").textContent = delivery;
+      renderBreadcrumb();
       if (isOwing) {
         document.getElementById("typeTag").textContent = "欠单送货单";
         document.getElementById("typeTag").classList.add("owing");
-        document.getElementById("notice").classList.add("owing");
-        document.getElementById("notice").textContent =
-          "本单仅展示未完成的欠发数量，补发后将生成独立的客户欠单收货单。";
       }
+      if (menuContext) {
+        document.getElementById("custName").textContent = menuContext.customer || "—";
+        document.getElementById("orderDate").textContent = "2026年09月01日 09:00:00";
+        document.getElementById("arrangeDate").textContent = formatDateTime(menuContext.arrange || "—");
+        document.getElementById("footNote").textContent = isOwing
+          ? "欠单送货单：剩余数量为当前待补发数量，且小于原订单数量。"
+          : "剩余数量表示当前仍需交付的数量；部分发货后，差额将生成欠单送货单。";
+      }
+      // 平台欠单送货单：收货方为平台中转仓（读取平台收货单的收货人信息）
+      if (platformOwing) {
+        document.getElementById("custName").textContent = platformOwing.customer;
+        document.getElementById("custContact").textContent = platformOwing.receiverName || "平台收货人";
+        document.getElementById("custPhone").textContent = platformOwing.receiverPhone || "—";
+        document.getElementById("receiverName").textContent = platformOwing.receiverName || "平台收货人";
+        document.getElementById("receiverPhone").textContent = platformOwing.receiverPhone || "—";
+        document.getElementById("custAddress").textContent = platformOwing.address;
+        document.getElementById("orderDate").textContent = platformOwing.orderDate;
+        document.getElementById("arrangeDate").textContent = platformOwing.arrangeDate;
+      }
+      // 欠单送货单（申请验收差额生成）：单据信息与原送货单完全一致
+      if (selfOwing) {
+        document.getElementById("custName").textContent = selfOwing.customer || "—";
+        document.getElementById("custContact").textContent = selfOwing.contact || "—";
+        document.getElementById("custPhone").textContent = selfOwing.phone || "—";
+        document.getElementById("receiverName").textContent = selfOwing.receiverName || "—";
+        document.getElementById("receiverPhone").textContent = selfOwing.receiverPhone || "—";
+        document.getElementById("custAddress").textContent = selfOwing.address || "—";
+        document.getElementById("orderDate").textContent = selfOwing.orderDate || "—";
+        document.getElementById("arrangeDate").textContent = selfOwing.arrangeDate || "—";
+      }
+      if (!platformOwing && !selfOwing && !menuContext) {
+        // 非欠单场景：送货日期取本单安排日期，订单日期沿用订单日期（含时分秒）
+        document.getElementById("arrangeDate").textContent = formatDateTime(
+          (SHIP_ARRANGE[order] && SHIP_ARRANGE[order][delivery]) || "2025-12-20 09:20:00"
+        );
+        document.getElementById("orderDate").textContent = formatDateTime(
+          (ORDER_CREATED[order] || "2025-12-18 14:35:20")
+        );
+      }
+      function formatDateTime(value) {
+        if (!value) return "—";
+        if (value.indexOf("年") !== -1) return value;
+        var parts = String(value).split(" "),
+          d = (parts[0] || "").split("-"),
+          t = (parts[1] || "00:00:00").split(":");
+        if (d.length < 3) return value;
+        return d[0] + "年" + d[1] + "月" + d[2] + "日 " + [t[0] || "00", t[1] || "00", t[2] || "00"].join(":");
+      }
+      // 状态步骤条与列表状态保持一致
       setFlow(initStatus);
-      document.getElementById("actionButtons").style.display = "flex";
-      if (initStatus !== "pending") {
-        document.getElementById("shipBtn").disabled = true;
-        document.getElementById("shipBtn").textContent = "已申请验收";
+      // 按钮与剩余数量对齐：存在剩余数量 → 「申请验收」可点；剩余数量为 0 → 锁定为「已申请验收」
+      function syncShipButton() {
+        var btn = document.getElementById("shipBtn");
+        if (!sent && totalRemain() > 0) {
+          btn.disabled = false;
+          btn.textContent = "申请验收";
+        } else {
+          btn.disabled = true;
+          btn.textContent = "已申请验收";
+        }
       }
+      document.getElementById("actionButtons").style.display = "flex";
+      syncShipButton();
       render();
     </script>
-  </body>
+  
+<div id="stkToast" style="display:none;position:fixed;top:82px;left:50%;transform:translateX(-50%);padding:10px 18px;background:#f5fbff;border:1px solid #b7dcff;color:#1677d2;border-radius:6px;font-size:13px;z-index:1500"></div>
+
+</body>
 </html>

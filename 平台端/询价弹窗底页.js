@@ -7,7 +7,8 @@
 (function () {
   var backdrop = document.createElement('iframe');
   backdrop.id = 'inquiry-detail-backdrop';
-  backdrop.src = '平台询价单详情.html';
+  // 弹窗页沿用打开时的询价单参数，背景与关闭后的真实详情页保持同一状态。
+  backdrop.src = '平台询价单详情.html' + window.location.search;
   backdrop.title = '平台询价单详情背景';
   backdrop.style.cssText = 'position:fixed;inset:0;z-index:1;width:100%;height:100%;border:0;pointer-events:none';
   document.body.prepend(backdrop);
@@ -20,7 +21,7 @@
   }
 
   window.restoreInquiryDetail = function () {
-    // replace 不保留弹窗页历史，关闭后始终得到可交互的详情工作台新实例。
-    window.location.replace('平台询价单详情.html?modalClosed=' + Date.now());
+    // replace 不保留弹窗页历史，但必须保留状态、单号和负责人等原详情参数。
+    window.location.replace('平台询价单详情.html' + window.location.search);
   };
 }());

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>待采订单审核 - 运营管理平台</title>
+    <title>待采订单 - 运营管理平台</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -164,7 +164,43 @@
             width: 40px; padding: 4px 6px; border: 1px solid #d9d9d9;
             border-radius: 2px; margin: 0 4px; text-align: center;
         }
-    </style>
+
+        /* ===== 业务分类页签（鸡蛋业务 / 其他业务） ===== */
+        .cat-tabs { display: flex; background: #fff; border-radius: 4px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+        .cat-tab { padding: 13px 22px; font-size: 14px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; }
+        .cat-tab:hover { color: #2BA471; }
+        .cat-tab.active { color: #2BA471; border-bottom-color: #2BA471; font-weight: 500; background: #f7fdfa; }
+        .cat-tab .ct-cnt { color: #999; font-size: 12px; font-weight: 400; margin-left: 6px; }
+        .cat-tab.active .ct-cnt { color: #2BA471; }
+        .cat-hidden { display: none !important; }
+        .cat-egg-head { display: flex; align-items: center; margin-bottom: 14px; }
+        .cat-egg-title { font-size: 15px; font-weight: 600; color: #333; }
+        .cat-egg-title .count { color: #999; font-weight: 400; font-size: 13px; margin-left: 6px; }
+        .cat-egg-tip { margin-left: auto; font-size: 12px; color: #999; }
+
+        /* ===== 状态标签（鸡蛋业务面板复用） ===== */
+        .status { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 500; }
+        .status-confirm { background: #e6fffb; color: #00b578; border: 1px solid #87e8de; }
+        .status-pending { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+        .status-done { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .status-cancel { background: #f5f5f5; color: #999; border: 1px solid #d9d9d9; }
+        .receive-status { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 500; }
+        .receive-none { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+        .receive-partial { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+        .receive-all { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+
+        /* ===== 鸡蛋业务面板：状态小徽标（配色与宿主语义一致） ===== */
+        #catEgg .bg { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+        #catEgg .bg-green { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        #catEgg .bg-orange { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+        #catEgg .bg-blue { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+        #catEgg .bg-gray { background: #f5f5f5; color: #999; border: 1px solid #d9d9d9; }
+        #catEgg .egg-title-bar { display: flex; align-items: center; margin-bottom: 14px; }
+        #catEgg .egg-title { font-size: 15px; font-weight: 600; color: #333; }
+        #catEgg .egg-title .count { color: #999; font-weight: 400; font-size: 13px; margin-left: 6px; }
+        #catEgg .egg-tip { margin-left: auto; font-size: 12px; color: #999; }
+        #catEgg .egg-bar { display: inline-block; width: 3px; height: 14px; background: #2BA471; border-radius: 2px; margin-right: 8px; vertical-align: -2px; }
+</style>
 </head>
 <body>
 
@@ -201,16 +237,40 @@
             <span class="home-icon">🏠</span>
             <a>首页</a>
             <span class="sep">/</span>
-            <span class="current">待采订单审核</span>
+            <span class="current">待采订单</span>
         </div>
 
         <!-- 搜索筛选区 -->
-        <div class="filter-card">
+        <!-- 业务分类页签：鸡蛋业务 / 其他业务（其他业务为原有内容，未改动） -->
+        <div class="cat-tabs">
+            <div class="cat-tab" id="catTabEgg" onclick="switchCat('egg')">鸡蛋业务<span class="ct-cnt">3</span></div>
+            <div class="cat-tab" id="catTabOther" onclick="switchCat('other')">其他业务</div>
+        </div>
+        <!-- 鸡蛋业务视图：筛选卡与表格卡均复用宿主页面类名，保证与其他业务视觉一致 -->
+        <div id="catEgg" style="display:none;">
+    <div class="filter-card">
+        <div class="filter-row">
+            <div class="filter-item"><label>待采单号</label><input id="eggF0" placeholder="请输入待采单号" oninput="eggFilter()" /></div>
+                <div class="filter-item"><label>源销售订单</label><input id="drillEgg" data-drill="1" placeholder="请输入源销售订单" oninput="drillApply(this.value)" /></div>
+            <div class="filter-item"><label>审核状态</label><select id="eggF1" onchange="eggFilter()"><option>全部</option><option>待审核</option><option>审核通过</option></select></div>
+            <div class="filter-item"><label>提交日期</label><input id="eggF2" type="date" /></div>
+            <div class="filter-actions"><button class="btn btn-primary" onclick="eggFilter()">查询</button><button class="btn" onclick="eggReset()">重置</button></div>
+        </div>
+    </div>
+    <div class="table-card">
+        <div class="table-toolbar"><div class="table-title">鸡蛋待采订单</div><div class="table-toolbar-right"><button class="btn" id="eggBatchSubmit">批量提交审核</button><button class="btn btn-primary" id="eggBatchReview">批量审核</button></div></div>
+<table><thead><tr><th><input type="checkbox" id="eggPendingCheckAll"></th><th>序号</th><th>待采单号</th><th>源销售订单</th><th>客户</th><th>金额</th><th>审核状态</th><th>提交日期</th></tr></thead><tbody id="eggTbody"><tr style="cursor:pointer;" data-no="EGG-PC-20260905001" data-status="" onclick="location.href='鸡蛋-待采订单详情.html?order=EGG-PC-20260905001'"><td><input class="egg-pending-select" type="checkbox" onclick="event.stopPropagation()"></td><td>1</td><td>EGG-PC-20260905001</td><td>EGG-SO-20260905001</td><td>aqtest薄眠（山东）数字产业发展有限公司</td><td>¥ 0.00</td><td></td><td>2026年09月05日</td></tr><tr style="cursor:pointer;" data-no="EGG-PC-20260901002" data-status="待审核" onclick="location.href='鸡蛋-待采订单详情.html?order=EGG-PC-20260901002&amp;status=pending'"><td><input class="egg-pending-select" type="checkbox" onclick="event.stopPropagation()"></td><td>2</td><td>EGG-PC-20260901002</td><td>EGG-SO-20260901002</td><td>aqtest薄眠（山东）数字产业发展有限公司</td><td>¥ 0.00</td><td><span class="bg bg-orange">待审核</span></td><td>2026年09月01日</td></tr><tr style="cursor:pointer;" data-no="EGG-PC-20260828003" data-status="审核通过" onclick="location.href='鸡蛋-待采订单详情.html?order=EGG-PC-20260828003&amp;status=pass'"><td><input type="checkbox" disabled></td><td>3</td><td>EGG-PC-20260828003</td><td>EGG-SO-20260828003</td><td>aqtest薄眠（山东）数字产业发展有限公司</td><td>¥ 0.00</td><td><span class="bg bg-green">审核通过</span></td><td>2026年08月28日</td></tr></tbody></table>
+            <div class="pagination"><span class="page-info" id="eggCount">共 3 条</span><button class="page-btn" disabled>‹</button><button class="page-btn active">1</button><button class="page-btn" disabled>›</button></div>
+    </div>
+        </div>
+
+        <div class="filter-card cat-other">
             <div class="filter-row">
                 <div class="filter-item">
                     <label>待采订单号</label>
                     <input type="text" id="order-filter" placeholder="请输入待采订单号">
-                </div>
+                </div><div class="filter-item"><label>源销售订单</label><input data-drill="1" placeholder="请输入源销售订单" oninput="drillApply(this.value)" /></div>
+
                 <div class="filter-item">
                     <label>客户名称</label>
                     <input type="text" placeholder="请输入客户名称">
@@ -233,7 +293,7 @@
         </div>
 
         <!-- 表格 -->
-        <div class="table-card">
+        <div class="table-card cat-other">
             <div class="table-toolbar">
                 <div class="table-title">
                     待采订单
@@ -267,6 +327,16 @@
             </div>
         </div>
     </main>
+</div>
+
+<div id="eggBatchReviewModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;">
+    <div style="width:480px;background:#fff;border-radius:8px;padding:24px;box-shadow:0 12px 36px rgba(0,0,0,.18);">
+        <div style="font-size:18px;font-weight:600;margin-bottom:16px;">批量审核待采订单</div>
+        <div id="eggReviewSummary" style="color:#666;margin-bottom:14px;"></div>
+        <label for="eggRejectReason" style="display:block;margin-bottom:8px;color:#666;">驳回原因（执行驳回时必填）</label>
+        <textarea id="eggRejectReason" rows="4" placeholder="请输入驳回原因" style="width:100%;padding:10px;border:1px solid #d9d9d9;border-radius:4px;resize:vertical;"></textarea>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;"><button class="btn" id="eggReviewCancel">取消</button><button class="btn" id="eggReviewReject">审核驳回</button><button class="btn btn-primary" id="eggReviewApprove">审核通过</button></div>
+    </div>
 </div>
 
 <!-- 左侧菜单组件 -->
@@ -352,5 +422,117 @@
     renderRows(auditData);
 </script>
 
+
+<script>
+    // ===== 业务分类页签：只切换显隐，「其他业务」即原有页面内容，未做任何改动 =====
+    function switchCat(c) {
+        var isEgg = (c !== 'other');
+        var egg = document.getElementById('catEgg');
+        if (egg) egg.style.display = isEgg ? 'block' : 'none';
+        Array.prototype.forEach.call(document.querySelectorAll('.cat-other'), function (el) {
+            el.classList[isEgg ? 'add' : 'remove']('cat-hidden');
+        });
+        var te = document.getElementById('catTabEgg');
+        var to = document.getElementById('catTabOther');
+        if (te) te.classList.toggle('active', isEgg);
+        if (to) to.classList.toggle('active', !isEgg);
+        try {
+            var sp = new URLSearchParams(location.search);
+            sp.set('cat', isEgg ? 'egg' : 'other');
+            history.replaceState(null, '', location.pathname + '?' + sp.toString());
+        } catch (e) {}
+    }
+    (function () {
+        var m = location.search.match(/[?&]cat=(\w+)/);
+        switchCat(m && m[1] === 'other' ? 'other' : 'egg');
+    })();
+</script>
+
+<script>
+    // ===== 鸡蛋业务面板筛选：按单号模糊 + 状态下拉过滤 =====
+    function eggFilter() {
+        var kwEl = document.getElementById('eggF0'), selEl = document.getElementById('eggF1');
+        var kw = kwEl ? kwEl.value.trim().toLowerCase() : '';
+        var sel = selEl ? selEl.value : '';
+        var n = 0;
+        Array.prototype.forEach.call(document.querySelectorAll('#eggTbody tr'), function (tr) {
+            var no = (tr.getAttribute('data-no') || '').toLowerCase();
+            var st = tr.getAttribute('data-status') || '';
+            var hit = (!kw || no.indexOf(kw) >= 0) && (!sel || sel === '全部' || st === sel || !st);
+            tr.style.display = hit ? '' : 'none';
+            if (hit) n++;
+        });
+        var c = document.getElementById('eggCount');
+        if (c) c.textContent = '共 ' + n + ' 条';
+    }
+
+
+    // ===== 胶囊下钻：仅回填筛选值（不做数据过滤），切换页签与重置时保持/清空 =====
+    var DRILL = '';
+    function drillApply(v) {
+        DRILL = (v == null ? '' : String(v)).trim();
+        Array.prototype.forEach.call(document.querySelectorAll('[data-drill]'), function (el) {
+            if (el.value !== DRILL) el.value = DRILL;
+        });
+    }
+    (function () {
+        var params = ['so'];
+        var v = '';
+        for (var i = 0; i < params.length; i++) {
+            var m = location.search.match(new RegExp('[?&]' + params[i] + '=([^&]*)'));
+            if (m) { v = decodeURIComponent(m[1]); break; }
+        }
+        if (v) drillApply(v);
+    })();
+    function eggReset() {
+        drillApply('');
+        var kwEl = document.getElementById('eggF0'), selEl = document.getElementById('eggF1'), dEl = document.getElementById('eggF2');
+        if (kwEl) kwEl.value = '';
+        if (selEl) selEl.value = '全部';
+        if (dEl) dEl.value = '';
+        eggFilter();
+    }
+</script>
+<script>
+    (function () {
+        var tbody = document.getElementById('eggTbody');
+        var generated = JSON.parse(localStorage.getItem('haifu_egg_auto_pending_orders') || '[]');
+        generated.forEach(function (item) {
+            if (tbody.querySelector('tr[data-no="' + item.no + '"]')) return;
+            var row = document.createElement('tr'); row.dataset.no = item.no; row.dataset.status = ''; row.style.cursor = 'pointer';
+            row.innerHTML = '<td><input class="egg-pending-select" type="checkbox" onclick="event.stopPropagation()"></td><td>—</td><td>' + item.no + '</td><td>' + item.salesNo + '</td><td>' + item.customer + '</td><td>¥ 0.00</td><td></td><td>—</td>';
+            row.onclick = function () { location.href = '鸡蛋-待采订单详情.html?order=' + encodeURIComponent(item.no); }; tbody.appendChild(row);
+        });
+        function selected(status) { return Array.prototype.filter.call(tbody.querySelectorAll('tr'), function (row) { var b = row.querySelector('.egg-pending-select'); return b && b.checked && row.dataset.status === status; }); }
+        function change(row, status, html) { row.dataset.status = status; row.querySelectorAll('td')[6].innerHTML = html; }
+        document.getElementById('eggPendingCheckAll').addEventListener('change', function () { tbody.querySelectorAll('.egg-pending-select').forEach(function (box) { box.checked = this.checked; }, this); });
+        document.getElementById('eggBatchSubmit').addEventListener('click', function () {
+            var rows = selected(''); if (!rows.length) return alert('请先选择未提交的待采订单');
+            if (!confirm('确认批量提交审核吗？')) return; rows.forEach(function (row) { change(row, '待审核', '<span class="bg bg-orange">待审核</span>'); }); alert('已批量提交审核');
+        });
+        var reviewRows = [];
+        document.getElementById('eggBatchReview').addEventListener('click', function () {
+            reviewRows = selected('待审核'); if (!reviewRows.length) return alert('请先选择待审核的待采订单');
+            document.getElementById('eggReviewSummary').textContent = '已选择 ' + reviewRows.length + ' 条待采订单，请选择审核结果。';
+            document.getElementById('eggRejectReason').value = '';
+            document.getElementById('eggBatchReviewModal').style.display = 'flex';
+        });
+        function closeBatchReview() { document.getElementById('eggBatchReviewModal').style.display = 'none'; reviewRows = []; }
+        document.getElementById('eggReviewCancel').addEventListener('click', closeBatchReview);
+        document.getElementById('eggReviewApprove').addEventListener('click', function () {
+            var orders = JSON.parse(localStorage.getItem('haifu_egg_auto_purchase_orders') || '[]');
+            reviewRows.forEach(function (row) { var cells = row.querySelectorAll('td'), pendingNo = cells[2].textContent.trim(), salesNo = cells[3].textContent.trim(), poNo = 'EGG-PO-' + pendingNo.replace('EGG-PC-', '');
+                if (!orders.some(function (item) { return item.no === poNo; })) orders.push({ no: poNo, salesNo: salesNo, supplier: '平原县蛋鸡养殖合作社', customerOrderNo: 'DH' + salesNo.replace('EGG-SO-', ''), deliveryMode: '供应商送到平台', receiver: '焱丰（山东）供应链管理有限公司', address: '山东省济南市历下区经十路9999号', status: 'confirmed' });
+                change(row, '审核通过', '<span class="bg bg-green">审核通过</span>'); var box = row.querySelector('.egg-pending-select'); box.checked = false; box.disabled = true;
+            }); localStorage.setItem('haifu_egg_auto_purchase_orders', JSON.stringify(orders)); closeBatchReview(); alert('审核通过，已自动生成已确认采购订单');
+        });
+        document.getElementById('eggReviewReject').addEventListener('click', function () {
+            var reason = document.getElementById('eggRejectReason').value.trim(); if (!reason) return alert('审核驳回时必须填写驳回原因');
+            reviewRows.forEach(function (row) { change(row, '审核驳回', '<span class="bg bg-orange">审核驳回</span>'); row.dataset.rejectReason = reason; var box = row.querySelector('.egg-pending-select'); box.checked = false; box.disabled = true; });
+            closeBatchReview(); alert('已批量审核驳回');
+        });
+        document.getElementById('eggBatchReviewModal').addEventListener('click', function (event) { if (event.target === this) closeBatchReview(); });
+    })();
+</script>
 </body>
 </html>

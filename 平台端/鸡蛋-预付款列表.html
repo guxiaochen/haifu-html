@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预付款列表 - 运营管理平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", Arial, sans-serif; background-color: #f5f7fa; color: #333; font-size: 14px; min-height: 100vh; }
+        .top-nav { height: 56px; background: #fff; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 100; }
+        .brand { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; }
+        .brand-logo { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: linear-gradient(135deg,#2BA471,#5BC09F); color: #fff; }
+        .account { margin-left: auto; display: flex; align-items: center; gap: 8px; color: #666; }
+        .avatar { width: 28px; height: 28px; border-radius: 50%; background: #2BA471; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+        .layout { display: flex; min-height: calc(100vh - 56px); }
+        .main { flex: 1; padding: 16px 20px; min-width: 0; }
+        .breadcrumb-bar { background: #fff; padding: 12px 20px; margin-bottom: 12px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,.04); color: #666; font-size: 13px; }
+        .breadcrumb-bar .current { color: #333; font-weight: 500; }
+        .sep { padding: 0 8px; color: #d9d9d9; }
+        .filter-card { background: #fff; border-radius: 4px; padding: 16px 20px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+        .filter-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+        .filter-item { display: flex; align-items: center; gap: 8px; }
+        .filter-item label { color: #555; font-size: 13px; white-space: nowrap; }
+        .filter-input { padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; outline: none; width: 180px; font-family: inherit; }
+        .filter-input:focus { border-color: #2BA471; }
+        .filter-select { padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; outline: none; font-family: inherit; background: #fff; }
+        .btn { padding: 6px 16px; background: #fff; border: 1px solid #d9d9d9; border-radius: 2px; color: #333; font: inherit; cursor: pointer; }
+        .btn:hover { border-color: #2BA471; color: #2BA471; }
+        .btn-primary { background: #2BA471; border-color: #2BA471; color: #fff; }
+        .btn-primary:hover { background: #229963; color: #fff; }
+        .table-card { background: #fff; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,.04); overflow: hidden; }
+        .table-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 12px; }
+        .table-title { font-size: 16px; font-weight: 600; }
+        .table-title .count { font-size: 13px; color: #8c8c8c; font-weight: 400; margin-left: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        thead { background: #fafafa; }
+        th { text-align: left; color: #555; font-weight: 500; white-space: nowrap; padding: 11px 12px; border-bottom: 1px solid #f0f0f0; }
+        td { padding: 12px; border-bottom: 1px solid #f5f5f5; }
+        tbody tr:hover td { background: #fafdfb; }
+        tbody tr { cursor: pointer; }
+        .num { text-align: right; font-variant-numeric: tabular-nums; }
+        .status-tag { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 500; }
+        .status-review { background: #fff7e6; color: #d48806; }
+        .status-confirm { background: #e6fffb; color: #13c2c2; }
+        .status-paid { background: #f0faf5; color: #2BA471; }
+        .status-reject { background: #fff1f0; color: #ff4d4f; }
+        .pagination { display: flex; align-items: center; justify-content: flex-end; gap: 6px; padding: 16px 20px; }
+        .page-btn { min-width: 30px; height: 30px; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; color: #555; display: flex; align-items: center; justify-content: center; padding: 0 8px; }
+        .page-btn.active { background: #2BA471; color: #fff; border-color: #2BA471; }
+        .page-btn:disabled { color: #ccc; cursor: not-allowed; }
+        .page-info { font-size: 13px; color: #8c8c8c; margin-right: 12px; }
+        .modal-mask { position: fixed; inset: 0; z-index: 300; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.42); }
+        .modal-mask.show { display: flex; }
+        .create-modal { width: 760px; max-width: calc(100vw - 40px); max-height: 88vh; overflow: auto; background: #fff; border-radius: 6px; box-shadow: 0 16px 48px rgba(0,0,0,.2); }
+        .modal-head, .modal-foot { display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid #f0f0f0; }
+        .modal-head { font-size: 16px; font-weight: 600; }
+        .modal-close { margin-left: auto; border: 0; background: none; color: #999; font-size: 22px; cursor: pointer; }
+        .modal-body { padding: 20px; }
+        .modal-foot { justify-content: flex-end; gap: 8px; border-top: 1px solid #f0f0f0; border-bottom: 0; }
+        .section-name { margin: 4px 0 12px; padding-left: 9px; border-left: 3px solid #2BA471; color: #333; font-weight: 600; }
+        .order-search { display: flex; margin-bottom: 10px; }
+        .order-search input { width: 100%; padding: 8px 10px; border: 1px solid #d9d9d9; border-radius: 3px; outline: none; }
+        .order-search input:focus { border-color: #2BA471; }
+        .order-picker { max-height: 190px; overflow: auto; border: 1px solid #f0f0f0; border-radius: 4px; }
+        .order-picker table { font-size: 12px; }
+        .order-picker th, .order-picker td { padding: 8px 10px; }
+        .order-picker tbody tr { cursor: pointer; }
+        .order-picker tbody tr.selected td { background: #f0faf5; }
+        .choice-radio { accent-color: #2BA471; }
+        .order-tip { margin: 12px 0 16px; padding: 10px 12px; border-radius: 4px; background: #f6ffed; color: #56745f; border: 1px solid #d9f7be; line-height: 1.6; }
+        .order-tip.warn { background: #fff7e6; color: #ad6800; border-color: #ffd591; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; }
+        .form-row { display: flex; align-items: center; gap: 10px; }
+        .form-row.full { grid-column: 1 / -1; }
+        .form-row label { width: 92px; flex-shrink: 0; text-align: right; color: #666; }
+        .form-row input, .form-row select, .form-row textarea { flex: 1; min-width: 0; padding: 8px 10px; border: 1px solid #d9d9d9; border-radius: 3px; outline: none; font: inherit; }
+        .form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color: #2BA471; }
+        .form-row textarea { min-height: 68px; resize: vertical; }
+        .req { color: #ff4d4f; margin-right: 3px; }
+        .form-error { min-height: 20px; margin: 8px 0 0 102px; color: #ff4d4f; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <header class="top-nav"><div class="brand"><span class="brand-logo">叶</span><span>运营管理平台</span></div><div class="account"><span class="avatar">A</span>Administrator</div></header>
+    <div class="layout"><div id="sidebar-container"></div>
+    <main class="main">
+        <div class="breadcrumb-bar">首页<span class="sep">/</span>结算<span class="sep">/</span><span class="current">预付款</span></div>
+        <div class="filter-card">
+            <div class="filter-row">
+                <div class="filter-item"><label>预付款单号：</label><input class="filter-input" placeholder="请输入预付款单号"></div>
+                <div class="filter-item"><label>采购订单号：</label><input class="filter-input" placeholder="请输入采购订单号" id="drillFill" oninput="applyFilter()"></div>
+                <div class="filter-item"><label>状态：</label><select class="filter-select"><option>全部</option><option>待审核</option><option>待确认</option><option>已支付</option></select></div>
+                <div class="filter-item"><button class="btn btn-primary">查询</button><button class="btn">重置</button></div>
+            </div>
+        </div>
+        <div class="table-card">
+            <div class="table-toolbar"><div class="table-title">预付款列表<span class="count">共 5 条</span></div><button class="btn btn-primary" type="button" onclick="openCreateModal()">创建预付款</button></div>
+            <table>
+                <thead><tr><th>序号</th><th>预付款单号</th><th>采购订单号</th><th>供应商</th><th class="num">付款金额</th><th>付款方式</th><th>申请日期</th><th>状态</th><th>凭证</th></tr></thead>
+                <tbody id="prepayListBody">
+                    <tr onclick="location.href='鸡蛋-预付款详情.html?no=EGG-PP-20260905001&status=review'">
+                        <td>1</td><td>EGG-PP-20260905001</td><td>EGG-PO-20260901002</td><td>平原县蛋鸡养殖合作社</td><td class="num">¥ 20,000.00</td><td>银行转账</td><td>2026-09-05</td>
+                        <td><span class="status-tag status-review">待审核</span></td><td>—</td>
+                    </tr>
+                    <tr onclick="location.href='鸡蛋-预付款详情.html?no=EGG-PP-20260906001&status=paid'">
+                        <td>2</td><td>EGG-PP-20260906001</td><td>EGG-PO-20260901002</td><td>平原县蛋鸡养殖合作社</td><td class="num">¥ 50,000.00</td><td>银行转账</td><td>2026-09-06</td>
+                        <td><span class="status-tag status-paid">已支付</span></td><td>2 个</td>
+                    </tr>
+                    <tr onclick="location.href='鸡蛋-预付款详情.html?no=EGG-PP-20260907002&status=review'">
+                        <td>3</td><td>EGG-PP-20260907002</td><td>EGG-PO-20260901002</td><td>平原县蛋鸡养殖合作社</td><td class="num">¥ 30,000.00</td><td>银行转账</td><td>2026-09-07</td>
+                        <td><span class="status-tag status-review">待审核</span></td><td>—</td>
+                    </tr>
+                    <tr onclick="location.href='鸡蛋-预付款详情.html?no=EGG-PP-20260908003&status=confirm'">
+                        <td>4</td><td>EGG-PP-20260908003</td><td>EGG-PO-20260828003</td><td>夏津县绿源养殖专业合作社</td><td class="num">¥ 45,000.00</td><td>银行转账</td><td>2026-09-08</td>
+                        <td><span class="status-tag status-confirm">待确认</span></td><td>—</td>
+                    </tr>
+                    <tr onclick="location.href='鸡蛋-预付款详情.html?no=EGG-PP-20260909004&status=paid'">
+                        <td>5</td><td>EGG-PP-20260909004</td><td>EGG-PO-20260828003</td><td>夏津县绿源养殖专业合作社</td><td class="num">¥ 60,000.00</td><td>银行转账</td><td>2026-09-09</td>
+                        <td><span class="status-tag status-paid">已支付</span></td><td>1 个</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination"><span class="page-info">共 5 条</span><button class="page-btn" disabled>‹</button><button class="page-btn active">1</button><button class="page-btn">›</button></div>
+        </div>
+    </main></div>
+
+    <div class="modal-mask" id="createModal" onclick="if(event.target===this) closeCreateModal()">
+        <div class="create-modal">
+            <div class="modal-head">创建预付款<button class="modal-close" type="button" onclick="closeCreateModal()">×</button></div>
+            <div class="modal-body">
+                <div class="section-name">关联采购订单</div>
+                <div class="order-search"><input id="poSearch" placeholder="搜索采购订单号 / 供应商" oninput="renderPoChoices()"></div>
+                <div class="order-picker">
+                    <table><thead><tr><th></th><th>采购订单号</th><th>供应商</th><th class="num">订单金额</th><th class="num">剩余可付</th></tr></thead><tbody id="poChoiceBody"></tbody></table>
+                </div>
+                <div class="order-tip" id="poTip">请选择关联采购订单，系统将自动带出供应商、订单金额和剩余可付金额。</div>
+
+                <div class="section-name">预付款信息</div>
+                <div class="form-grid">
+                    <div class="form-row"><label>供应商</label><input id="createSupplier" readonly></div>
+                    <div class="form-row"><label>订单金额</label><input id="createOrderTotal" readonly></div>
+                    <div class="form-row"><label>已申请金额</label><input id="createApplied" readonly></div>
+                    <div class="form-row"><label>剩余可付</label><input id="createAvailable" readonly></div>
+                    <div class="form-row"><label><span class="req">*</span>付款方式</label><select id="createWay"><option>银行转账</option><option>线下转账</option></select></div>
+                    <div class="form-row"><label>付款性质</label><select id="createNature"><option>预付款</option><option>尾款</option></select></div>
+                    <div class="form-row"><label><span class="req">*</span>付款金额</label><input id="createAmount" type="number" min="0.01" step="0.01" placeholder="请输入付款金额"></div>
+                    <div class="form-row full"><label>备注</label><textarea id="createRemark" placeholder="请输入备注（选填）"></textarea></div>
+                </div>
+                <div class="form-error" id="createError"></div>
+            </div>
+            <div class="modal-foot"><button class="btn" type="button" onclick="closeCreateModal()">取消</button><button class="btn btn-primary" type="button" onclick="submitCreatePrepay()">提交审核</button></div>
+        </div>
+    </div>
+    <script src="sidebar.js"></script>
+
+<script>
+    // __drill_fill__ 胶囊下钻：把来源单号回填到「drillFill」并执行筛选
+    (function () {
+        var params = ['po'];
+        var v = '';
+        for (var i = 0; i < params.length; i++) {
+            var m = location.search.match(new RegExp('[?&]' + params[i] + '=([^&]*)'));
+            if (m) { v = decodeURIComponent(m[1]); break; }
+        }
+        var el = document.getElementById('drillFill');
+        if (!v || !el) return;
+        el.value = v;
+        window.addEventListener('load', function () {
+            if (typeof applyFilter === 'function') applyFilter();
+        });
+    })();
+</script>
+
+<script>
+    // 预付款列表筛选：按单号 / 采购订单号 / 状态过滤（含胶囊下钻回填）
+    function applyFilter() {
+        var kw = (document.getElementById('drillFill') ? '' : '');
+        var inputs = document.querySelectorAll('.filter-input');
+        var no = inputs[0] ? inputs[0].value.trim() : '';
+        var po = document.getElementById('drillFill') ? document.getElementById('drillFill').value.trim() : '';
+        var sel = document.querySelector('.filter-select');
+        var st = sel ? sel.value : '';
+        var n = 0;
+        Array.prototype.forEach.call(document.querySelectorAll('#prepayListBody tr'), function (tr) {
+            var tds = tr.children;
+            var hit = (!no || (tds[1] && tds[1].textContent.indexOf(no) >= 0))
+                && (!po || (tds[2] && tds[2].textContent.indexOf(po) >= 0))
+                && (!st || st === '全部' || (tds[7] && tds[7].textContent.indexOf(st) >= 0));
+            tr.style.display = hit ? '' : 'none';
+            if (hit) n++;
+        });
+        var cnt = document.querySelector('.table-title .count');
+        if (cnt) cnt.textContent = '共 ' + n + ' 条';
+        var info = document.querySelector('.page-info');
+        if (info) info.textContent = '共 ' + n + ' 条';
+    }
+    function resetFilter() {
+        var inputs = document.querySelectorAll('.filter-input');
+        if (inputs[0]) inputs[0].value = '';
+        if (inputs[1]) inputs[1].value = '';
+        var sel = document.querySelector('.filter-select');
+        if (sel) sel.value = '全部';
+        applyFilter();
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        var btns = document.querySelectorAll('.filter-item .btn');
+        if (btns[0]) btns[0].onclick = applyFilter;
+        if (btns[1]) btns[1].onclick = resetFilter;
+        var di = document.getElementById('drillFill');
+        if (di) di.oninput = applyFilter;
+    });
+</script>
+
+<script>
+    // 预付款列表创建：交互结构与供应商端「创建发票—关联销售订单」保持一致
+    var PURCHASE_ORDERS = [
+        { no:'EGG-PO-20260905001', supplier:'平原县蛋鸡养殖合作社', total:128587.20, applied:20000 },
+        { no:'EGG-PO-20260901002', supplier:'平原县蛋鸡养殖合作社', total:128587.20, applied:80000 },
+        { no:'EGG-PO-20260828003', supplier:'夏津县绿源养殖专业合作社', total:196465.72, applied:105000 }
+    ];
+    var selectedPo = '';
+
+    function formatMoney(n) {
+        return '¥ ' + Number(n || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function selectedOrder() {
+        for (var i = 0; i < PURCHASE_ORDERS.length; i++) if (PURCHASE_ORDERS[i].no === selectedPo) return PURCHASE_ORDERS[i];
+        return null;
+    }
+    function openCreateModal() {
+        selectedPo = '';
+        document.getElementById('poSearch').value = '';
+        document.getElementById('createAmount').value = '';
+        document.getElementById('createWay').value = '银行转账';
+        document.getElementById('createNature').value = '预付款';
+        document.getElementById('createRemark').value = '';
+        document.getElementById('createError').textContent = '';
+        updatePoDetail();
+        renderPoChoices();
+        document.getElementById('createModal').classList.add('show');
+    }
+    function closeCreateModal() { document.getElementById('createModal').classList.remove('show'); }
+    function renderPoChoices() {
+        var kw = document.getElementById('poSearch').value.trim().toLowerCase();
+        var list = PURCHASE_ORDERS.filter(function(o) { return !kw || (o.no + ' ' + o.supplier).toLowerCase().indexOf(kw) >= 0; });
+        document.getElementById('poChoiceBody').innerHTML = list.length ? list.map(function(o) {
+            var available = Math.max(0, o.total - o.applied);
+            return '<tr class="' + (selectedPo === o.no ? 'selected' : '') + '" onclick="choosePo(\'' + o.no + '\')"><td><input class="choice-radio" type="radio" name="poChoice" ' + (selectedPo === o.no ? 'checked' : '') + ' onclick="event.stopPropagation();choosePo(\'' + o.no + '\')"></td><td>' + o.no + '</td><td>' + o.supplier + '</td><td class="num">' + formatMoney(o.total) + '</td><td class="num">' + formatMoney(available) + '</td></tr>';
+        }).join('') : '<tr><td colspan="5" style="padding:22px;text-align:center;color:#999;">未找到匹配的采购订单</td></tr>';
+    }
+    function choosePo(no) {
+        selectedPo = no;
+        renderPoChoices();
+        updatePoDetail();
+    }
+    function updatePoDetail() {
+        var o = selectedOrder();
+        document.getElementById('createSupplier').value = o ? o.supplier : '';
+        document.getElementById('createOrderTotal').value = o ? formatMoney(o.total) : '';
+        document.getElementById('createApplied').value = o ? formatMoney(o.applied) : '';
+        document.getElementById('createAvailable').value = o ? formatMoney(Math.max(0, o.total - o.applied)) : '';
+        var tip = document.getElementById('poTip');
+        if (!o) {
+            tip.className = 'order-tip';
+            tip.textContent = '请选择关联采购订单，系统将自动带出供应商、订单金额和剩余可付金额。';
+        } else if (o.applied >= o.total) {
+            tip.className = 'order-tip warn';
+            tip.textContent = '该采购订单已无剩余可付金额，不能继续创建预付款。';
+        } else {
+            tip.className = 'order-tip';
+            tip.textContent = '已选择 ' + o.no + '，本次最多可申请 ' + formatMoney(o.total - o.applied) + '。';
+        }
+        document.getElementById('createError').textContent = '';
+    }
+    function nextPrepayNo() {
+        var now = new Date();
+        var ymd = '' + now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+        return 'EGG-PP-' + ymd + String(document.querySelectorAll('#prepayListBody tr').length + 1).padStart(3, '0');
+    }
+    function submitCreatePrepay() {
+        var o = selectedOrder();
+        var amount = Number(document.getElementById('createAmount').value || 0);
+        var error = document.getElementById('createError');
+        if (!o) { error.textContent = '请选择关联采购订单'; return; }
+        var available = Math.max(0, o.total - o.applied);
+        if (available <= 0) { error.textContent = '该采购订单已无剩余可付金额'; return; }
+        if (amount <= 0) { error.textContent = '付款金额必须大于 0'; return; }
+        if (amount > available + 0.005) { error.textContent = '付款金额不能超过剩余可付金额 ' + formatMoney(available); return; }
+        var no = nextPrepayNo();
+        var now = new Date();
+        var date = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+        var tr = document.createElement('tr');
+        tr.onclick = function() { location.href = '鸡蛋-预付款详情.html?no=' + encodeURIComponent(no) + '&status=review'; };
+        tr.innerHTML = '<td></td><td>' + no + '</td><td>' + o.no + '</td><td>' + o.supplier + '</td><td class="num">' + formatMoney(amount) + '</td><td>' + document.getElementById('createWay').value + '</td><td>' + date + '</td><td><span class="status-tag status-review">待审核</span></td><td>—</td>';
+        document.getElementById('prepayListBody').insertBefore(tr, document.getElementById('prepayListBody').firstChild);
+        o.applied += amount;
+        Array.prototype.forEach.call(document.querySelectorAll('#prepayListBody tr'), function(row, index) { row.cells[0].textContent = index + 1; });
+        var count = document.querySelectorAll('#prepayListBody tr').length;
+        document.querySelector('.table-title .count').textContent = '共 ' + count + ' 条';
+        document.querySelector('.page-info').textContent = '共 ' + count + ' 条';
+        closeCreateModal();
+        alert('预付款创建成功，状态为“待审核”');
+    }
+</script>
+</body>
+</html>

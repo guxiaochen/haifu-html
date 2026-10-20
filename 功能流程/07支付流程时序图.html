@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支付流程 · 时序图</title>
+    <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --c-supplier: #2e7d32;
+            --c-supplier-bg: #e8f5e9;
+            --c-supplier-soft: #f1f8e9;
+            --c-platform: #1565c0;
+            --c-platform-bg: #e3f2fd;
+            --c-platform-soft: #e3f2fd;
+            --c-customer: #c62828;
+            --c-customer-bg: #fce4ec;
+            --c-customer-soft: #fff5f7;
+            --c-bank: #6a1b9a;
+            --c-bank-bg: #f3e5f5;
+            --c-warn: #e65100;
+            --c-warn-bg: #fff3e0;
+            --c-text: #333;
+            --c-text-soft: #666;
+            --c-line: #e0e0e0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding: 18px 20px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--c-text);
+        }
+
+        /* ================== 页间切换 ================== */
+        .nav-bar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+
+        .nav-bar a {
+            font-size: 13px;
+            text-decoration: none;
+            color: #546e7a;
+            background: #fff;
+            border: 1px solid var(--c-line);
+            border-radius: 18px;
+            padding: 6px 16px;
+        }
+
+        .nav-bar a.on {
+            background: var(--c-platform-bg);
+            color: var(--c-platform);
+            border-color: #90caf9;
+            font-weight: 700;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 24px 28px 32px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 1680px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 6px;
+        }
+
+        .version-tag {
+            text-align: center;
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 18px;
+            line-height: 1.75;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin: 34px 0 14px;
+            padding-left: 12px;
+            border-left: 4px solid var(--c-platform);
+        }
+
+        h3 {
+            font-size: 16px;
+            margin: 0 0 10px;
+            color: #455a64;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 22px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .legend-line {
+            width: 26px;
+            height: 0;
+            border-top: 2px solid #90a4ae;
+            display: inline-block;
+        }
+
+        .legend-line.dashed {
+            border-top: 2px dashed #b0bec5;
+        }
+
+        .lead {
+            background: #fafafa;
+            border: 1px solid var(--c-line);
+            border-radius: 6px;
+            padding: 14px 18px;
+            font-size: 13px;
+            line-height: 1.9;
+            color: var(--c-text-soft);
+            margin-top: 8px;
+        }
+
+        .lead strong { color: var(--c-text); }
+
+        /* ================== 表格 ================== */
+        .table-wrap { overflow-x: auto; margin-top: 14px; }
+
+        table.info-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 720px;
+        }
+
+        table.info-table th,
+        table.info-table td {
+            border: 1px solid var(--c-line);
+            padding: 9px 11px;
+            text-align: left;
+            vertical-align: top;
+            line-height: 1.7;
+        }
+
+        table.info-table th {
+            background: #fafafa;
+            color: #555;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        table.info-table td.col-sp { background: var(--c-supplier-soft); }
+        table.info-table td.col-pf { background: var(--c-platform-soft); }
+        table.info-table td.col-cu { background: var(--c-customer-soft); }
+
+        .pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-weight: 600;
+            font-size: 12px;
+            margin: 0 2px;
+            white-space: nowrap;
+        }
+
+        .pill.supplier { background: var(--c-supplier-bg); color: var(--c-supplier); }
+        .pill.platform { background: var(--c-platform-bg); color: var(--c-platform); }
+        .pill.customer { background: var(--c-customer-bg); color: var(--c-customer); }
+        .pill.bank { background: var(--c-bank-bg); color: var(--c-bank); }
+        .pill.gray { background: #eee; color: #777; }
+        .pill.warn { background: var(--c-warn-bg); color: var(--c-warn); }
+
+        /* ================== 时序图 ================== */
+        .seq {
+            border: 1px solid var(--c-line);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+            margin-bottom: 26px;
+        }
+
+        .seq-scroll { overflow-x: auto; }
+
+        .seq-title {
+            padding: 12px 18px;
+            font-size: 17px;
+            font-weight: 700;
+            color: #37474f;
+            background: #f7f9fb;
+            border-bottom: 1px solid var(--c-line);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .seq-title .sub {
+            font-size: 12px;
+            font-weight: 400;
+            color: #78909c;
+        }
+
+        .seq-head {
+            display: flex;
+            padding: 14px 18px 8px 60px;
+        }
+
+        .lane-head {
+            flex: 1;
+            margin: 0 6px;
+            padding: 8px 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 700;
+            border: 1px solid transparent;
+        }
+
+        .lane-head .r {
+            display: block;
+            font-size: 12px;
+            font-weight: 400;
+            opacity: .75;
+            margin-top: 2px;
+        }
+
+        .lane-head.supplier { background: var(--c-supplier-bg); color: var(--c-supplier); border-color: #c8e6c9; }
+        .lane-head.platform { background: var(--c-platform-bg); color: var(--c-platform); border-color: #bbdefb; }
+        .lane-head.customer { background: var(--c-customer-bg); color: var(--c-customer); border-color: #f8bbd0; }
+        .lane-head.bank { background: var(--c-bank-bg); color: var(--c-bank); border-color: #e1bee7; }
+
+        .lane-head.off {
+            background: #f7f7f7;
+            color: #b0b0b0;
+            border-color: #efefef;
+        }
+
+        .track { position: relative; padding: 0 18px 18px 60px; }
+
+        .lifelines {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 60px;
+            right: 18px;
+            display: flex;
+            pointer-events: none;
+        }
+
+        .lifelines i {
+            flex: 1;
+            position: relative;
+        }
+
+        .lifelines i::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            border-left: 1px dashed #d7dee5;
+        }
+
+        .lifelines i.off::before { border-left-color: #f0f0f0; }
+
+        .rows { position: relative; z-index: 1; }
+
+        .row {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: auto auto;
+            align-items: center;
+            padding: 4px 0 2px;
+        }
+
+        .seq.n3 .row { grid-template-columns: repeat(3, 1fr); }
+        .seq.n4 .row { grid-template-columns: repeat(4, 1fr); }
+
+        .row > .no {
+            position: absolute;
+            left: -44px;
+            top: 27px;
+            width: 30px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #607d8b;
+        }
+
+        /* 每步动作下方一行状态条：结算单 + 订单的当前态 */
+        .row .state {
+            grid-column: 2 / 4;
+            grid-row: 2;
+            justify-self: start;
+            margin: 4px 6px 7px;
+            padding: 7px 14px;
+            background: #f7f9fc;
+            border-left: 3px solid #90caf9;
+            border-radius: 0 4px 4px 0;
+            font-size: 13.5px;
+            line-height: 1.8;
+            color: #455a64;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .row .state .lbl {
+            font-weight: 700;
+            color: #455a64;
+            margin-right: 1px;
+        }
+
+        .row .state .arrow {
+            color: #90a4ae;
+            font-weight: 700;
+            font-size: 14px;
+            margin: 0 3px;
+        }
+
+        .row .state .sep {
+            color: #cfd8dc;
+            font-weight: 700;
+            margin: 0 9px 0 5px;
+        }
+
+        .row .state .term {
+            display: inline-block;
+            padding: 1px 6px;
+            margin-left: 2px;
+            border-radius: 3px;
+            background: var(--c-warn-bg);
+            color: var(--c-warn);
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .msg {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 46px;
+            min-width: 0;
+        }
+
+        .msg .ln {
+            position: absolute;
+            top: 50%;
+            height: 2px;
+            margin-top: -1px;
+            left: var(--s);
+            right: calc(100% - var(--e));
+            background: var(--lc);
+            border-radius: 2px;
+        }
+
+        .msg .ln::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -1px;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 8px solid var(--lc);
+        }
+
+        .msg.rev .ln::after {
+            left: -1px;
+            right: auto;
+            border-left: none;
+            border-right: 8px solid var(--lc);
+        }
+
+        .msg .chip {
+            position: relative;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            max-width: 100%;
+            padding: 7px 14px;
+            border-radius: 16px;
+            background: #fff;
+            border: 1px solid #cfd8dc;
+            font-size: 14.5px;
+            line-height: 1.5;
+            color: #37474f;
+            overflow-wrap: anywhere;
+        }
+
+        /* 同一端内部动作：只以虚线气泡表示，不画消息线，避免被长文案遮住 */
+        .msg.self .ln { display: none; }
+
+        .msg.self .chip {
+            border-style: dashed;
+            border-color: #90a4ae;
+            background: #fafbfc;
+        }
+
+        .msg .chip .role {
+            font-style: normal;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+
+        .msg.lane-supplier .chip .role { background: var(--c-supplier-bg); color: var(--c-supplier); }
+        .msg.lane-platform .chip .role { background: var(--c-platform-bg); color: var(--c-platform); }
+        .msg.lane-customer .chip .role { background: var(--c-customer-bg); color: var(--c-customer); }
+        .msg.lane-bank .chip .role { background: var(--c-bank-bg); color: var(--c-bank); }
+
+        .row.note { display: block; }
+
+        .note-box {
+            margin: 4px 0 6px;
+            padding: 7px 12px;
+            border: 1px dashed #ffd54f;
+            border-radius: 6px;
+            background: #fffdf5;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #8a6d3b;
+        }
+
+        .note-box.phase {
+            border-style: solid;
+            border-color: #64b5f6;
+            background: var(--c-platform-bg);
+            color: #0d47a1;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 9px 14px;
+        }
+
+        /* 节点分区条在 .row 内独占一行 */
+        .row.note .note-box { grid-column: 2 / 4; }
+
+        .note-box.warn {
+            border-color: #ffb74d;
+            background: var(--c-warn-bg);
+            color: #8a4b00;
+        }
+
+
+        /* ================== 说明区 ================== */
+        .info-card {
+            border: 1px solid var(--c-line);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 18px;
+            background: #fff;
+        }
+
+        .info-card > h3 {
+            margin: 0;
+            padding: 10px 16px;
+            font-size: 15px;
+            color: #455a64;
+            background: #f7f9fb;
+            border-bottom: 1px solid var(--c-line);
+        }
+
+        .info-card .body {
+            padding: 14px 16px;
+            font-size: 14px;
+            line-height: 1.95;
+            color: var(--c-text-soft);
+        }
+
+        .info-card .body strong { color: var(--c-text); }
+
+        .info-card .body ul { padding-left: 20px; }
+        .info-card .body li { margin-bottom: 5px; }
+
+        .state-flow {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .state-node {
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .state-node.platform { background: var(--c-platform-bg); color: var(--c-platform); }
+        .state-node.customer { background: var(--c-customer-bg); color: var(--c-customer); }
+        .state-node.supplier { background: var(--c-supplier-bg); color: var(--c-supplier); }
+        .state-node.gray { background: #eee; color: #777; }
+
+        .state-node.terminal {
+            background: var(--c-warn-bg);
+            color: var(--c-warn);
+            border: 1px dashed #ff9800;
+        }
+
+        .state-arrow {
+            color: #bbb;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .gap-callout {
+            padding: 12px 16px;
+            background: #fff8e1;
+            border-left: 4px solid #ffb300;
+            border-radius: 0 4px 4px 0;
+            font-size: 13px;
+            line-height: 1.9;
+            color: #6d4c41;
+        }
+
+        .gap-callout strong { color: var(--c-warn); }
+
+        .footer-note {
+            margin-top: 34px;
+            padding-top: 18px;
+            border-top: 2px dashed var(--c-line);
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            line-height: 1.75;
+        }
+
+        .download-btn {
+            display: block;
+            margin: 26px auto 0;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .download-btn:hover { background-color: #0056b3; }
+
+        @media (max-width: 1100px) {
+            .seq-inner { min-width: 980px; }
+        }
+
+    
+/* ===== 优化：动作流程（左）与状态变化（右）分层 ===== */
+.seq .seq-inner{min-width:calc(66px + 860px + var(--stw));padding:0 18px 16px 0}
+.hd,.r{display:grid;grid-template-columns:48px 1fr var(--stw)}
+.hd{padding:14px 0 6px}.lanes{display:flex}
+.sth,.stc{display:grid;grid-template-columns:repeat(var(--nc),1fr)}
+.sth{border-left:2px solid #cfd8dc}
+.sh{margin:0 4px;padding:7px 4px;text-align:center;font-size:13.5px;font-weight:700;color:#455a64;background:#f1f4f6;border-radius:6px;line-height:1.35}
+.sh span{display:block;font-size:11.5px;font-weight:400;color:#90a4ae}
+.r{border-bottom:1px solid #f0f3f5;min-height:54px}.r:hover{background:#f7fafd}
+.r .no{align-self:center;text-align:center;font-size:13px;font-weight:700;color:#607d8b}
+.msgs{position:relative;display:grid;grid-template-columns:repeat(var(--n),1fr);align-items:center}
+.msgs .msg{z-index:1}.ll2{position:absolute;inset:0;display:flex;pointer-events:none}
+.ll2 i{flex:1;position:relative}.ll2 i::before{content:'';position:absolute;left:50%;top:0;bottom:0;border-left:1px dashed #d7dee5}
+.ll2 i.off::before{border-left-color:#f0f0f0}
+.r.ph{display:block;padding:6px 0 2px;border-bottom:0}.r.ph:hover{background:none}
+.stc{border-left:2px solid #cfd8dc;background:#fbfcfd}
+.c{position:relative;display:flex;align-items:center;justify-content:center}
+.c.hold::before,.c.chg::before,.c.chg::after{content:'';position:absolute;left:50%;width:3px;margin-left:-1.5px;border-radius:2px}
+.c.hold::before{top:0;bottom:0;background:var(--n);opacity:.55}
+.c.chg::before{top:0;bottom:50%;background:var(--p);opacity:.55}
+.c.chg::after{top:50%;bottom:0;background:var(--n);opacity:.55}
+.pills{position:relative;z-index:1;display:flex;flex-direction:column;gap:3px;align-items:center;padding:4px 0}
+.sp{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12.5px;font-weight:700;line-height:1.4;text-align:center;background:#fff;border:1.5px solid var(--k);color:var(--k)}
+.sp.w{--k:#78909c}.sp.r{--k:#ef8f00}.sp.b{--k:#1565c0}.sp.d{--k:#2e7d32;background:#2e7d32;color:#fff}
+.sp b{font-size:11px;margin-left:5px;padding-left:5px;border-left:1px solid rgba(255,255,255,.6)}
+.st-legend{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:center;margin:-4px 0 16px;font-size:13px;color:#607d8b}
+.flow-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.flow-row>em{font-style:normal;font-weight:700;color:#455a64;min-width:200px}
+.flow-row .ar{color:#b0bec5;font-weight:700}
+</style>
+</head>
+
+<body>
+    <div class="nav-bar">
+        <a href="06.结算流程时序图.html">结算流程 · 时序图</a>
+        <a href="07.支付流程时序图.html" class="on">支付流程 · 时序图</a>
+    </div>
+
+    <div class="container" id="capture-container">
+        <h1>支付流程 · 时序图</h1>
+
+        <div class="legend">
+            <div class="legend-item"><span class="legend-dot" style="background:var(--c-supplier-bg);border:2px solid var(--c-supplier);"></span>供应商端</div>
+            <div class="legend-item"><span class="legend-dot" style="background:var(--c-platform-bg);border:2px solid var(--c-platform);"></span>平台端</div>
+            <div class="legend-item"><span class="legend-dot" style="background:var(--c-customer-bg);border:2px solid var(--c-customer);"></span>客户端</div>
+        </div>
+
+
+        <section id="sec-overview">
+           
+            <div class="table-wrap">
+                <table class="info-table">
+                    <thead>
+                        <tr>
+                            <th style="width:20%;">链路</th>
+                            <th style="width:16%;">资金方向</th>
+                            <th style="width:22%;">触发条件</th>
+                            <th style="width:20%;">支付节点起点</th>
+                            <th>收尾标志</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="pill customer">链路一</span>  平台 → 客户</td>
+                            <td> 客户 → 平台</td>
+                            <td>平台点【预收款】/【尾款】生成结算单并推送</td>
+                            <td>客户在线支付（通联）</td>
+                            <td>客户结算单 <span class="pill platform">已收款</span>，采购订单已结清</td>
+                        </tr>
+                        <tr>
+                            <td><span class="pill platform">链路二</span> 供应商 → 平台</td>
+                            <td>平台 → 供应商</td>
+                            <td>供应商结算单已审核（进入「待付款」）</td>
+                            <td>平台【推送付款单】</td>
+                            <td>供应商结算单 <span class="pill supplier">已付款</span>，采购订单 / 销售订单已完成</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <h2>一、时序图</h2>
+
+                <section class="seq seq2" style="--nc:4;--stw:512px"><div class="seq-title"><span>图 1 ·  客户（预付款 + 尾款） → 平台</span></div><div class="seq-scroll"><div class="seq-inner"><div class="hd"><span></span><div class="lanes"><div class="lane-head supplier off">供应商端<span class="r">本图未参与</span></div><div class="lane-head platform">平台端<span class="r">销售 / 会计</span></div><div class="lane-head customer">客户端<span class="r">采购方</span></div></div><div class="sth"><div class="sh">销售订单<span>采购 / 销售</span></div><div class="sh">订单支付状态<span>订单</span></div><div class="sh">预付款结算单<span>客户 → 平台</span></div><div class="sh">尾款结算单<span>客户 → 平台</span></div></div></div><div class="r ph"><div class="note-box phase">节点 A · 预付款</div></div><div class="r"><span class="no">1</span><div class="msgs" style="--n:3"><div class="ll2"><i class="off"></i><i class=""></i><i class=""></i></div><div class="msg rev lane-customer" style="grid-column:2 / 4;--s:25%;--e:75%;--lc:#c62828"><span class="ln"></span><span class="chip"><em class="role">客户</em>采购订单 →【提交订单】</span></div></div><div class="stc"><div class="c chg" style="--p:transparent;--n:#1565c0"><div class="pills"><span class="sp w">采购单 草稿</span><span class="sp b">销售单 已生成</span></div></div><div class="c chg" style="--p:transparent;--n:#78909c"><div class="pills"><span class="sp w">待支付</span></div></div><div class="c"></div><div class="c"></div></div></div><div class="r"><span class="no">2</span><div class="msgs" style="--n:3"><div class="ll2"><i class="off"></i><i class=""></i><i class=""></i></div><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台</em>点【预收款】→【选择是否要预付款】→ 填写预付款比例 →【生成预付款结算单】</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c hold" style="--n:#78909c"></div><div class="c chg" style="--p:transparent;--n:#78909c"><div class="pills"><span class="sp w">草稿</span></div></div><div class="c"></div></div></div><div class="r"><span class="no">3</span><div class="msgs" style="--n:3"><div class="ll2"><i class="off"></i><i class=""></i><i class=""></i></div><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台</em>销售 / 会计 核对金额、维护账单日期 →【推送】进平台账单池</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c hold" style="--n:#78909c"></div><div class="c chg" style="--p:#78909c;--n:#ef8f00"><div class="pills"><span class="sp r">待审核账单</span></div></div><div class="c"></div></div></div><div class="r"><span class="no">4</span><div class="msgs" style="--n:3"><div class="ll2"><i class="off"></i><i class=""></i><i class=""></i></div><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台</em>会计 账单详情 →【平台审核】</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c hold" style="--n:#78909c"></div><div class="c chg" style="--p:#ef8f00;--n:#1565c0"><div class="pills"><span class="sp b">已审核</span></div></div><div class="c"></div></div></div><div class="r"><span class="no">5</span><div class="msgs" style="--n:3"><div class="ll2"><i class="off"></i><i class=""></i><i class=""></i></div><div class="msg fwd lane-platform" style="grid-column:2 / 4;--s:25%;--e:75%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台</em>【推送付款单】→ 推送给客户</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c hold" style="--n:#78909c"></div><div class="c chg" style="--p:#1565c0;--n:#78909c"><div class="pills"><span class="sp w">待付款</span></div></div><div class="c"></div></div></div><div class="r"><span class="no">6</span><div class="msgs" style="--n:3"><div class="ll2"><i class="off"></i><i class=""></i><i class=""></i></div><div class="msg self lane-customer" style="grid-column:3 / 4;--s:22%;--e:78%;--lc:#c62828"><span class="ln"></span><span class="chip"><em class="role">客户</em>【在线支付（通联）】支付预付款</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c chg" style="--p:#78909c;--n:#1565c0"><div class="pills"><span class="sp b">部分支付</span></div></div><div class="c chg" style="--p:#78909c;--n:#1565c0"><div class="pills"><span class="sp b">已付款</span></div></div><div class="c"></div></div></div><div class="r"><span class="no">7</span><div class="msgs" style="--n:3"><div class="ll2"><i class="off"></i><i class=""></i><i class=""></i></div><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台</em>核对到账 →【确认收款】</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c hold" style="--n:#1565c0"></div><div class="c chg" style="--p:#1565c0;--n:transparent"><div class="pills"><span class="sp d">已收款<b>终态</b></span></div></div><div class="c"></div></div></div><div class="r ph"><div class="note-box phase">节点 B · 尾款</div></div><div class="r"><span class="no">8</span><div class="msgs" style="--n:3"><div class="ll2"><i class="off"></i><i class=""></i><i class=""></i></div><div class="msg self lane-customer" style="grid-column:3 / 4;--s:22%;--e:78%;--lc:#c62828"><span class="ln"></span><span class="chip"><em class="role">客户</em>全部【确认收货】</span></div></div><div class="stc"><div class="c chg" style="--p:#1565c0;--n:#1565c0"><div class="pills"><span class="sp b">销售单 收货完成</span></div></div><div class="c hold" style="--n:#1565c0"></div><div class="c"></div><div class="c"></div></div></div><div class="r"><span class="no">9</span><div class="msgs" style="--n:3"><div class="ll2"><i class="off"></i><i class=""></i><i class=""></i></div><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台</em>点【尾款】→【生成尾款结算单】</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c hold" style="--n:#1565c0"></div><div class="c"></div><div class="c chg" style="--p:transparent;--n:#78909c"><div class="pills"><span class="sp w">草稿</span></div></div></div></div><div class="r"><span class="no">10</span><div class="msgs" style="--n:3"><div class="ll2"><i class="off"></i><i class=""></i><i class=""></i></div><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台</em>销售 / 会计 核对金额、维护账单日期 →【推送】进平台账单池</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c hold" style="--n:#1565c0"></div><div class="c"></div><div class="c chg" style="--p:#78909c;--n:#ef8f00"><div class="pills"><span class="sp r">待审核账单</span></div></div></div></div><div class="r"><span class="no">11</span><div class="msgs" style="--n:3"><div class="ll2"><i class="off"></i><i class=""></i><i class=""></i></div><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台</em>会计 账单详情 →【平台审核】</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c hold" style="--n:#1565c0"></div><div class="c"></div><div class="c chg" style="--p:#ef8f00;--n:#1565c0"><div class="pills"><span class="sp b">已审核</span></div></div></div></div><div class="r"><span class="no">12</span><div class="msgs" style="--n:3"><div class="ll2"><i class="off"></i><i class=""></i><i class=""></i></div><div class="msg fwd lane-platform" style="grid-column:2 / 4;--s:25%;--e:75%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台</em>【推送付款单】→ 推送给客户</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c hold" style="--n:#1565c0"></div><div class="c"></div><div class="c chg" style="--p:#1565c0;--n:#78909c"><div class="pills"><span class="sp w">待付款</span></div></div></div></div><div class="r"><span class="no">13</span><div class="msgs" style="--n:3"><div class="ll2"><i class="off"></i><i class=""></i><i class=""></i></div><div class="msg self lane-customer" style="grid-column:3 / 4;--s:22%;--e:78%;--lc:#c62828"><span class="ln"></span><span class="chip"><em class="role">客户</em>【在线支付（通联）】支付尾款</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c chg" style="--p:#1565c0;--n:#1565c0"><div class="pills"><span class="sp b">全额支付</span></div></div><div class="c"></div><div class="c chg" style="--p:#78909c;--n:#1565c0"><div class="pills"><span class="sp b">已付款</span></div></div></div></div><div class="r"><span class="no">14</span><div class="msgs" style="--n:3"><div class="ll2"><i class="off"></i><i class=""></i><i class=""></i></div><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台</em>核对到账 →【确认收款】</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c chg" style="--p:#1565c0;--n:transparent"><div class="pills"><span class="sp d">已收款<b>终态</b></span></div></div><div class="c"></div><div class="c chg" style="--p:#1565c0;--n:transparent"><div class="pills"><span class="sp d">已收款<b>终态</b></span></div></div></div></div></div></div></section>
+        
+
+
+                <section class="seq seq2" style="--nc:3;--stw:384px"><div class="seq-title"><span>图 2 ·  平台 → 供应商（结算与支付节点）</span></div><div class="seq-scroll"><div class="seq-inner"><div class="hd"><span></span><div class="lanes"><div class="lane-head supplier">供应商端<span class="r">供货方 / 收款方</span></div><div class="lane-head platform">平台端<span class="r">财务 / 出纳</span></div><div class="lane-head customer off">客户端<span class="r">收货确认</span></div></div><div class="sth"><div class="sh">销售订单<span>订单</span></div><div class="sh">供应商结算单<span>平台 → 供应商</span></div><div class="sh">订单支付状态<span>订单</span></div></div></div><div class="r"><span class="no">1</span><div class="msgs" style="--n:3"><div class="ll2"><i class=""></i><i class=""></i><i class="off"></i></div><div class="msg self lane-customer" style="grid-column:3 / 4;--s:22%;--e:78%;--lc:#c62828"><span class="ln"></span><span class="chip"><em class="role">客户</em>全部【确认收货】</span></div></div><div class="stc"><div class="c chg" style="--p:transparent;--n:#1565c0"><div class="pills"><span class="sp b">收货完成</span></div></div><div class="c"></div><div class="c"></div></div></div><div class="r"><span class="no">2</span><div class="msgs" style="--n:3"><div class="ll2"><i class=""></i><i class=""></i><i class="off"></i></div><div class="msg self lane-supplier" style="grid-column:1 / 2;--s:22%;--e:78%;--lc:#2e7d32"><span class="ln"></span><span class="chip"><em class="role">供应商</em>销售订单 →【创建结算】→ 生成草稿结算单</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c chg" style="--p:transparent;--n:#78909c"><div class="pills"><span class="sp w">草稿</span></div></div><div class="c"></div></div></div><div class="r"><span class="no">3</span><div class="msgs" style="--n:3"><div class="ll2"><i class=""></i><i class=""></i><i class="off"></i></div><div class="msg fwd lane-supplier" style="grid-column:1 / 3;--s:25%;--e:75%;--lc:#2e7d32"><span class="ln"></span><span class="chip"><em class="role">供应商</em>核对金额、维护账单日期 →【推送到平台】</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c chg" style="--p:#78909c;--n:#ef8f00"><div class="pills"><span class="sp r">待审核账单</span></div></div><div class="c"></div></div></div><div class="r"><span class="no">4</span><div class="msgs" style="--n:3"><div class="ll2"><i class=""></i><i class=""></i><i class="off"></i></div><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台·会计</em>供应商 &gt; 账单 →【平台审核】</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c chg" style="--p:#ef8f00;--n:#1565c0"><div class="pills"><span class="sp b">已审核</span></div></div><div class="c"></div></div></div><div class="r"><span class="no">5</span><div class="msgs" style="--n:3"><div class="ll2"><i class=""></i><i class=""></i><i class="off"></i></div><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台·财务</em>账单页维护支付人 →【推送付款单】→ 推给平台出纳</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c chg" style="--p:#1565c0;--n:#78909c"><div class="pills"><span class="sp w">待付款</span></div></div><div class="c chg" style="--p:transparent;--n:#78909c"><div class="pills"><span class="sp w">待支付</span></div></div></div></div><div class="r"><span class="no">6</span><div class="msgs" style="--n:3"><div class="ll2"><i class=""></i><i class=""></i><i class="off"></i></div><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台·出纳</em>上传支付凭证 →【支付】</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c hold" style="--n:#78909c"></div><div class="c hold" style="--n:#78909c"></div></div></div><div class="r"><span class="no">7</span><div class="msgs" style="--n:3"><div class="ll2"><i class=""></i><i class=""></i><i class="off"></i></div><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台·出纳</em>支付页维护日记账、供应链金融票据 →【创建付款】</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c chg" style="--p:#78909c;--n:#1565c0"><div class="pills"><span class="sp b">已付款</span></div></div><div class="c hold" style="--n:#78909c"></div></div></div><div class="r"><span class="no">8</span><div class="msgs" style="--n:3"><div class="ll2"><i class=""></i><i class=""></i><i class="off"></i></div><div class="msg rev lane-platform" style="grid-column:1 / 3;--s:25%;--e:75%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台·出纳</em>付款到账</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c hold" style="--n:#1565c0"></div><div class="c chg" style="--p:#78909c;--n:#1565c0"><div class="pills"><span class="sp b">部分支付 / 全额支付</span></div></div></div></div><div class="r"><span class="no">9</span><div class="msgs" style="--n:3"><div class="ll2"><i class=""></i><i class=""></i><i class="off"></i></div><div class="msg self lane-supplier" style="grid-column:1 / 2;--s:22%;--e:78%;--lc:#2e7d32"><span class="ln"></span><span class="chip"><em class="role">供应商</em>查看支付凭证 / 付款单详情</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c hold" style="--n:#1565c0"></div><div class="c hold" style="--n:#1565c0"></div></div></div><div class="r"><span class="no">10</span><div class="msgs" style="--n:3"><div class="ll2"><i class=""></i><i class=""></i><i class="off"></i></div><div class="msg self lane-supplier" style="grid-column:1 / 2;--s:22%;--e:78%;--lc:#2e7d32"><span class="ln"></span><span class="chip"><em class="role">供应商</em>【确认收款】</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c hold" style="--n:#1565c0"></div><div class="c hold" style="--n:#1565c0"></div></div></div><div class="r"><span class="no">11</span><div class="msgs" style="--n:3"><div class="ll2"><i class=""></i><i class=""></i><i class="off"></i></div><div class="msg self lane-platform" style="grid-column:2 / 3;--s:22%;--e:78%;--lc:#1565c0"><span class="ln"></span><span class="chip"><em class="role">平台</em>与供应商对账 → 结算单置为终态</span></div></div><div class="stc"><div class="c hold" style="--n:#1565c0"></div><div class="c chg" style="--p:#1565c0;--n:transparent"><div class="pills"><span class="sp d">已收款<b>终态</b></span></div></div><div class="c chg" style="--p:#1565c0;--n:transparent"><div class="pills"><span class="sp d">已付款<b>终态</b></span></div></div></div></div></div></div></section>
+        
+
+
+        
+
+
+        <!-- <div class="info-card">
+            <h3>关键路径</h3>
+            <div class="body">
+                <ul>
+                    <li><strong>预付款可选：</strong>平台点【预收款】后选择是否需要；不需要时无预付款结算单，直接走一遍尾款的 6 步。</li>
+                    <li><strong>尾款生成时机：</strong>客户全部【确认收货】、销售订单转「收货完成」后，平台侧才出现【尾款】按钮；该动作同时是供应商发起结算单的前置条件。</li>
+                    <li><strong>客户结算单的两次推送：</strong>核对金额、维护账单日期后【推送】进平台账单池（「待审核账单」）；【平台审核】通过后【推送付款单】给客户（「待付款」）。</li>
+                    <li><strong>客户链路的付款方向：</strong>客户 → 平台，客户在结算单页【在线支付（通联）】完成付款；平台只做【确认收款】，不存在平台出纳环节。</li>
+                    <li><strong>两条链路并行：</strong>客户付款进度不阻塞平台向供应商付款。</li>
+                    <li><strong>平台付款前置条件：</strong>供应商结算单已审核（进入「待付款」）。</li>
+                    <li><strong>平台出纳的支付动作：</strong>上传支付凭证 →【支付】→ 支付页维护日记账、供应链金融票据 →【创建付款】，<strong>不含「拆分票据」</strong>。</li>
+                    <li><strong>供应商在链路中的动作：</strong>客户确认收货后【创建结算】→【推送到平台】→ 等待到账 → 查看支付凭证 / 付款单详情 →【确认收款】，<strong>不参与开票</strong>。</li>
+                    <li><strong>图 2 的完整链路：</strong>客户【确认收货】→ 供应商【创建结算】生成草稿结算单 →【推送到平台】→ 平台【平台审核】→【推送付款单】给平台出纳 → 出纳支付 → 供应商【确认收款】→ 对账置终态；<strong>开票不列入</strong>。</li>
+                    <li><strong>图 2 的起点在供应商：</strong>结算单由供应商先发起并推送到平台，平台只做审核与付款，不代供应商建单。</li>
+                </ul>
+            </div>
+        </div> -->
+
+        
+    </div>
+
+    <button class="download-btn" onclick="downloadImage()">下载 PNG 图片</button>
+
+    <script>
+        function downloadImage() {
+            var container = document.getElementById('capture-container');
+            var button = document.querySelector('.download-btn');
+            button.style.display = 'none';
+            htmlToImage.toPng(container, { quality: 0.95, backgroundColor: '#ffffff', pixelRatio: 2 })
+                .then(function (dataUrl) {
+                    var link = document.createElement('a');
+                    link.download = '支付流程-时序图.png';
+                    link.href = dataUrl;
+                    link.click();
+                })
+                .catch(function (error) { console.error(error); alert('抱歉，图片生成失败，请重试。'); })
+                .finally(function () { button.style.display = 'block'; });
+        }
+    </script>
+</body>
+
+</html>

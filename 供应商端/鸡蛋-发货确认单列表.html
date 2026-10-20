@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>发货确认单列表 - 供应商端</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#1890ff;--blue-dark:#096dd9;--ink:#1f2937;--muted:#8c98a8;--line:#edf0f4;--surface:#fff;--page:#f4f6f9}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--page);color:var(--ink);font-size:14px;min-height:100vh}
+.main-area{margin-left:200px;min-height:100vh}
+.top-nav{height:64px;background:#fff;display:flex;align-items:center;padding:0 32px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.breadcrumb{display:flex;align-items:center;gap:9px;color:#9aa5b1;font-size:13px}
+.breadcrumb a{color:#667382;text-decoration:none;cursor:pointer}
+.breadcrumb a:hover{color:var(--blue)}
+.breadcrumb .current{color:#253142;font-weight:600}
+.sep{color:#cfd6de}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:22px;color:#778393}
+.notice{font-size:18px;position:relative;cursor:pointer}
+.badge{position:absolute;top:-7px;right:-8px;background:#ff4d4f;border:2px solid #fff;color:#fff;min-width:16px;height:16px;padding:0 4px;border-radius:9px;font-size:10px;display:flex;align-items:center;justify-content:center}
+.user{display:flex;align-items:center;gap:9px;color:#475467;cursor:pointer}
+.avatar{width:30px;height:30px;border-radius:50%;background:#e6f4ff;color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:600}
+.main{padding:26px 32px 40px;max-width:1600px}
+.page-banner{font-size:20px;color:#253142;font-weight:600;margin-bottom:16px}
+.filter-card,.table-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 16px rgba(29,45,61,.03)}
+.filter-card{padding:18px 20px;margin-bottom:16px}
+.filter-row{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.filter-item{display:flex;align-items:center;gap:8px}
+.filter-label{font-size:12px;color:#667382;white-space:nowrap}
+.filter-input,.filter-select{height:34px;border:1px solid #d8dee6;border-radius:4px;padding:0 10px;outline:none;color:#344054;background:#fff;font-family:inherit;font-size:13px;min-width:180px}
+.filter-input:focus,.filter-select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(24,144,255,.12)}
+.filter-actions{display:flex;gap:8px;margin-left:auto}
+.btn{height:34px;padding:0 17px;border-radius:4px;font-family:inherit;font-size:13px;cursor:pointer;transition:all .2s}
+.btn-primary{border:1px solid var(--blue);color:#fff;background:var(--blue)}
+.btn-primary:hover{background:var(--blue-dark);border-color:var(--blue-dark)}
+.btn-primary:disabled{border-color:#e5e7eb;background:#f5f5f5;color:#b7bec8;cursor:not-allowed}
+.btn-default{border:1px solid #d8dee6;color:#52606f;background:#fff}
+.btn-default:hover{border-color:var(--blue);color:var(--blue)}
+.table-head{height:58px;display:flex;align-items:center;padding:0 20px;border-bottom:1px solid var(--line)}
+.table-title{font-size:15px;font-weight:600;color:#253142}
+.table-title span{font-size:12px;color:#98a2b3;font-weight:400;margin-left:6px}
+.table-title .hint{margin-left:10px;font-size:12px;color:#98a2b3;font-weight:400}
+.table-tools{margin-left:auto;display:flex;gap:8px}
+.tool-btn{border:1px solid #d8dee6;background:#fff;color:#667382;height:30px;padding:0 12px;border-radius:4px;cursor:pointer;font-size:12px}
+.tool-btn:hover{color:var(--blue);border-color:var(--blue)}
+.table-wrap{overflow-x:auto}
+.data-table{width:100%;min-width:1240px;border-collapse:collapse;font-size:13px}
+.data-table th{height:44px;background:#fafbfd;color:#667382;font-weight:600;text-align:left;padding:0 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+.data-table td{height:64px;padding:0 14px;border-bottom:1px solid #f2f4f7;color:#344054;white-space:nowrap}
+.data-table tbody tr:hover{background:#fbfdff}
+.check{width:16px;height:16px;accent-color:var(--blue);cursor:pointer}
+.check:disabled{cursor:not-allowed}
+.link{color:var(--blue);font-weight:600;cursor:pointer}
+.link:hover{text-decoration:underline}
+.muted{color:#8b96a3}
+.qty{font-variant-numeric:tabular-nums;font-weight:600}
+.status{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:4px;font-size:12px}
+.status::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.status-pending{color:#667382;background:#f4f5f7}
+.status-sent{color:#389e0d;background:#f1fae9}
+.status-received{color:#1677d2;background:#eaf4ff}
+.tag-batch{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:3px;font-size:11px;font-weight:400;color:#1677d2;background:#eaf4ff;border:1px solid #b7dcff;vertical-align:middle}
+.tag-owing{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:3px;font-size:11px;font-weight:400;color:#d46b08;background:#fff7e6;border:1px solid #ffd591;vertical-align:middle}
+.tag-normal{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:3px;font-size:11px;font-weight:400;color:#52606f;background:#f4f5f7;border:1px solid #e3e7ec;vertical-align:middle}
+.remain-cell{font-variant-numeric:tabular-nums;font-weight:600;color:#389e0d}
+.remain-cell.short{color:#d46b08}
+.batch-card{margin-bottom:16px}
+.batch-card .data-table td{height:52px}
+.empty{text-align:center;color:#98a2b3;padding:48px 0 !important;height:auto !important}
+.pagination{height:64px;display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:0 20px;color:#98a2b3;font-size:12px}
+.page-btn{min-width:28px;height:28px;border:1px solid #d8dee6;background:#fff;color:#667382;border-radius:4px;cursor:pointer}
+.page-btn:hover,.page-btn.active{border-color:var(--blue);color:var(--blue)}
+.page-btn.active{background:var(--blue);color:#fff}
+.page-btn:disabled{color:#cbd2da;cursor:not-allowed}
+.action-bar{display:flex;align-items:center;min-height:68px;margin-bottom:16px;padding:0 20px;border:1px solid #b7dcff;border-radius:8px;background:#fff}
+.action-bar .selection{color:#667382}
+.action-bar .selection b{color:var(--blue);font-size:16px}
+.action-bar .amount{margin-left:22px;color:#8b96a3}
+.action-bar .amount b{color:#253142}
+.action-bar .btn{min-width:144px;height:38px}
+.action-bar .btn:first-of-type{margin-left:auto}
+.action-bar .btn + .btn{margin-left:10px}
+.modal-mask{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(0,21,41,.45)}
+.modal-mask.show{display:flex}
+.modal{width:620px;max-width:calc(100vw - 32px);border-radius:8px;background:#fff;box-shadow:0 14px 42px rgba(0,0,0,.18)}
+.modal-head{display:flex;align-items:center;padding:17px 20px;border-bottom:1px solid var(--line);font-size:16px;font-weight:600}
+.close{margin-left:auto;border:0;background:transparent;color:#98a2b3;cursor:pointer;font-size:24px}
+.modal-body{padding:20px;color:#52606f;line-height:1.8;font-size:13px;max-height:60vh;overflow:auto}
+.modal-body .group{display:flex;align-items:center;gap:8px;margin:14px 0 8px;font-weight:600;color:#253142}
+.modal-body .group span{font-weight:400;color:#8b96a3;font-size:12px}
+.mini-table{width:100%;border-collapse:collapse;font-size:12px}
+.mini-table th{background:#fafbfd;color:#667382;font-weight:600;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+.mini-table td{padding:8px 10px;border-bottom:1px solid #f2f4f7;color:#344054}
+.mini-qty{width:78px;height:30px;border:1px solid #d8dee6;border-radius:4px;padding:0 8px;font-family:inherit;font-size:13px;color:#344054;outline:none}
+.mini-qty:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(24,144,255,.12)}
+.mini-qty.invalid{border-color:#ff4d4f;box-shadow:0 0 0 2px rgba(255,77,79,.12)}
+.mini-qty[readonly]{background:#f5f6f7;color:#99a4a8}
+.short-cell{color:#8b96a3}
+.short-cell.short{color:#d46b08;font-weight:600}
+.batch-tip{margin:10px 0 0;padding:12px 14px;border-radius:6px;background:#f7faff;color:#52606f;line-height:2}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--line)}
+.toast{position:fixed;top:82px;left:50%;transform:translateX(-50%);padding:11px 20px;border:1px solid #b7eb8f;background:#f0faf5;color:#2f8f62;border-radius:5px;box-shadow:0 7px 20px rgba(56,158,13,.12);display:none;z-index:60}
+.toast.show{display:block}
+@media(max-width:1000px){.sidebar{width:180px}.main-area{margin-left:180px}.top-nav,.main{padding-left:20px;padding-right:20px}.filter-actions{margin-left:0}.action-bar{align-items:flex-start;flex-wrap:wrap;padding:14px 20px}.action-bar .btn{width:100%;margin:12px 0 0}}
+</style>
+</head>
+  <body>
+<script src="sidebar.js"></script>
+<div class="main-area">
+  <header class="top-nav">
+    <div class="breadcrumb"><a href="#">首页</a><span class="sep">/</span><span class="current">发货确认单</span></div>
+    <div class="top-actions"><span class="notice">♧<span class="badge">3</span></span><div class="user"><span class="avatar">管</span><span>超级管理员</span><span style="font-size:11px">⌄</span></div></div>
+  </header>
+  <main class="main">
+    <div class="page-banner">发货确认单</div>
+
+    <section class="filter-card">
+      <div class="filter-row">
+        <div class="filter-item"><label class="filter-label">发货单号</label><input class="filter-input" id="keyword" placeholder="请输入发货单号" /></div>
+        <div class="filter-item"><label class="filter-label">关联销售订单</label><input class="filter-input" id="orderKeyword" placeholder="请输入销售订单号" /></div>
+        <div class="filter-item"><label class="filter-label">采购单位</label><select class="filter-select" id="buyerFilter"><option value="">全部采购单位</option><option value="焱丰（山东）供应链管理有限公司" selected>焱丰（山东）供应链管理有限公司</option></select></div>
+        <div class="filter-item"><label class="filter-label">发货日期</label><input class="filter-input" type="date" /></div>
+        <div class="filter-actions"><button class="btn btn-primary" onclick="applyFilter()">查询</button><button class="btn btn-default" onclick="resetFilter()">重置</button></div>
+      </div>
+    </section>
+
+    <section class="table-card">
+      <div class="table-head">
+        <div class="table-title">发货确认单<span id="tableCount">共 3 条</span><span class="hint">点击整行可查看发货确认单详情</span></div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" style="min-width:1100px;">
+          <thead><tr>
+            <th style="width:56px;">序号</th>
+            <th>发货单号</th>
+            <th>关联销售订单</th>
+            <th>采购单位</th>
+            <th>供应单位</th>
+            <th>发货日期</th>
+            <th style="text-align:right;">实发总数量</th><th>状态</th>
+            <th>备注</th>
+          </tr></thead>
+          <tbody id="body">
+            <tr style="cursor:pointer" data-no="FH20260906001" data-order="EGG-SO-20260901002" onclick="location.href='鸡蛋-发货确认单详情.html?no=FH20260906001&status=received'"><td>1</td><td>FH20260906001</td><td class="muted">EGG-SO-20260901002</td><td>焱丰（山东）供应链管理有限公司</td><td>平原县蛋鸡养殖合作社</td><td>2026年09月06日</td><td class="qty" style="text-align:right;">1,314</td><td><span class="status status-received">已收货</span></td><td class="muted">—</td></tr>
+            <tr style="cursor:pointer" data-no="FH20260905002" data-order="EGG-SO-20260901002" onclick="location.href='鸡蛋-发货确认单详情.html?no=FH20260905002&status=sent'"><td>2</td><td>FH20260905002</td><td class="muted">EGG-SO-20260901002</td><td>焱丰（山东）供应链管理有限公司</td><td>夏津县绿源养殖专业合作社</td><td>2026年09月05日</td><td class="qty" style="text-align:right;">860</td><td><span class="status status-sent">已发货</span></td><td>分两车发运</td></tr>
+            <tr style="cursor:pointer" data-no="FH20260903003" data-order="EGG-SO-20260828003" onclick="location.href='鸡蛋-发货确认单详情.html?no=FH20260903003&status=pending'"><td>3</td><td>FH20260903003</td><td class="muted">EGG-SO-20260828003</td><td>焱丰（山东）供应链管理有限公司</td><td>临邑县丰羽蛋鸡养殖场</td><td>2026年09月03日</td><td class="qty" style="text-align:right;">420</td><td><span class="status status-pending">待发货</span></td><td class="muted">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination"><span style="margin-right:10px">共 <b id="totalRows">3</b> 条</span><button class="page-btn" disabled>‹</button><button class="page-btn active">1</button><button class="page-btn" disabled>›</button></div>
+    </section>
+
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 鸡蛋发货确认单列表：3 条静态示例，筛选为演示口径 =====
+function applyFilter(){
+  var kw = document.getElementById('keyword').value.trim().toLowerCase();
+  var ow = document.getElementById('orderKeyword').value.trim().toLowerCase();
+  var visible = 0;
+  Array.prototype.forEach.call(document.querySelectorAll('#body tr'), function(tr){
+    var no = (tr.getAttribute('data-no') || '').toLowerCase();
+    var order = (tr.getAttribute('data-order') || '').toLowerCase();
+    var hit = (!kw || no.indexOf(kw) >= 0) && (!ow || order.indexOf(ow) >= 0);
+    tr.style.display = hit ? '' : 'none';
+    if(hit) visible++;
+  });
+  document.getElementById('tableCount').textContent = '共 ' + visible + ' 条';
+  document.getElementById('totalRows').textContent = visible;
+  showToast('已按条件筛选，共 ' + visible + ' 条发货确认单');
+}
+
+function resetFilter(){
+  document.getElementById('keyword').value = '';
+  document.getElementById('orderKeyword').value = '';
+  Array.prototype.forEach.call(document.querySelectorAll('#body tr'), function(tr){ tr.style.display = ''; });
+  document.getElementById('tableCount').textContent = '共 3 条';
+  document.getElementById('totalRows').textContent = '3';
+  showToast('筛选条件已重置');
+}
+
+function showToast(msg){
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(window.tt);
+  window.tt = setTimeout(function(){ el.classList.remove('show'); }, 2600);
+}
+</script>
+</body>
+</html>

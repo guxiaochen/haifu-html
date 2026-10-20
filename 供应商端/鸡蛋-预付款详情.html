@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>结算单详情 - 供应商端</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#1890ff;--blue-dark:#096dd9;--ink:#1f2937;--muted:#8c98a8;--line:#edf0f4;--surface:#fff;--page:#f4f6f9}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--page);color:var(--ink);font-size:14px;min-height:100vh}
+.main-area{margin-left:200px;min-height:100vh}
+.top-nav{height:64px;background:#fff;display:flex;align-items:center;padding:0 32px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.breadcrumb{display:flex;align-items:center;gap:9px;color:#9aa5b1;font-size:13px}
+.breadcrumb a{color:#667382;text-decoration:none;cursor:pointer}
+.breadcrumb a:hover{color:var(--blue)}
+.breadcrumb .current{color:#253142;font-weight:600}
+.sep{color:#cfd6de}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:22px;color:#778393}
+.notice{font-size:18px;position:relative;cursor:pointer}
+.badge{position:absolute;top:-7px;right:-8px;background:#ff4d4f;border:2px solid #fff;color:#fff;min-width:16px;height:16px;padding:0 4px;border-radius:9px;font-size:10px;display:flex;align-items:center;justify-content:center}
+.user{display:flex;align-items:center;gap:9px;color:#475467;cursor:pointer}
+.avatar{width:30px;height:30px;border-radius:50%;background:#e6f4ff;color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:600}
+.main{padding:26px 32px 40px;max-width:1600px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 16px rgba(29,45,61,.03);padding:20px 24px;margin-bottom:16px}
+.title-bar{display:flex;align-items:center;gap:12px;padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+.page-title{font-size:20px;font-weight:600;color:#253142}
+.status{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:4px;font-size:12px}
+.status::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.st-draft{color:#667382;background:#f4f5f7}
+.st-approval{color:#d46b08;background:#fff7e6}
+.st-posted{color:#1677d2;background:#eaf4ff}
+.st-confirm{color:#0fb5a5;background:#e6fffb}
+.st-paid{color:#389e0d;background:#f1fae9}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 64px;margin-bottom:8px}
+.section-title{font-size:14px;font-weight:600;color:var(--blue);margin:4px 0 16px;padding-left:10px;border-left:3px solid var(--blue)}
+.kv{display:flex;align-items:flex-start;gap:16px;margin-bottom:14px}
+.kv .k{min-width:96px;color:#667382;font-size:13px;flex-shrink:0;text-align:right}
+.kv .v{flex:1;color:#344054;font-size:13px;line-height:1.6}
+.kv .v b.amount{color:var(--blue);font-size:15px}
+.kv .v a{color:var(--blue);cursor:pointer;text-decoration:none;font-weight:600}
+.kv .v a:hover{text-decoration:underline}
+.file-card{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fafbfd;border:1px solid var(--line);border-radius:6px;max-width:380px;margin-bottom:8px}
+.file-ico{width:32px;height:32px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;flex-shrink:0}
+.file-ico.img{background:#4aa3df}.file-ico.pdf{background:#d9534f}
+.file-meta{flex:1;min-width:0}
+.file-name{font-size:13px;color:#344054;display:block}
+.file-type{font-size:11px;color:#98a2b3}
+.file-ops{display:inline-flex;gap:10px}
+.file-ops a{color:var(--blue);cursor:pointer;font-size:13px;text-decoration:none}
+.file-ops a:hover{text-decoration:underline}
+.toast{position:fixed;top:82px;left:50%;transform:translateX(-50%);padding:11px 20px;border:1px solid #b7dcff;background:#f7faff;color:#1677d2;border-radius:5px;box-shadow:0 7px 20px rgba(24,144,255,.12);display:none;z-index:60}
+.toast.show{display:block}
+@media(max-width:1000px){.sidebar{width:180px}.main-area{margin-left:180px}.top-nav,.main{padding-left:20px;padding-right:20px}.info-grid{grid-template-columns:1fr}}
+</style>
+</head>
+  <body>
+<script src="sidebar.js"></script>
+<div class="main-area">
+  <header class="top-nav">
+    <div class="breadcrumb"><a onclick="location.href='鸡蛋-预付款列表.html'">首页</a><span class="sep">/</span><a onclick="location.href='鸡蛋-预付款列表.html'">结算单</a><span class="sep">/</span><span class="current">结算单详情</span></div>
+    <div class="top-actions"><span class="notice">♧<span class="badge">3</span></span><div class="user"><span class="avatar">管</span><span>超级管理员</span><span style="font-size:11px">⌄</span></div></div>
+  </header>
+  <main class="main">
+
+    <section class="card">
+      <div class="title-bar">
+        <div class="page-title" id="payNo">EGG-PP-20260906001</div>
+        <!-- <span class="status st-paid" id="statusTag">已支付</span> -->
+      </div>
+
+      <div class="section-title">单据信息</div>
+      <div class="info-grid">
+        <div class="kv"><span class="k">单据编号</span><span class="v" id="v-no">EGG-PP-20260906001</span></div>
+        <div class="kv"><span class="k">关联销售订单</span><span class="v"><a id="v-so" onclick="location.href='鸡蛋-销售订单详情.html?order=EGG-SO-20260905001&status=shipped'">EGG-SO-20260905001</a></span></div>
+        <div class="kv"><span class="k">采购单位</span><span class="v" id="v-buyer">焱丰（山东）供应链管理有限公司</span></div>
+        <div class="kv"><span class="k">订单总金额</span><span class="v" id="v-order-total">¥ 128,587.20</span></div>
+        <div class="kv"><span class="k">付款金额</span><span class="v"><b class="amount" id="v-amount">¥ 50,000.00</b></span></div>
+        <div class="kv"><span class="k">付款方式</span><span class="v" id="v-way">银行转账</span></div>
+        <div class="kv"><span class="k">付款日期</span><span class="v" id="v-date">2026-09-06</span></div>
+      </div>
+
+      <div class="section-title">支付凭证附件</div>
+      <div id="voucherArea">
+        <div class="file-card"><span class="file-ico img">🖼</span><span class="file-meta"><span class="file-name">支付凭证_银行回单.jpg</span><span class="file-type">图片</span></span><span class="file-ops"><a title="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" onclick="showToast('下载（演示）')">⬇</a></span></div>
+        <div class="file-card"><span class="file-ico pdf">PDF</span><span class="file-meta"><span class="file-name">支付凭证_付款汇总.pdf</span><span class="file-type">PDF</span></span><span class="file-ops"><a title="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" onclick="showToast('下载（演示）')">⬇</a></span></div>
+      </div>
+      <div class="empty" id="voucherEmpty" style="display:none;">暂无支付凭证，待平台完成付款后展示</div>
+    </section>
+
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 鸡蛋预付款详情（供应商只读视图）：无任何操作按钮，仅查看 =====
+function g(n){ var m = location.search.match(new RegExp('[?&]'+n+'=([^&]*)')); return m ? decodeURIComponent(m[1]) : ''; }
+var toastTimer = null;
+function showToast(msg){ var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2000); }
+
+var DEMO = {
+    'EGG-PP-20260906001': { buyer:'焱丰（山东）供应链管理有限公司', amount:'¥ 50,000.00', way:'银行转账', date:'2026-09-06', so:'EGG-SO-20260905001', total:'¥ 128,587.20' },
+    'EGG-PP-20260907002': { buyer:'焱丰（山东）供应链管理有限公司', amount:'¥ 30,000.00', way:'银行转账', date:'2026-09-07', so:'EGG-SO-20260905001', total:'¥ 128,587.20' },
+    'EGG-PP-20260908003': { buyer:'焱丰（山东）供应链管理有限公司', amount:'¥ 45,000.00', way:'银行转账', date:'2026-09-08', so:'EGG-SO-20260828003', total:'¥ 196,465.72' }
+};
+var TAGS = { posted:['st-posted','待过账'], review:['st-approval','待审核'], confirm:['st-confirm','待确认'], paid:['st-paid','已支付'] };
+
+function applyStatus(status) {
+    var tag = document.getElementById('statusTag');
+    var t = TAGS[status] || TAGS.paid;
+    tag.className = 'status ' + t[0];
+    tag.textContent = t[1];
+    var showVoucher = (status === 'paid');
+    document.getElementById('voucherArea').style.display = showVoucher ? 'block' : 'none';
+    document.getElementById('voucherEmpty').style.display = showVoucher ? 'none' : 'block';
+}
+(function(){
+    var no = g('no') || 'EGG-PP-20260906001';
+    var d = DEMO[no] || DEMO['EGG-PP-20260906001'];
+    document.title = '结算单详情 ' + no + ' - 供应商端';
+    document.getElementById('payNo').textContent = no;
+    document.getElementById('v-no').textContent = no;
+    document.getElementById('v-buyer').textContent = d.buyer;
+    document.getElementById('v-amount').textContent = d.amount;
+    document.getElementById('v-way').textContent = d.way;
+    document.getElementById('v-date').textContent = d.date;
+    document.getElementById('v-order-total').textContent = d.total;
+    var soLink = document.getElementById('v-so');
+    soLink.textContent = d.so;
+    soLink.setAttribute('onclick', "location.href='鸡蛋-销售订单详情.html?order=" + d.so + "&status=shipped'");
+    var status = g('status') || 'paid';
+    if (status === 'approval') status = 'review';   // 兼容旧入口参数
+    applyStatus(status);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>发票详情 - 供应商端</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#1890ff;--blue-dark:#096dd9;--ink:#1f2937;--muted:#8c98a8;--line:#edf0f4;--surface:#fff;--page:#f4f6f9}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--page);color:var(--ink);font-size:14px;min-height:100vh}
+.main-area{margin-left:200px;min-height:100vh}
+.top-nav{height:64px;background:#fff;display:flex;align-items:center;padding:0 32px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.breadcrumb{display:flex;align-items:center;gap:9px;color:#9aa5b1;font-size:13px}
+.breadcrumb a{color:#667382;text-decoration:none;cursor:pointer}
+.breadcrumb a:hover{color:var(--blue)}
+.breadcrumb .current{color:#253142;font-weight:600}
+.sep{color:#cfd6de}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:22px;color:#778393}
+.notice{font-size:18px;position:relative;cursor:pointer}
+.badge{position:absolute;top:-7px;right:-8px;background:#ff4d4f;border:2px solid #fff;color:#fff;min-width:16px;height:16px;padding:0 4px;border-radius:9px;font-size:10px;display:flex;align-items:center;justify-content:center}
+.user{display:flex;align-items:center;gap:9px;color:#475467;cursor:pointer}
+.avatar{width:30px;height:30px;border-radius:50%;background:#e6f4ff;color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:600}
+.main{padding:26px 32px 40px;max-width:1200px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 16px rgba(29,45,61,.03);padding:22px 24px;margin-bottom:16px}
+.doc-head{display:flex;align-items:center;gap:12px;padding-bottom:16px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+.doc-title{font-size:20px;font-weight:600;color:#111827}
+.status{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:4px;font-size:12px}
+.status::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.status-paid{color:#389e0d;background:#f1fae9}
+.head-spacer{margin-left:auto}
+.section-title{font-size:14px;font-weight:600;color:var(--blue);margin:4px 0 16px;padding-left:10px;border-left:3px solid var(--blue)}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 64px;margin-bottom:8px}
+.kv{display:flex;align-items:flex-start;gap:16px;margin-bottom:14px}
+.kv .k{min-width:110px;color:#667382;font-size:13px;flex-shrink:0}
+.kv .v{flex:1;color:#1f2937;font-size:13px;line-height:1.6}
+.kv .v b{font-weight:600}
+.money{font-variant-numeric:tabular-nums;font-weight:600;color:#253142}
+.link{color:var(--blue);cursor:pointer;text-decoration:none}
+.link:hover{text-decoration:underline}
+.file-card{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f7f9fb;border:1px solid var(--line);border-radius:6px;max-width:420px}
+.file-ico{width:34px;height:34px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;flex-shrink:0;background:#d9534f}
+.file-meta{flex:1;min-width:0}
+.file-name{font-size:13px;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.file-type{font-size:11px;color:#8c98a8}
+.file-ops{display:inline-flex;gap:10px}
+.file-ops a{color:var(--blue);cursor:pointer;font-size:13px;text-decoration:none}
+.file-ops a:hover{text-decoration:underline}
+.tip{margin-top:12px;font-size:12px;color:#8c98a8;line-height:1.8}
+.toast{position:fixed;top:82px;left:50%;transform:translateX(-50%);padding:11px 20px;border:1px solid #b7dcff;background:#f7faff;color:#1677d2;border-radius:5px;box-shadow:0 7px 20px rgba(24,144,255,.12);display:none;z-index:60}
+.toast.show{display:block}
+@media(max-width:1000px){.main-area{margin-left:180px}.top-nav,.main{padding-left:20px;padding-right:20px}.info-grid{grid-template-columns:1fr}}
+</style>
+</head>
+  <body>
+<script src="sidebar.js"></script>
+<div class="main-area">
+  <header class="top-nav">
+    <div class="breadcrumb"><a href="#">首页</a><span class="sep">/</span><a onclick="location.href='鸡蛋-发票列表.html'">发票</a><span class="sep">/</span><span class="current">发票详情</span></div>
+    <div class="top-actions"><span class="notice">♧<span class="badge">3</span></span><div class="user"><span class="avatar">管</span><span>超级管理员</span><span style="font-size:11px">⌄</span></div></div>
+  </header>
+  <main class="main">
+    <div class="card">
+      <div class="doc-head">
+        <span class="doc-title" id="invNoTitle">FP20260908001</span>
+        <span class="status status-paid" id="invStatus">已上传</span>
+      </div>
+
+      <div class="section-title">票面信息</div>
+      <div class="info-grid">
+        <div class="kv"><span class="k"><b>发票号码</b></span><span class="v" id="iv-no">—</span></div>
+        <div class="kv"><span class="k"><b>发票代码</b></span><span class="v" id="iv-code">—</span></div>
+        <div class="kv"><span class="k">开票日期</span><span class="v" id="iv-date">—</span></div>
+        <div class="kv"><span class="k">票种</span><span class="v" id="iv-kind">—</span></div>
+        <div class="kv"><span class="k">税率</span><span class="v">免税（0%）</span></div>
+        <div class="kv"><span class="k">金额（不含税）</span><span class="v money" id="iv-amount">—</span></div>
+        <div class="kv"><span class="k">税额</span><span class="v money" id="iv-tax">—</span></div>
+        <div class="kv"><span class="k">价税合计</span><span class="v money" id="iv-total">—</span></div>
+      </div>
+
+      <div class="section-title">关联信息</div>
+      <div class="info-grid">
+        <div class="kv"><span class="k"><b>销售订单号</b></span><span class="v"><a class="link" id="iv-so" onclick="goOrder()">—</a></span></div>
+        <div class="kv"><span class="k">关联结算单</span><span class="v"><a class="link" id="iv-settle" onclick="goSettle()">—</a></span></div>
+        <div class="kv"><span class="k">购方名称</span><span class="v" id="iv-buyer">—</span></div>
+        <div class="kv"><span class="k">销方名称</span><span class="v" id="iv-seller">—</span></div>
+      </div>
+
+      <div class="section-title">发票附件</div>
+      <div class="file-card">
+        <span class="file-ico">PDF</span>
+        <span class="file-meta"><span class="file-name" id="iv-file">—</span><span class="file-type">PDF · 销售订单上传后同步</span></span>
+        <span class="file-ops"><a title="预览" onclick="showToast('预览（演示）')">🔍</a><a title="下载" onclick="showToast('下载（演示）')">⬇</a></span>
+      </div>
+      <div class="tip">发票在「销售订单 - 发票」页签上传并由系统读取票面信息后同步至此；如需更正，请在该页签删除附件后重新上传。平台（焱丰）侧为只读查看，不做驳回卡控。</div>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="鸡蛋发票数据.js"></script>
+<script>
+// ===== 鸡蛋发票详情（供应商端只读）：数据与销售订单「发票」页签同源 =====
+var INV_ROWS = (window.EggInv ? EggInv.all().map(function (x) {
+    return { no: x.no, code: x.code, date: x.date, kind: x.kind, so: x.so, seller: x.seller, buyer: x.buyer,
+             amount: x.amount, tax: x.tax, file: (x.files && x.files[0]) || '—',
+             settle: (x.remark || '').indexOf('对应结算单 ') === 0 ? x.remark.replace('对应结算单 ', '') : '—',
+             status: '已上传' };
+}) : []);
+var cur = null;
+
+function money(n) { return '¥ ' + Number(n).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function cnDate(d) { var p = String(d).split('-'); return p[0] + '年' + p[1] + '月' + p[2] + '日'; }
+function g(n) { var m = location.search.match(new RegExp('[?&]' + n + '=([^&]*)')); return m ? decodeURIComponent(m[1]) : ''; }
+function setText(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
+
+function goOrder() { if (cur) location.href = '鸡蛋-销售订单详情.html?no=' + encodeURIComponent(cur.so) + '&tab=invoice'; }
+function goSettle() { if (cur) location.href = '鸡蛋-预付款详情.html?no=' + encodeURIComponent(cur.settle) + '&status=paid'; }
+function showToast(msg) {
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(window.tt);
+    window.tt = setTimeout(function () { el.classList.remove('show'); }, 2600);
+}
+
+(function init() {
+    var no = g('no');
+    for (var i = 0; i < INV_ROWS.length; i++) { if (INV_ROWS[i].no === no) { cur = INV_ROWS[i]; break; } }
+    if (!cur) cur = INV_ROWS[0];
+    setText('invNoTitle', cur.no);
+    setText('iv-no', cur.no);
+    setText('iv-code', cur.code || '—');
+    setText('iv-date', cnDate(cur.date));
+    setText('iv-kind', cur.kind);
+    setText('iv-amount', money(cur.amount));
+    setText('iv-tax', money(cur.tax));
+    setText('iv-total', money(cur.amount + cur.tax));
+    setText('iv-so', cur.so);
+    setText('iv-settle', cur.settle);
+    setText('iv-buyer', cur.buyer);
+    setText('iv-seller', cur.seller);
+    setText('iv-file', cur.file);
+    document.title = '发票详情 ' + cur.no + ' - 供应商端';
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>发票 - 供应商端</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#1890ff;--blue-dark:#096dd9;--ink:#1f2937;--muted:#8c98a8;--line:#edf0f4;--surface:#fff;--page:#f4f6f9}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--page);color:var(--ink);font-size:14px;min-height:100vh}
+.main-area{margin-left:200px;min-height:100vh}
+.top-nav{height:64px;background:#fff;display:flex;align-items:center;padding:0 32px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.breadcrumb{display:flex;align-items:center;gap:9px;color:#9aa5b1;font-size:13px}
+.breadcrumb a{color:#667382;text-decoration:none;cursor:pointer}
+.breadcrumb a:hover{color:var(--blue)}
+.breadcrumb .current{color:#253142;font-weight:600}
+.sep{color:#cfd6de}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:22px;color:#778393}
+.notice{font-size:18px;position:relative;cursor:pointer}
+.badge{position:absolute;top:-7px;right:-8px;background:#ff4d4f;border:2px solid #fff;color:#fff;min-width:16px;height:16px;padding:0 4px;border-radius:9px;font-size:10px;display:flex;align-items:center;justify-content:center}
+.user{display:flex;align-items:center;gap:9px;color:#475467;cursor:pointer}
+.avatar{width:30px;height:30px;border-radius:50%;background:#e6f4ff;color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:600}
+.main{padding:26px 32px 40px;max-width:1600px}
+.page-banner{font-size:20px;color:#253142;font-weight:600;margin-bottom:16px}
+.filter-card,.table-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 16px rgba(29,45,61,.03)}
+.filter-card{padding:18px 20px;margin-bottom:16px}
+.filter-row{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.filter-item{display:flex;align-items:center;gap:8px}
+.filter-label{font-size:12px;color:#667382;white-space:nowrap}
+.filter-input,.filter-select{height:34px;border:1px solid #d8dee6;border-radius:4px;padding:0 10px;outline:none;color:#344054;background:#fff;font-family:inherit;font-size:13px;min-width:180px}
+.filter-input:focus,.filter-select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(24,144,255,.12)}
+.filter-actions{display:flex;gap:8px;margin-left:auto}
+.btn{height:34px;padding:0 17px;border-radius:4px;font-family:inherit;font-size:13px;cursor:pointer;transition:all .2s}
+.btn-primary{border:1px solid var(--blue);color:#fff;background:var(--blue)}
+.btn-primary:hover{background:var(--blue-dark);border-color:var(--blue-dark)}
+.btn-default{border:1px solid #d8dee6;color:#52606f;background:#fff}
+.btn-default:hover{border-color:var(--blue);color:var(--blue)}
+.table-head{height:58px;display:flex;align-items:center;padding:0 20px;border-bottom:1px solid var(--line)}
+.table-title{font-size:15px;font-weight:600;color:#253142}
+.table-title span{font-size:12px;color:#98a2b3;font-weight:400;margin-left:6px}
+.table-title .hint{margin-left:10px;font-size:12px;color:#98a2b3;font-weight:400}
+.table-wrap{overflow-x:auto}
+.data-table{width:100%;min-width:1080px;border-collapse:collapse;font-size:13px}
+.data-table th{white-space:nowrap}
+.data-table td{white-space:normal}
+.data-table .file-cell .nm{max-width:132px;display:inline-block;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.data-table th{height:44px;background:#fafbfd;color:#667382;font-weight:600;text-align:left;padding:0 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+.data-table td{height:64px;padding:0 14px;border-bottom:1px solid #f2f4f7;color:#344054;white-space:nowrap}
+.data-table tbody tr:hover{background:#fbfdff}
+.link{color:var(--blue);font-weight:600;cursor:pointer}
+.link:hover{text-decoration:underline}
+.muted{color:#8b96a3}
+.money{font-variant-numeric:tabular-nums;font-weight:600;color:#253142}
+.status{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:4px;font-size:12px}
+.status::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.status-pending{color:#667382;background:#f4f5f7}
+.status-paid{color:#389e0d;background:#f1fae9}
+.file-cell{display:inline-flex;align-items:center;gap:8px}
+.file-cell .ico{width:26px;height:26px;border-radius:4px;background:#d9534f;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.file-cell .nm{color:#344054}
+.ops{display:inline-flex;gap:10px}
+.ops a{color:var(--blue);cursor:pointer;font-size:13px;text-decoration:none}
+.ops a:hover{text-decoration:underline}
+.empty{text-align:center;color:#98a2b3;padding:48px 0 !important;height:auto !important}
+.pagination{height:64px;display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:0 20px;color:#98a2b3;font-size:12px}
+.page-btn{min-width:28px;height:28px;border:1px solid #d8dee6;background:#fff;color:#667382;border-radius:4px;cursor:pointer}
+.page-btn:hover,.page-btn.active{border-color:var(--blue);color:var(--blue)}
+.page-btn.active{background:var(--blue);color:#fff}
+.page-btn:disabled{color:#cbd2da;cursor:not-allowed}
+.head-actions{margin-left:auto}
+.modal-mask{position:fixed;inset:0;background:rgba(15,23,42,0.45);display:none;align-items:center;justify-content:center;z-index:1200}
+.modal-mask.show{display:flex}
+.modal{width:640px;max-width:94vw;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.18)}
+.modal-title{padding:18px 20px 10px;font-size:16px;font-weight:600;color:#253142;display:flex;align-items:center}
+.modal-title .modal-x{margin-left:auto;cursor:pointer;color:#8c98a8;font-weight:400}
+.modal-title .modal-x:hover{color:#1f2937}
+.modal-body{padding:4px 20px 18px;max-height:70vh;overflow-y:auto}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--line);background:#fafbfd}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px}
+.form-row{display:flex;flex-direction:column;gap:6px}
+.form-row.full{grid-column:span 2}
+.form-row label{font-size:12px;color:#667382}
+.form-row label .req{color:#ff4d4f;margin-right:3px}
+.form-row input,.form-row select,.form-row textarea{padding:7px 10px;border:1px solid #d8dee6;border-radius:4px;font:inherit;font-size:13px;outline:none;background:#fff;color:#344054}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--blue)}
+.form-row input[readonly]{background:#f7f9fb;color:#8c98a8}
+.ord-pick{border:1px solid #d8dee6;border-radius:6px;overflow:hidden}
+.ord-bar{padding:10px 12px;background:#fafbfd;border-bottom:1px solid var(--line)}
+.ord-bar input{width:100%;height:32px;padding:0 10px;border:1px solid #d8dee6;border-radius:4px;font:inherit;font-size:13px;outline:none;background:#fff}
+.ord-bar input:focus{border-color:var(--blue)}
+.ord-wrap{max-height:190px;overflow:auto}
+.ord-table{table-layout:fixed}
+.ord-table th:nth-child(1),.ord-table td:nth-child(1){width:34px}
+.ord-table th:nth-child(2),.ord-table td:nth-child(2){width:30%}
+.ord-table th:nth-child(3),.ord-table td:nth-child(3){width:26%}
+.ord-table th:nth-child(4),.ord-table td:nth-child(4){width:22%}
+.ord-table th:nth-child(5),.ord-table td:nth-child(5){width:22%;text-align:right}
+.ord-table td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ord-table{table-layout:auto}
+.ord-table th:nth-child(1),.ord-table td:nth-child(1){width:34px}
+.ord-table th,.ord-table td{padding-left:8px;padding-right:8px}
+.ord-table{width:100%;min-width:0;border-collapse:collapse;font-size:12px;table-layout:fixed}
+.ord-table th{height:36px;background:#fafbfd;color:#667382;font-weight:600;text-align:left;padding:0 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.ord-table td{padding:9px 10px;border-bottom:1px solid #f2f4f7;color:#344054;white-space:nowrap}
+.ord-table tr.pick{cursor:pointer}
+.ord-table tr.pick:hover{background:#fbfdff}
+.ord-table tr.pick.on{background:#eaf4ff}
+.ord-note{font-size:12px;color:#8c98a8;margin-top:6px;line-height:1.7}
+.sec-row{font-size:13px;font-weight:600;color:var(--blue);padding-top:4px;border-top:1px solid var(--line);margin-top:2px}
+.tip-bar{grid-column:span 2;padding:9px 12px;border-radius:4px;font-size:12px;line-height:1.7;background:#f0faf5;border:1px solid #b7e4cd;color:#1d6b46}
+.tip-bar.warn{background:#fff7e6;border-color:#ffd591;color:#d46b08}
+.upload-line{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px dashed #d8dee6;border-radius:6px;cursor:pointer;color:var(--blue);font-size:13px;align-self:flex-start}
+.up-file{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f7f9fb;border:1px solid var(--line);border-radius:6px;margin-top:8px;max-width:420px}
+.up-file .nm{flex:1;min-width:0;font-size:13px;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.up-file .tp{font-size:11px;color:#8c98a8}
+.up-file a{color:var(--blue);cursor:pointer;text-decoration:none;font-size:13px;margin-left:8px}
+.toast{position:fixed;top:82px;left:50%;transform:translateX(-50%);padding:11px 20px;border:1px solid #b7dcff;background:#f7faff;color:#1677d2;border-radius:5px;box-shadow:0 7px 20px rgba(24,144,255,.12);display:none;z-index:60}
+.toast.show{display:block}
+@media(max-width:1000px){.main-area{margin-left:180px}.top-nav,.main{padding-left:20px;padding-right:20px}.filter-actions{margin-left:0}}
+</style>
+</head>
+  <body>
+<script src="鸡蛋发票数据.js"></script>
+<script src="sidebar.js"></script>
+<div class="main-area">
+  <header class="top-nav">
+    <div class="breadcrumb"><a href="#">首页</a><span class="sep">/</span><span class="current">发票</span></div>
+    <div class="top-actions"><span class="notice">♧<span class="badge">3</span></span><div class="user"><span class="avatar">管</span><span>超级管理员</span><span style="font-size:11px">⌄</span></div></div>
+  </header>
+  <main class="main">
+    <div class="page-banner">发票</div>
+
+    <section class="filter-card">
+      <div class="filter-row">
+        <div class="filter-item"><label class="filter-label">发票号码</label><input class="filter-input" id="fNo" placeholder="请输入发票号码" /></div>
+        <div class="filter-item"><label class="filter-label">销售订单号</label><input class="filter-input" id="fSo" placeholder="请输入销售订单号" /></div>
+        <div class="filter-item"><label class="filter-label">票种</label><select class="filter-select" id="fKind"><option value="">全部</option><option>增值税普通发票（免税）</option></select></div>
+        <div class="filter-item"><label class="filter-label">开票日期</label><input class="filter-input" type="date" id="fDate" /></div>
+        <div class="filter-actions"><button class="btn btn-primary" onclick="applyFilter()">查询</button><button class="btn btn-default" onclick="resetFilter()">重置</button></div>
+      </div>
+    </section>
+
+    <section class="table-card">
+      <div class="table-head">
+        <div class="table-title">发票<span id="tableCount">共 2 条</span></div>
+        <div class="head-actions"><button class="btn btn-primary" onclick="openUpload()">+ 上传发票</button></div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th style="width:56px;">序号</th>
+            <th>发票号码</th>
+            <th>开票日期</th>
+            <th>票种</th>
+            <th style="text-align:right;">金额（不含税）</th>
+            <th style="text-align:right;">税额</th>
+            <th style="text-align:right;">价税合计</th>
+          </tr></thead>
+          <tbody id="body"></tbody>
+        </table>
+      </div>
+      <div class="pagination"><span style="margin-right:10px">共 <b id="totalRows">2</b> 条</span><button class="page-btn" disabled>‹</button><button class="page-btn active">1</button><button class="page-btn" disabled>›</button></div>
+    </section>
+
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 鸡蛋发票列表（供应商端）：数据与「销售订单 - 发票页签」同源，先款后票、不做卡控 =====
+function invRows() {
+    return EggInv.all().map(function (x) {
+        return { no: x.no, code: x.code, date: x.date, kind: x.kind, so: x.so, seller: x.seller, buyer: x.buyer,
+                 amount: x.amount, tax: x.tax, file: (x.files && x.files[0]) || '—',
+                 settle: (x.remark || '').indexOf('对应结算单 ') === 0 ? x.remark.replace('对应结算单 ', '') : '—',
+                 status: '已上传', by: x.by || '供应商上传' };
+    });
+}
+
+function money(n) { return '¥ ' + Number(n).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function cnDate(d) { var p = String(d).split('-'); return p[0] + '年' + p[1] + '月' + p[2] + '日'; }
+function findInv(no) { for (var i = 0; i < INV_ROWS.length; i++) { if (INV_ROWS[i].no === no) return INV_ROWS[i]; } return null; }
+
+function render(rows) {
+    var tb = document.getElementById('body');
+    if (!rows.length) {
+        tb.innerHTML = '<tr><td colspan="7" class="empty">没有符合条件的发票，销售订单上传发票后将同步到这里</td></tr>';
+    } else {
+        tb.innerHTML = rows.map(function (x, i) {
+            return '<tr style="cursor:pointer" onclick="goDetail(\'' + x.no + '\')">' +
+                '<td>' + (i + 1) + '</td>' +
+                '<td><span class="link">' + x.no + '</span></td>' +
+                '<td>' + cnDate(x.date) + '</td>' +
+                '<td>' + x.kind + '</td>' +
+                '<td class="money" style="text-align:right;">' + money(x.amount) + '</td>' +
+                '<td class="money" style="text-align:right;">' + money(x.tax) + '</td>' +
+                '<td class="money" style="text-align:right;">' + money(x.amount + x.tax) + '</td>' +
+            '</tr>';
+        }).join('');
+    }
+    document.getElementById('tableCount').textContent = '共 ' + rows.length + ' 条';
+    document.getElementById('totalRows').textContent = rows.length;
+}
+
+function filtered() {
+    var no = document.getElementById('fNo').value.trim().toLowerCase();
+    var so = document.getElementById('fSo').value.trim().toLowerCase();
+    var kind = document.getElementById('fKind').value;
+    var date = document.getElementById('fDate').value;
+    return invRows().filter(function (x) {
+        return (!no || x.no.toLowerCase().indexOf(no) >= 0) &&
+               (!so || x.so.toLowerCase().indexOf(so) >= 0) &&
+               (!kind || x.kind === kind) &&
+               (!date || x.date === date);
+    });
+}
+
+function applyFilter() {
+    var rows = filtered();
+    render(rows);
+    showToast('已按条件筛选，共 ' + rows.length + ' 张发票');
+}
+
+function resetFilter() {
+    document.getElementById('fNo').value = '';
+    document.getElementById('fSo').value = '';
+    document.getElementById('fKind').value = '';
+    document.getElementById('fDate').value = '';
+    render(invRows());
+    showToast('筛选条件已重置');
+}
+
+function goDetail(no) { location.href = '鸡蛋-发票详情.html?no=' + encodeURIComponent(no); }
+function goOrder(so) { location.href = '鸡蛋-销售订单详情.html?no=' + encodeURIComponent(so) + '&tab=invoice'; }
+
+function showToast(msg) {
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(window.tt);
+    window.tt = setTimeout(function () { el.classList.remove('show'); }, 2600);
+}
+
+(function init() {
+    // 胶囊/下钻带入：?so= 回填销售订单号并筛选（仅填值，不改变原始数据）
+    var m = location.search.match(/[?&]so=([^&]*)/);
+    if (m) document.getElementById('fSo').value = decodeURIComponent(m[1]);
+    render(filtered());
+})();
+</script>
+
+<!-- 上传发票（关联销售订单；该订单已开票时提示无需重复上传） -->
+<div class="modal-mask" id="upMask">
+  <div class="modal">
+    <div class="modal-title">上传发票<span class="modal-x" onclick="closeUpload()">✕</span></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="tip-bar" id="soTip">选择关联的销售订单后，自动带出平台（购方）与本单待开票金额。</div>
+        <div class="form-row full">
+          <label><span class="req">*</span>关联销售订单</label>
+          <div class="ord-pick">
+            <div class="ord-bar"><input id="iSoSearch" placeholder="搜索供应商销售订单编号 / 名称" oninput="renderSoChoices()"></div>
+            <div class="ord-wrap"><table class="ord-table"><thead><tr><th style="width:40px;"></th><th>销售单编号</th><th>销售单名称</th><th>状态</th><th style="text-align:right;">金额</th></tr></thead><tbody id="iSoChoices"></tbody></table></div>
+          </div>
+          <input type="hidden" id="iSo">
+        </div>
+        <div class="form-row full">
+          <label><span class="req">*</span>发票附件</label>
+          <span class="upload-line" onclick="pickFile()">⬆ 上传发票附件（PDF / 图片）</span>
+          <input type="file" id="iFile" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="onFilePicked(this)">
+          <div id="fileList"></div>
+          <div class="ord-note">上传后系统自动 OCR 识别票面信息，回填下方发票号码、发票代码、开票日期与金额</div>
+        </div>
+        <div class="form-row full">发票信息</div>
+        <div class="form-row"><label>购方（平台）</label><input id="iBuyer" readonly></div>
+        <div class="form-row"><label>本方（销方）</label><input id="iSeller" readonly></div>
+        <div class="form-row"><label>订单金额</label><input id="iOrderAmt" readonly></div>
+        <div class="form-row"><label>待开票金额</label><input id="iTodo" readonly></div>
+        <div class="form-row"><label><span class="req">*</span>发票号码</label><input id="iNo" placeholder="请输入发票号码"></div>
+        <div class="form-row"><label>发票代码</label><input id="iCode" placeholder="请输入发票代码"></div>
+        <div class="form-row"><label><span class="req">*</span>开票日期</label><input id="iDate" type="date"></div>
+        <div class="form-row"><label>票种</label><input id="iKind" readonly></div>
+        <div class="form-row"><label><span class="req">*</span>金额（不含税）</label><input id="iAmount" type="number" step="0.01" min="0" oninput="syncTotal()"></div>
+        <div class="form-row"><label>税率 / 税额</label><input id="iTax" readonly></div>
+        <div class="form-row full"><label>价税合计</label><input id="iTotal" readonly></div>
+        <div class="form-row full"><label>备注</label><textarea id="iRemark" rows="2" placeholder="如：对应结算单 EGG-PP-XXXXXXXXXXX"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-default" onclick="closeUpload()">取消</button>
+      <button class="btn btn-primary" onclick="submitUpload()">确认上传</button>
+    </div>
+  </div>
+</div>
+
+<script>
+    // ===== 发票模块上传：关联销售订单 + 已开票去重提示（与订单「发票」页签同一台账） =====
+    var UPL_FILES = [];
+    function renderSoChoices() {
+        var kw = (document.getElementById('iSoSearch').value || '').trim().toLowerCase();
+        var cur = document.getElementById('iSo').value;
+        var rows = EggInv.ORDERS.filter(function (o) {
+            return !kw || o.no.toLowerCase().indexOf(kw) >= 0 || (o.name || '').toLowerCase().indexOf(kw) >= 0;
+        });
+        document.getElementById('iSoChoices').innerHTML = rows.length ? rows.map(function (o) {
+            return '<tr class="pick' + (o.no === cur ? ' on' : '') + '" onclick="selectSo(\'' + o.no + '\')">' +
+                '<td><input type="radio" name="soPick"' + (o.no === cur ? ' checked' : '') + '></td>' +
+                '<td>' + o.no + (EggInv.invoiced(o.no) ? ' <span class="ord-tag">已开票</span>' : '') + '</td>' +
+                '<td>' + (o.name || '—') + '</td><td>' + o.label + '</td><td style="text-align:right;">' + EggInv.num(o.amount) + '</td></tr>';
+        }).join('') : '<tr><td colspan="5" class="empty" style="padding:22px 0">未找到匹配的销售订单</td></tr>';
+    }
+    function selectSo(no) { document.getElementById('iSo').value = no; renderSoChoices(); onSoChange(); }
+    function onSoChange() {
+        var no = document.getElementById('iSo').value, o = EggInv.order(no), tip = document.getElementById('soTip');
+        document.getElementById('iBuyer').value = o ? EggInv.BUYER : '';
+        document.getElementById('iSeller').value = o ? o.seller : '';
+        document.getElementById('iOrderAmt').value = o ? EggInv.money(o.amount) : '';
+        document.getElementById('iTodo').value = o ? EggInv.money(EggInv.todo(no)) : '';
+        document.getElementById('iAmount').value = no ? EggInv.todo(no).toFixed(2) : '';
+        var exists = no ? EggInv.forOrder(no) : [];
+        if (!o) { tip.className = 'tip-bar'; tip.textContent = '选择关联的销售订单后，自动带出平台（购方）与本单待开票金额。'; }
+        else if (exists.length) {
+            tip.className = 'tip-bar warn';
+            tip.innerHTML = '该销售订单已上传 ' + exists.length + ' 张发票（' + exists.map(function (x) { return x.no; }).join('、') +
+                '），无需在发票模块重复上传；如需分批补开可继续填写。<a class="link" style="margin-left:8px" onclick="goOrder(\'' + no + '\')">查看该订单发票</a>';
+        } else if (Number(o.amount) <= 0) {
+            tip.className = 'tip-bar warn'; tip.textContent = '该销售订单金额为 0 或未确认，暂不具备开票条件。';
+        } else { tip.className = 'tip-bar'; tip.textContent = '该销售订单尚未开票，可全额开具发票。'; }
+        syncTotal();
+    }
+    function syncTotal() {
+        var a = Number(document.getElementById('iAmount').value) || 0;
+        document.getElementById('iTax').value = '免税 / ' + EggInv.num(0);
+        document.getElementById('iTotal').value = EggInv.money(a);
+    }
+    function openUpload() {
+        document.getElementById('iSo').value = '';
+        document.getElementById('iSoSearch').value = '';
+        renderSoChoices();
+        document.getElementById('iNo').value = EggInv.nextNo();
+        document.getElementById('iCode').value = '';
+        document.getElementById('iDate').value = new Date().toISOString().slice(0, 10);
+        document.getElementById('iKind').value = EggInv.KIND;
+        document.getElementById('iRemark').value = '';
+        UPL_FILES = []; renderFiles();
+        document.getElementById('upMask').classList.add('show');
+        onSoChange();
+    }
+    function closeUpload() { document.getElementById('upMask').classList.remove('show'); }
+    function pickFile() { document.getElementById('iFile').click(); }
+    function onFilePicked(inp) {
+        var f = inp.files && inp.files[0]; if (!f) return;
+        UPL_FILES = [f.name];
+        // OCR：仅回填空白项，不覆盖已手工填写的内容
+        var so = document.getElementById('iSo').value, o = EggInv.order(so);
+        var setIf = function (id, v) { var el = document.getElementById(id); if (el && !String(el.value || '').trim()) el.value = v; };
+        setIf('iNo', f.name.replace(/[^0-9]/g, '').slice(-8) || EggInv.nextNo());
+        setIf('iCode', '310023451300');
+        setIf('iDate', new Date().toISOString().slice(0, 10));
+        setIf('iKind', EggInv.KIND);
+        if (o) setIf('iAmount', EggInv.todo(so).toFixed(2));
+        renderFiles(); syncTotal(); showToast('已 OCR 识别票面信息并回填，请核对后提交');
+    }
+    function renderFiles() {
+        document.getElementById('fileList').innerHTML = UPL_FILES.map(function (n) {
+            return '<div class="up-file"><span>' + n + '</span><span class="nm"></span><span class="tp">PDF</span><a onclick="delFile()">✕</a></div>';
+        }).join('');
+    }
+    function delFile() { UPL_FILES = []; renderFiles(); }
+    function submitUpload() {
+        var so = document.getElementById('iSo').value, o = EggInv.order(so);
+        var no = document.getElementById('iNo').value.trim(), date = document.getElementById('iDate').value;
+        var amt = Number(document.getElementById('iAmount').value) || 0;
+        if (!so) { showToast('请选择关联的销售订单'); return; }
+        if (!o || Number(o.amount) <= 0) { showToast('该销售订单金额为 0，暂不能开票'); return; }
+        if (!no) { showToast('请输入发票号码'); return; }
+        if (!date) { showToast('请选择开票日期'); return; }
+        if (amt <= 0) { showToast('开票金额需大于 0'); return; }
+        if (amt > Number(o.amount) + 0.005) { showToast('开票金额不能超过销售订单金额 ' + EggInv.money(o.amount)); return; }
+        if (!UPL_FILES.length) { showToast('请上传发票附件'); return; }
+        EggInv.add({ no: no, code: document.getElementById('iCode').value.trim(), date: date, kind: EggInv.KIND, so: so,
+            buyer: EggInv.BUYER, seller: o.seller, amount: amt, tax: 0, files: UPL_FILES.slice(),
+            remark: document.getElementById('iRemark').value.trim(), by: '供应商上传' });
+        closeUpload(); render(invRows()); showToast('发票已上传并关联 ' + so);
+    }
+    document.getElementById('upMask').addEventListener('click', function (e) { if (e.target === this) closeUpload(); });
+</script>
+
+</body>
+</html>

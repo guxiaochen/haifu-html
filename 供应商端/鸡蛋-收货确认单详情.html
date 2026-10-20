@@ -1,0 +1,1162 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>收货单详情 - 供应商端</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+          "Microsoft YaHei", sans-serif;
+        color: #1f2937;
+        background: #f4f6f9;
+        font-size: 13px;
+      }
+      .app-header {
+        display: none;
+      }
+      .page {
+        padding: 26px 32px 40px;
+        max-width: 1600px;
+      }
+      .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #9aa5b1;
+        font-size: 13px;
+        height: 42px;
+        margin-bottom: 4px;
+      }
+      .breadcrumb a {
+        color: #667382;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .breadcrumb a:hover {
+        color: #1890ff;
+      }
+      .breadcrumb .current {
+        color: #253142;
+        font-weight: 600;
+      }
+      .breadcrumb .sep {
+        color: #cfd6de;
+      }
+      .top-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 45px;
+        margin-bottom: 14px;
+      }
+      .page-label {
+        font-size: 16px;
+        font-weight: 600;
+        color: #253142;
+      }
+      .page-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .back-btn,
+      .nav-btn {
+        height: 32px;
+        border: 1px solid #d8dee6;
+        border-radius: 4px;
+        background: #fff;
+        color: #52606f;
+        padding: 0 13px;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 13px;
+      }
+      .nav-btn {
+        width: 32px;
+        padding: 0;
+      }
+      .back-btn:hover,
+      .nav-btn:hover {
+        color: #1890ff;
+        border-color: #1890ff;
+      }
+      .muted {
+        color: #98a2b3;
+        font-size: 12px;
+      }
+      .content {
+        background: #fff;
+        border: 1px solid #edf0f4;
+        border-radius: 8px;
+        padding: 18px 20px;
+        box-shadow: 0 4px 16px rgba(29, 45, 61, 0.03);
+      }
+      .order-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .order-head-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        background: #fff;
+        border: 1px solid #edf0f4;
+        border-radius: 8px;
+        padding: 16px 20px;
+        box-shadow: 0 4px 16px rgba(29, 45, 61, 0.03);
+        margin-bottom: 16px;
+      }
+      .order-head-bar .head-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .star {
+        font-size: 21px;
+        color: #8a969b;
+      }
+      .order-no {
+        font-size: 20px;
+        font-weight: 600;
+        color: #253142;
+      }
+      .type-tag {
+        padding: 4px 10px;
+        border-radius: 10px;
+        color: #1890ff;
+        background: #eaf4ff;
+        font-size: 12px;
+      }
+      .type-tag.owing {
+        color: #d46b08;
+        background: #fff3df;
+      }
+      .status {
+        margin-left: auto;
+        padding: 5px 11px;
+        border-radius: 10px;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #667382;
+        background: #f4f5f7;
+      }
+      .status:before {
+        content: "";
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+      .status.sent {
+        color: #389e0d;
+        background: #f1fae9;
+      }
+      .status.received {
+        color: #389e0d;
+        background: #f1fae9;
+      }
+      .status-flow {
+        flex-shrink: 0;
+      }
+      .step-tabs {
+        display: flex;
+        align-items: center;
+        gap: 0;
+      }
+      .step-tab {
+        padding: 6px 18px;
+        background: #f5f5f5;
+        color: #666;
+        font-size: 13px;
+        clip-path: polygon(
+          0 0,
+          calc(100% - 8px) 0,
+          100% 50%,
+          calc(100% - 8px) 100%,
+          0 100%,
+          8px 50%
+        );
+        margin-right: -8px;
+        transition: all 0.15s;
+      }
+      .step-tab:first-child {
+        clip-path: polygon(
+          0 0,
+          calc(100% - 8px) 0,
+          100% 50%,
+          calc(100% - 8px) 100%,
+          0 100%
+        );
+      }
+      .step-tab:last-child {
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 8px 50%);
+        margin-right: 0;
+      }
+      .step-tab.active {
+        background: #1890ff;
+        color: #fff;
+      }
+      .step-tab.done {
+        background: #e8e8e8;
+        color: #999;
+      }
+      .info-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px 70px;
+        padding: 6px 18px 22px;
+        border-bottom: 1px solid #f0f2f3;
+      }
+      .info-section .buttons {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 4px;
+      }
+      .info-column {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+      .info-title {
+        font-weight: 600;
+        color: #253142;
+        margin-bottom: 2px;
+      }
+      .info-title:before {
+        content: "";
+        display: inline-block;
+        width: 3px;
+        height: 14px;
+        background: #1890ff;
+        border-radius: 2px;
+        vertical-align: -2px;
+        margin-right: 7px;
+      }
+      .info-item {
+        display: flex;
+        gap: 18px;
+        line-height: 1.6;
+      }
+      .label {
+        width: 72px;
+        text-align: right;
+        color: #667382;
+        font-size: 13px;
+        flex-shrink: 0;
+      }
+      .value {
+        color: #344054;
+      }
+      .tabs {
+        display: flex;
+        gap: 0;
+        margin: 18px 0 0;
+        border-bottom: 1px solid #e8edef;
+      }
+      .tab {
+        padding: 10px 22px;
+        border: 1px solid #d8dee6;
+        border-bottom: 0;
+        color: #667382;
+        background: #fff;
+        border-radius: 7px 7px 0 0;
+        cursor: pointer;
+      }
+      .tab.active {
+        border-color: #1890ff;
+        color: #1890ff;
+        background: #f5fbff;
+        border-bottom: 1px solid #f5fbff;
+        margin-bottom: -1px;
+      }
+      .tab-content {
+        padding-top: 16px;
+      }
+      .notice {
+        padding: 10px 14px;
+        margin-bottom: 12px;
+        background: #f5fbff;
+        border: 1px solid #b7dcff;
+        color: #667382;
+        border-radius: 5px;
+      }
+      .notice.owing {
+        background: #fffaf0;
+        border-color: #ffe7ba;
+        color: #a65d00;
+      }
+      .logistics-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .logistics-tip {
+        color: #8b96a3;
+        font-size: 12px;
+      }
+      .logistics-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .logistics-card {
+        padding: 16px;
+        border: 1px solid #e7edf3;
+        border-radius: 7px;
+        background: #fbfdff;
+      }
+      .logistics-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .logistics-card-title {
+        color: #253142;
+        font-weight: 600;
+      }
+      .logistics-card-meta {
+        color: #98a2b3;
+        font-size: 12px;
+        margin-left: 8px;
+      }
+      .logistics-card-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .logistics-save-hint {
+        color: #d46b08;
+        font-size: 12px;
+      }
+      .logistics-fields {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px 20px;
+      }
+      .logistics-field label {
+        display: block;
+        margin-bottom: 5px;
+        color: #667382;
+        font-size: 12px;
+      }
+      .logistics-field input {
+        width: 100%;
+        height: 34px;
+        padding: 0 10px;
+        border: 1px solid #d8dee6;
+        border-radius: 4px;
+        color: #344054;
+        outline: none;
+      }
+      .logistics-field input:focus {
+        border-color: #1890ff;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, .12);
+      }
+      .logistics-files {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .file-upload-box {
+        min-height: 92px;
+        padding: 12px;
+        border: 1px dashed #b7dcff;
+        border-radius: 6px;
+        background: #f5fbff;
+      }
+      .file-upload-box h4 {
+        margin: 0 0 8px;
+        color: #52606f;
+        font-size: 12px;
+      }
+      .file-upload-box input[type="file"] {
+        width: 100%;
+        font-size: 12px;
+        color: #667382;
+      }
+      .file-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 8px;
+      }
+      .file-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        max-width: 100%;
+        padding: 4px 8px;
+        border: 1px solid #d8e7f5;
+        border-radius: 4px;
+        background: #fff;
+        color: #52606f;
+        font-size: 12px;
+      }
+      .file-chip a { color: #1677d2; text-decoration: none; }
+      .file-chip button {
+        border: 0;
+        padding: 0;
+        background: transparent;
+        color: #ff4d4f;
+        cursor: pointer;
+      }
+      .empty-logistics {
+        padding: 38px 0;
+        color: #98a2b3;
+        text-align: center;
+        border: 1px dashed #d8dee6;
+        border-radius: 6px;
+      }
+      .file-preview-mask {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: rgba(15, 23, 42, .55);
+      }
+      .file-preview-mask.show { display: flex; }
+      .file-preview-modal {
+        width: min(860px, 100%);
+        max-height: calc(100vh - 48px);
+        overflow: hidden;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 18px 60px rgba(15, 23, 42, .25);
+      }
+      .file-preview-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px 18px;
+        border-bottom: 1px solid #edf0f4;
+        color: #253142;
+        font-weight: 600;
+      }
+      .file-preview-close { border: 0; background: transparent; color: #667382; font-size: 22px; cursor: pointer; }
+      .file-preview-body { max-height: calc(100vh - 130px); overflow: auto; padding: 22px; background: #f7f9fb; text-align: center; }
+      .file-preview-body img, .file-preview-body video { max-width: 100%; max-height: 64vh; border-radius: 6px; background: #111; }
+      .preview-sheet { width: 100%; border-collapse: collapse; background: #fff; text-align: left; font-size: 13px; }
+      .preview-sheet th, .preview-sheet td { padding: 10px 12px; border: 1px solid #e5e7eb; }
+      .preview-sheet th { background: #f0f5fa; color: #52606f; }
+      .preview-empty { padding: 42px 0; color: #667382; }
+      .product-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+      .product-table th {
+        height: 42px;
+        text-align: left;
+        color: #667382;
+        font-weight: 600;
+        border-bottom: 1px solid #e9edef;
+        padding: 0 12px;
+        white-space: nowrap;
+      }
+      .product-table td {
+        height: 62px;
+        padding: 0 12px;
+        border-bottom: 1px solid #f0f2f3;
+        color: #344054;
+        white-space: nowrap;
+      }
+      .product-table tr:hover td {
+        background: #fbfdff;
+      }
+      .product-name {
+        font-weight: 500;
+        color: #344054;
+      }
+      .product-img {
+        width: 42px;
+        height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #f5f7fa;
+        border: 1px solid #e5e7eb;
+        border-radius: 5px;
+        font-size: 22px;
+      }
+      .product-code {
+        display: block;
+        color: #98a2b3;
+        font-size: 11px;
+        margin-top: 3px;
+      }
+      .qty-input {
+        width: 86px;
+        height: 30px;
+        border: 1px solid #d8dee6;
+        border-radius: 5px;
+        padding: 0 8px;
+        font-family: inherit;
+        color: #344054;
+      }
+      .qty-input:focus {
+        border-color: #1890ff;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.12);
+      }
+      .qty-input.invalid {
+        border-color: #ff4d4f;
+        box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.12);
+      }
+          .qty-input:disabled {
+            background: #f5f6f7;
+            color: #99a4a8;
+          }
+          /* 只读展示的发货数量：与订单数量保持同一视觉口径，不使用灰底只读样式 */
+          .qty-static {
+            display: inline-block;
+            width: 86px;
+            height: 30px;
+            line-height: 30px;
+            padding: 0 8px;
+            border: 1px solid #d8dee6;
+            border-radius: 5px;
+            background: #fff;
+            color: #344054;
+            font-variant-numeric: tabular-nums;
+          }
+      .remain-cell {
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        color: #389e0d;
+      }
+      .remain-cell.short {
+        color: #d46b08;
+      }
+      .remain-note {
+        display: block;
+        margin-top: 3px;
+        color: #d46b08;
+        font-size: 11px;
+        font-weight: 400;
+      }
+      .tax {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 9px;
+        background: #f0f5ff;
+        color: #1890ff;
+        border: 1px solid #d6e4ff;
+        font-size: 11px;
+      }
+      .bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 18px;
+      }
+      .ship-progress {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        padding: 12px 16px;
+        background: #fafbfd;
+        border: 1px solid #edf0f4;
+        border-radius: 6px;
+        width: 100%;
+      }
+      .ship-progress .sp-item {
+        font-size: 13px;
+        color: #667382;
+      }
+      .ship-progress .sp-item b {
+        color: #253142;
+        font-size: 16px;
+        margin-left: 4px;
+        font-variant-numeric: tabular-nums;
+      }
+      .ship-progress .sp-item b.sp-remain {
+        color: #d46b08;
+      }
+      .ship-progress .sp-item b.sp-done {
+        color: #389e0d;
+      }
+      .hint {
+        color: #98a2b3;
+        font-size: 12px;
+      }
+      .buttons {
+        display: flex;
+        gap: 9px;
+      }
+      .btn {
+        height: 34px;
+        padding: 0 17px;
+        border: 1px solid #d8dee6;
+        border-radius: 5px;
+        background: #fff;
+        color: #52606f;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 13px;
+      }
+      .btn:hover {
+        color: #1890ff;
+        border-color: #1890ff;
+      }
+      .btn-primary {
+        background: #1890ff;
+        color: #fff;
+        border-color: #1890ff;
+      }
+      .btn-primary:hover {
+        background: #096dd9;
+        border-color: #096dd9;
+        color: #fff;
+      }
+      .btn:disabled {
+        color: #cbd2da;
+        background: #f7f8f8;
+        border-color: #edf0f1;
+        cursor: not-allowed;
+      }
+      .toast {
+        position: fixed;
+        top: 76px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: none;
+        padding: 10px 18px;
+        background: #f5fbff;
+        border: 1px solid #b7dcff;
+        color: #1677d2;
+        border-radius: 6px;
+      }
+      .toast.show {
+        display: block;
+      }
+      .modal-mask {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+      }
+      .modal-mask.show {
+        display: flex;
+      }
+      .modal {
+        width: 360px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 12px 40px rgba(15, 23, 42, 0.18);
+        overflow: hidden;
+      }
+      .preview-modal { width: min(960px, calc(100vw - 32px)); max-height: calc(100vh - 32px); }
+      .preview-body { max-height: calc(100vh - 150px); overflow: auto; padding: 24px; background: #f5f6f8; }
+      .print-preview-page { background: #fff; min-height: 620px; padding: 34px 42px; color: #111; box-shadow: 0 2px 12px rgba(0,0,0,.12); }
+      .preview-brand { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #8aa7c8; padding-bottom: 10px; }
+      .preview-brand strong { font-size: 22px; color: #1769aa; }
+      .preview-company { font-size: 16px; font-weight: 600; }
+      .preview-title { text-align: center; font-size: 30px; font-weight: 700; margin: 18px 0; }
+      .preview-info-wrap { position: relative; margin-bottom: 24px; }
+      .preview-info { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 28px; line-height: 1.7; padding-right: 136px; }
+      .preview-qr { position: absolute; top: -50px; right: 0; width: 112px; height: 112px; object-fit: contain; border: 1px solid #e5e7eb; padding: 5px; }
+      .preview-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+      .preview-table th, .preview-table td { border: 1px solid #777; padding: 7px 6px; text-align: left; }
+      .preview-table th { background: #f7f7f7; font-weight: 700; }
+      .preview-footer { display: flex; justify-content: space-between; margin-top: 28px; font-size: 13px; }
+      @media (max-width: 700px) { .preview-info { grid-template-columns: 1fr; } .print-preview-page { padding: 20px; } }
+      .modal-title {
+        padding: 18px 20px 6px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #253142;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .modal-title .warn-icon {
+        color: #faad14;
+        font-size: 18px;
+      }
+      .modal-body {
+        padding: 4px 20px 18px;
+        color: #52606f;
+        line-height: 1.7;
+        font-size: 13px;
+      }
+      .modal-body b {
+        color: #253142;
+      }
+      .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 14px 20px;
+        border-top: 1px solid #f0f2f3;
+        background: #fafbfd;
+      }
+      .main-area {
+        margin-left: 200px;
+        min-height: 100vh;
+      }
+      .top-nav {
+        height: 64px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        padding: 0 32px;
+        border-bottom: 1px solid #edf0f4;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      .top-actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        color: #778393;
+      }
+      .nav-notice {
+        font-size: 18px;
+        position: relative;
+        cursor: pointer;
+      }
+      .nav-badge {
+        position: absolute;
+        top: -7px;
+        right: -8px;
+        background: #ff4d4f;
+        border: 2px solid #fff;
+        color: #fff;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 4px;
+        border-radius: 9px;
+        font-size: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .nav-user {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #475467;
+        cursor: pointer;
+      }
+      .nav-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #e6f4ff;
+        color: #1890ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+      }
+      .main {
+        padding: 26px 32px 40px;
+        max-width: 1600px;
+      }
+      @media (max-width: 900px) {
+        .info-section {
+          grid-template-columns: 1fr;
+        }
+        .product-table {
+          min-width: 0;
+          table-layout: fixed;
+          font-size: 12px;
+        }
+        .product-table th, .product-table td {
+          padding: 8px 5px;
+        }
+        .qty-input {
+          width: 64px;
+        }
+        .content {
+          overflow-x: hidden;
+        }
+      }
+      @media print {
+        .top-nav, .breadcrumb, .page-actions, .tabs, .notice, .bottom, #actionButtons, .modal-mask, .toast {
+          display: none !important;
+        }
+        body { background: #fff; color: #111; }
+        .main-area, .main, .page { margin: 0; padding: 0; max-width: none; }
+        .content, .order-head-bar { border: 0; box-shadow: none; }
+        .product-table { width: 100%; font-size: 11px; }
+        .product-table th, .product-table td { border: 1px solid #999; padding: 6px; }
+        body.print-without-price .print-price { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <script src="sidebar.js"></script>
+    <div class="main-area">
+      <header class="top-nav">
+        <div class="breadcrumb" id="breadcrumb">
+            <a onclick="location.href='鸡蛋-收货确认单列表.html'">首页</a><span class="sep">/</span><a onclick="location.href='鸡蛋-收货确认单列表.html'">收货单</a><span class="sep">/</span><span class="current">收货单详情</span>
+        </div>
+        <div class="top-actions">
+          <span class="nav-notice">♧<span class="nav-badge">3</span></span>
+          <div class="nav-user"><span class="nav-avatar">管</span><span>超级管理员</span><span style="font-size:11px">⌄</span></div>
+        </div>
+      </header>
+      <main class="page">
+        <div class="order-head-bar">
+          <div class="head-left">
+            <span class="order-no" id="shipmentNo">SH20260906001</span
+            ><span class="type-tag" id="typeTag">收货单</span>
+          </div>
+          <span class="status-flow"
+            ><span class="step-tabs" id="statusFlow">
+              <span class="step-tab" data-step="pending">待发货</span>
+              <span class="step-tab" data-step="sent">已发货</span>
+              <span class="step-tab" data-step="received">已收货</span>
+            </span></span
+          >
+        </div>
+        
+<section class="content">
+          <div class="info-section">
+            <div class="buttons" id="actionButtons" style="display:flex;justify-content:flex-start">
+              <!-- <button class="btn btn-primary" id="shipBtn" onclick="submitShipment()">发货</button>
+              <button class="btn" id="zipBtn" onclick="uploadZip()">统一上传（zip，按车辆建文件夹）</button> -->
+              <button class="btn" id="stkBtn" type="button">盖章</button>
+            </div>
+                        <div class="info-column">
+              <div class="info-title">单据信息</div>
+              <div class="info-item">
+                <span class="label" style="width:110px">发货单号</span
+                ><span class="value">FH20260906001</span>
+              </div>
+              <div class="info-item">
+                <span class="label" style="width:110px">源销售单号</span
+                ><span class="value">EGG-SO-20260901002</span>
+              </div>
+              <div class="info-item">
+                <span class="label" style="width:110px">采购单位</span
+                ><span class="value">焱丰（山东）供应链管理有限公司</span>
+              </div>
+              <div class="info-item">
+                <span class="label" style="width:110px">收货人</span
+                ><span class="value">侯振鲁</span>
+              </div>
+              <div class="info-item">
+                <span class="label" style="width:110px">收货电话</span
+                ><span class="value">17505308090</span>
+              </div>
+              <div class="info-item">
+                <span class="label" style="width:110px">收货地址</span
+                ><span class="value">山东省济南市历下区经十路9999号 1号库</span>
+              </div>
+              <div class="info-item">
+                <span class="label" style="width:110px">供应单位</span
+                ><span class="value">平原县蛋鸡养殖合作社</span>
+              </div>
+              <!-- <div class="info-item">
+                <span class="label" style="width:110px">联系人</span
+                ><span class="value">王志远</span>
+              </div>
+              <div class="info-item">
+                <span class="label" style="width:110px">联系电话</span
+                ><span class="value">13905310001</span>
+              </div> -->
+              <div class="info-item">
+                <span class="label" style="width:110px">订单日期</span
+                ><span class="value">2026年09月01日</span>
+              </div>
+              <div class="info-item">
+                <span class="label" style="width:110px">发货日期</span
+                ><span class="value">2026年09月06日</span>
+              </div>
+              <div class="info-item">
+                <span class="label" style="width:110px">收货日期</span
+                ><span class="value">2026年09月06日</span>
+              </div>
+                          
+            </div>
+            <div class="info-column">
+              <div class="info-title">结算与附件</div>
+              <div class="info-item">
+                <span class="label" style="width:110px">实发总数量(箱)</span
+                ><span class="value">1,314 箱</span>
+              </div>
+              <div class="info-item">
+                <span class="label" style="width:110px">平均单价</span
+                ><span class="value">¥ 149.52 /箱</span>
+              </div>
+              <div class="info-item">
+                <span class="label" style="width:110px">结算金额</span
+                ><span class="value">¥ 196,465.72</span>
+              </div>
+              <div class="info-item">
+                <span class="label" style="width:110px">备注</span
+                ><span class="value">—</span>
+              </div>
+          <style>
+            .egg-file { display:inline-flex; align-items:center; gap:10px; padding:8px 12px; background:#f7f9fb; border:1px solid #edf0f4; border-radius:6px; max-width:100%; }
+            .egg-file .ico { width:32px; height:32px; border-radius:5px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:15px; flex-shrink:0; }
+            .egg-file .ico.pdf{background:#d9534f;} .egg-file .ico.img{background:#4aa3df;} .egg-file .ico.xls{background:#217346;}
+            .egg-file .nm{font-size:13px;color:#1f2937;} .egg-file .tp{font-size:11px;color:#8c98a8;}
+            .egg-file .ops{display:inline-flex;gap:10px;margin-left:6px;}
+            .egg-file .ops a{color:#1890ff;cursor:pointer;font-size:13px;text-decoration:none;}
+            .egg-file .ops a:hover{text-decoration:underline;}
+            .egg-file .ops a.del{color:#ff4d4f;}
+            .file-stack{display:flex;flex-direction:column;gap:6px;}
+          </style>
+              <div class="info-item">
+                <span class="label" style="width:110px">收货单</span
+                ><span class="value"><span class="file-stack"><span class="egg-file"><span class="ico xls">X</span><span class="meta"><span class="nm">收货确认单_20260906.xlsx</span><span class="tp">XLSX</span></span><span class="ops"><a onclick="fileAction('预览', '收货确认单_20260906.xlsx')" title="预览">🔍</a><a onclick="fileAction('下载', '收货确认单_20260906.xlsx')" title="下载">⬇</a></span></span><span style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px dashed #d9d9d9;border-radius:6px;cursor:pointer;color:#1890ff;font-size:13px;align-self:flex-start;" onclick="fileAction('上传', '收货确认单_20260906.xlsx')">⬆ 上传收货单</span></span></span>
+              </div>
+              <div class="info-item">
+                <span class="label" style="width:110px">收货单（盖章）</span
+                ><span class="value"><span class="file-stack">
+                  <span class="egg-file"><span class="ico pdf">PDF</span><span class="meta"><span class="nm">收货单_盖章（系统）.pdf</span><span class="tp">PDF</span></span><span class="ops"><a onclick="fileAction('预览', '收货单_盖章.pdf')" title="预览">🔍</a><a onclick="fileAction('下载', '收货单_盖章.pdf')" title="下载">⬇</a></span></span>
+                  <span class="egg-file"><span class="ico pdf">PDF</span><span class="meta"><span class="nm">收货单_我上传.pdf</span><span class="tp">PDF</span></span><span class="ops"><a onclick="fileAction('预览', '收货单_我上传.pdf')" title="预览">🔍</a><a onclick="fileAction('下载', '收货单_我上传.pdf')" title="下载">⬇</a><a class="del" onclick="deleteFile(this, '收货单_我上传.pdf')" title="删除">✕</a></span></span>
+                  <span style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px dashed #d9d9d9;border-radius:6px;cursor:pointer;color:#1890ff;font-size:13px;align-self:flex-start;" onclick="fileAction('上传', '收货单_盖章.pdf')">⬆ 上传收货单（盖章）</span>
+                </span></span>
+              </div>
+            </div>
+          </div>
+          <div class="tabs">
+            <div class="tab active" data-tab="vehicles" onclick="switchTab('vehicles')">收货详情</div>
+            <div class="tab" data-tab="attach" onclick="switchTab('attach')">附件</div>
+          </div>
+          <div class="tab-content" id="vehiclesTab">
+            <div class="notice">收货明细按「车辆 · 净重规格」分行；实发数量单位为箱，单价为含税单价，附件按车牌号分组上传。</div>
+            <div style="overflow-x:auto">
+              <table class="product-table">
+                <thead>
+                  <tr>
+                    <th>车牌号</th>
+                    <th>送货人</th>
+                    <th>司机电话</th>
+                    <th>产品</th>
+                    <th>净重规格</th>
+                    <th>单位</th><th style="text-align:right;">均重（斤）</th>
+                    <th style="text-align:right">总重(斤)</th>
+                    <th style="text-align:right">实发数量</th>
+                    <th style="text-align:right">单价(含税.元)</th>
+                    <th style="text-align:right">总价</th>
+                    <th>装货地址</th>
+                  </tr>
+                </thead>
+                <tbody><tr><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>38-39</td><td>箱</td><td style="text-align:right">38.50</td><td style="text-align:right">53,979.00</td><td style="text-align:right">0</td><td style="text-align:right">0.00</td><td style="text-align:right">0.00</td><td>河南省濮阳市</td></tr>
+<tr><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>39-40</td><td>箱</td><td style="text-align:right">39.50</td><td style="text-align:right">53,979.00</td><td style="text-align:right">1</td><td style="text-align:right">149.52</td><td style="text-align:right">149.52</td><td>河南省濮阳市</td></tr>
+<tr><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>40-41</td><td>箱</td><td style="text-align:right">40.50</td><td style="text-align:right">53,979.00</td><td style="text-align:right">196</td><td style="text-align:right">149.52</td><td style="text-align:right">29,305.92</td><td>河南省濮阳市</td></tr>
+<tr><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>41-42</td><td>箱</td><td style="text-align:right">41.50</td><td style="text-align:right">53,979.00</td><td style="text-align:right">813</td><td style="text-align:right">149.52</td><td style="text-align:right">121,559.76</td><td>河南省濮阳市</td></tr>
+<tr><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>42-43</td><td>箱</td><td style="text-align:right">42.50</td><td style="text-align:right">53,979.00</td><td style="text-align:right">283</td><td style="text-align:right">149.52</td><td style="text-align:right">42,314.16</td><td>河南省濮阳市</td></tr>
+<tr><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>43-44</td><td>箱</td><td style="text-align:right">43.50</td><td style="text-align:right">53,979.00</td><td style="text-align:right">2</td><td style="text-align:right">149.52</td><td style="text-align:right">299.04</td><td>河南省濮阳市</td></tr>
+<tr><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>≥46</td><td>箱</td><td style="text-align:right">46.00</td><td style="text-align:right">53,979.00</td><td style="text-align:right">4</td><td style="text-align:right">149.52</td><td style="text-align:right">598.08</td><td>河南省濮阳市</td></tr>
+<tr><td>冀D1J679</td><td>张书兴</td><td>15232846960</td><td>[00000007] 鲜鸡蛋</td><td>38-39</td><td>箱</td><td style="text-align:right">38.50</td><td style="text-align:right">54,612.70</td><td style="text-align:right">14</td><td style="text-align:right">151.48</td><td style="text-align:right">2,120.72</td><td>河北省邯郸市</td></tr>
+<tr><td>冀D1J679</td><td>张书兴</td><td>15232846960</td><td>[00000007] 鲜鸡蛋</td><td>40-41</td><td>箱</td><td style="text-align:right">40.50</td><td style="text-align:right">54,612.70</td><td style="text-align:right">1</td><td style="text-align:right">151.48</td><td style="text-align:right">151.48</td><td>河北省邯郸市</td></tr>
+<tr><td>冀D1J679</td><td>张书兴</td><td>15232846960</td><td>[00000007] 鲜鸡蛋</td><td>39-40</td><td>箱</td><td style="text-align:right">39.50</td><td style="text-align:right">54,612.70</td><td style="text-align:right">156</td><td style="text-align:right">151.48</td><td style="text-align:right">23,630.88</td><td>河北省邯郸市</td></tr>
+<tr><td>冀D3C079</td><td>王铁柱</td><td>13731005566</td><td>[00000007] 鲜鸡蛋</td><td>40-41</td><td>箱</td><td style="text-align:right">40.50</td><td style="text-align:right">55,204.50</td><td style="text-align:right">489</td><td style="text-align:right">151.48</td><td style="text-align:right">74,073.72</td><td>河北省邯郸市</td></tr>
+<tr><td>冀D9H888</td><td>李占军</td><td>13932007788</td><td>[00000007] 鲜鸡蛋</td><td>41-42</td><td>箱</td><td style="text-align:right">41.50</td><td style="text-align:right">53,458.20</td><td style="text-align:right">75</td><td style="text-align:right">151.48</td><td style="text-align:right">11,361.00</td><td>河北省邯郸市</td></tr>
+<tr><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>42-43</td><td>箱</td><td style="text-align:right">42.50</td><td style="text-align:right">53,979.00</td><td style="text-align:right">642</td><td style="text-align:right">149.52</td><td style="text-align:right">95,991.84</td><td>河南省濮阳市</td></tr>
+<tr><td>冀D1J679</td><td>张书兴</td><td>15232846960</td><td>[00000007] 鲜鸡蛋</td><td>43-44</td><td>箱</td><td style="text-align:right">43.50</td><td style="text-align:right">54,612.70</td><td style="text-align:right">238</td><td style="text-align:right">151.48</td><td style="text-align:right">36,052.24</td><td>河北省邯郸市</td></tr>
+<tr><td>冀D3C079</td><td>王铁柱</td><td>13731005566</td><td>[00000007] 鲜鸡蛋</td><td>44-45</td><td>箱</td><td style="text-align:right">44.50</td><td style="text-align:right">55,204.50</td><td style="text-align:right">512</td><td style="text-align:right">151.48</td><td style="text-align:right">77,557.76</td><td>河北省邯郸市</td></tr>
+<tr><td>冀D9H888</td><td>李占军</td><td>13932007788</td><td>[00000007] 鲜鸡蛋</td><td>≥46</td><td>箱</td><td style="text-align:right">46.00</td><td style="text-align:right">53,458.20</td><td style="text-align:right">89</td><td style="text-align:right">151.48</td><td style="text-align:right">13,481.72</td><td>河北省邯郸市</td></tr>
+<tr><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>38-39</td><td>箱</td><td style="text-align:right">38.50</td><td style="text-align:right">53,979.00</td><td style="text-align:right">730</td><td style="text-align:right">149.52</td><td style="text-align:right">109,149.60</td><td>河南省濮阳市</td></tr>
+<tr><td>冀D1J679</td><td>张书兴</td><td>15232846960</td><td>[00000007] 鲜鸡蛋</td><td>39-40</td><td>箱</td><td style="text-align:right">39.50</td><td style="text-align:right">54,612.70</td><td style="text-align:right">164</td><td style="text-align:right">151.48</td><td style="text-align:right">24,842.72</td><td>河北省邯郸市</td></tr>
+<tr><td>冀D3C079</td><td>王铁柱</td><td>13731005566</td><td>[00000007] 鲜鸡蛋</td><td>40-41</td><td>箱</td><td style="text-align:right">40.50</td><td style="text-align:right">55,204.50</td><td style="text-align:right">595</td><td style="text-align:right">151.48</td><td style="text-align:right">90,130.60</td><td>河北省邯郸市</td></tr>
+<tr><td>冀D9H888</td><td>李占军</td><td>13932007788</td><td>[00000007] 鲜鸡蛋</td><td>41-42</td><td>箱</td><td style="text-align:right">41.50</td><td style="text-align:right">53,458.20</td><td style="text-align:right">43</td><td style="text-align:right">151.48</td><td style="text-align:right">6,513.64</td><td>河北省邯郸市</td></tr>
+<tr><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>42-43</td><td>箱</td><td style="text-align:right">42.50</td><td style="text-align:right">53,979.00</td><td style="text-align:right">876</td><td style="text-align:right">149.52</td><td style="text-align:right">130,979.52</td><td>河南省濮阳市</td></tr>
+<tr><td>冀D1J679</td><td>张书兴</td><td>15232846960</td><td>[00000007] 鲜鸡蛋</td><td>43-44</td><td>箱</td><td style="text-align:right">43.50</td><td style="text-align:right">54,612.70</td><td style="text-align:right">210</td><td style="text-align:right">151.48</td><td style="text-align:right">31,810.80</td><td>河北省邯郸市</td></tr>
+<tr><td>冀D3C079</td><td>王铁柱</td><td>13731005566</td><td>[00000007] 鲜鸡蛋</td><td>44-45</td><td>箱</td><td style="text-align:right">44.50</td><td style="text-align:right">55,204.50</td><td style="text-align:right">668</td><td style="text-align:right">151.48</td><td style="text-align:right">101,188.64</td><td>河北省邯郸市</td></tr>
+<tr><td>冀D9H888</td><td>李占军</td><td>13932007788</td><td>[00000007] 鲜鸡蛋</td><td>≥46</td><td>箱</td><td style="text-align:right">46.00</td><td style="text-align:right">53,458.20</td><td style="text-align:right">97</td><td style="text-align:right">151.48</td><td style="text-align:right">14,693.56</td><td>河北省邯郸市</td></tr>
+<tr><td>豫J97319</td><td>冯晓攀</td><td>13253090005</td><td>[00000007] 鲜鸡蛋</td><td>38-39</td><td>箱</td><td style="text-align:right">38.50</td><td style="text-align:right">53,979.00</td><td style="text-align:right">451</td><td style="text-align:right">149.52</td><td style="text-align:right">67,433.52</td><td>河南省濮阳市</td></tr>
+<tr><td>冀D1J679</td><td>张书兴</td><td>15232846960</td><td>[00000007] 鲜鸡蛋</td><td>39-40</td><td>箱</td><td style="text-align:right">39.50</td><td style="text-align:right">54,612.70</td><td style="text-align:right">605</td><td style="text-align:right">151.48</td><td style="text-align:right">91,645.40</td><td>河北省邯郸市</td></tr></tbody>
+              </table>
+<style>
+.vpager{margin-top:12px;display:flex;align-items:center;gap:8px;font-size:13px;color:#667382}
+.vpager button{min-width:30px;height:28px;padding:0 10px;border:1px solid #d8dee6;background:#fff;border-radius:4px;font-size:13px;color:#555;cursor:pointer}
+.vpager button:hover:not(:disabled){border-color:#1890ff;color:#1890ff}
+.vpager button.on{background:#1890ff;border-color:#1890ff;color:#fff}
+.vpager button:disabled{color:#ccc;cursor:not-allowed}
+
+        
+
+    </style>
+<div class="vpager" id="vpager"></div>
+<script>
+(function(){
+  var tables=document.querySelectorAll('table'), tb=null;
+  tables.forEach(function(t){ if(t.querySelector && t.textContent.indexOf('车牌号')>=0 && !tb) tb=t; });
+  if(!tb) return;
+  var body=tb.querySelector('tbody'); if(!body) return;
+  var rows=[].slice.call(body.querySelectorAll('tr')).filter(function(r){return r.querySelectorAll('td').length>=12;});
+  var ps=20, cur=1, total=Math.max(1,Math.ceil(rows.length/ps));
+  function render(){
+    rows.forEach(function(r,i){ r.style.display=(i>=(cur-1)*ps && i<cur*ps)?'':'none'; });
+    var pager=document.getElementById('vpager'); if(!pager) return;
+    var html='共 '+rows.length+' 条 · 每页 '+ps+' 条';
+    html+='<button data-p="prev"'+(cur===1?' disabled':'')+'>上一页</button>';
+    for(var p=1;p<=total;p++) html+='<button data-p="'+p+'" class="'+(p===cur?'on':'')+'">'+p+'</button>';
+    html+='<button data-p="next"'+(cur===total?' disabled':'')+'>下一页</button>';
+    pager.innerHTML=html;
+    pager.querySelectorAll('button').forEach(function(b){ b.onclick=function(){ var v=b.getAttribute('data-p'); if(v==='prev'&&cur>1)cur--; else if(v==='next'&&cur<total)cur++; else if(v!=='prev'&&v!=='next')cur=parseInt(v,10); render(); }; });
+  }
+  render();
+})();
+</script>
+            </div>
+            <div class="bottom" id="footNote">
+              <div class="ship-progress">
+                <span class="sp-item">实发总数量<b>1,314</b> 箱</span>
+                <span class="sp-item">发货车辆<b>2</b> 辆</span>
+                <span class="sp-item">结算金额<b>¥ 196,465.72</b></span>
+                <span class="hint">明细行由发货过磅数据生成，提交后不可修改</span>
+              </div>
+            </div>
+          </div>
+          <div class="tab-content" id="attachTab" style="display:none">
+            <div class="notice">附件按车牌号分组：每辆车为过磅单 + 现场单据图片；可用【统一上传（zip，按车辆建文件夹）】一次性上传。</div>
+            <div style="overflow-x:auto">
+              <table class="product-table">
+                <thead>
+                  <tr>
+                    <th style="width:150px">车牌号</th>
+                    <th>附件</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td rowspan="4" style="vertical-align:top;font-weight:600">豫J97319</td>
+                    <td><span class="file-chip">🖼<span>微信图片_20260130164850_52_33.jpg</span><span class="muted">JPG</span><a onclick="fileAction('预览', '微信图片_20260130164850_52_33.jpg')" title="预览">🔍</a><a onclick="fileAction('下载', '微信图片_20260130164850_52_33.jpg')" title="下载">⬇</a></span></td>
+                  </tr>
+                  <tr><td><span class="file-chip">🖼<span>微信图片_2026-01-31_090252_695.jpg</span><span class="muted">JPG</span><a onclick="fileAction('预览', '微信图片_2026-01-31_090252_695.jpg')" title="预览">🔍</a><a onclick="fileAction('下载', '微信图片_2026-01-31_090252_695.jpg')" title="下载">⬇</a></span></td></tr>
+                  <tr><td><span class="file-chip">🖼<span>微信图片_2026-01-31_090245_983.jpg</span><span class="muted">JPG</span><a onclick="fileAction('预览', '微信图片_2026-01-31_090245_983.jpg')" title="预览">🔍</a><a onclick="fileAction('下载', '微信图片_2026-01-31_090245_983.jpg')" title="下载">⬇</a></span></td></tr>
+                  <tr><td><span class="file-chip">📄<span>豫J97319.xlsx</span><span class="muted">XLSX</span><a onclick="fileAction('预览', '豫J97319.xlsx')" title="预览">🔍</a><a onclick="fileAction('下载', '豫J97319.xlsx')" title="下载">⬇</a></span></td></tr>
+                  <tr>
+                    <td rowspan="4" style="vertical-align:top;font-weight:600">冀D1J679</td>
+                    <td><span class="file-chip">🖼<span>微信图片_20260130164855_66_33.jpg</span><span class="muted">JPG</span><a onclick="fileAction('预览', '微信图片_20260130164855_66_33.jpg')" title="预览">🔍</a><a onclick="fileAction('下载', '微信图片_20260130164855_66_33.jpg')" title="下载">⬇</a></span></td>
+                  </tr>
+                  <tr><td><span class="file-chip">🖼<span>微信图片_2026-01-31_090216_743.jpg</span><span class="muted">JPG</span><a onclick="fileAction('预览', '微信图片_2026-01-31_090216_743.jpg')" title="预览">🔍</a><a onclick="fileAction('下载', '微信图片_2026-01-31_090216_743.jpg')" title="下载">⬇</a></span></td></tr>
+                  <tr><td><span class="file-chip">🖼<span>微信图片_2026-01-31_090210_119.jpg</span><span class="muted">JPG</span><a onclick="fileAction('预览', '微信图片_2026-01-31_090210_119.jpg')" title="预览">🔍</a><a onclick="fileAction('下载', '微信图片_2026-01-31_090210_119.jpg')" title="下载">⬇</a></span></td></tr>
+                  <tr><td><span class="file-chip">📄<span>冀D1J679.xlsx</span><span class="muted">XLSX</span><a onclick="fileAction('预览', '冀D1J679.xlsx')" title="预览">🔍</a><a onclick="fileAction('下载', '冀D1J679.xlsx')" title="下载">⬇</a></span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script>
+      // ===== 鸡蛋收货单详情（供应商端演示页）=====
+      function getParam(name) {
+        var m = location.search.match(new RegExp("[?&]" + name + "=([^&]*)"));
+        return m ? decodeURIComponent(m[1]) : "";
+      }
+      function backList() {
+        location.href = "鸡蛋-收货确认单列表.html";
+      }
+      function switchTab(name) {
+        Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (t) {
+          t.classList.toggle("active", t.getAttribute("data-tab") === name);
+        });
+        document.getElementById("vehiclesTab").style.display = name === "vehicles" ? "" : "none";
+        document.getElementById("attachTab").style.display = name === "attach" ? "" : "none";
+      }
+      function showToast(msg) {
+        var el = document.getElementById("toast");
+        el.textContent = msg;
+        el.classList.add("show");
+        clearTimeout(window.tt);
+        window.tt = setTimeout(function () { el.classList.remove("show"); }, 2600);
+      }
+      // 单据操作：发货与统一上传 zip 均为演示
+      function submitShipment() {
+        setFlow("sent");
+        var btn = document.getElementById("shipBtn");
+        btn.disabled = true;
+        btn.textContent = "已发货";
+        showToast("收货单已提交（演示）：状态变更为「已发货」，车辆明细与附件同步采购单位确认。");
+      }
+      function uploadZip() {
+        showToast("请选择 zip 压缩包（演示）：系统按车牌号自动创建文件夹并匹配附件\n\n示例结构：\nSH20260906001.zip\n├── 豫J97319/（3 张图片 + 1 个 Excel）\n└── 冀D1J679/（3 张图片 + 1 个 Excel）");
+        showToast("已按车牌号分组匹配附件（演示）");
+      }
+      function uploadStamped() {
+        showToast("已上传盖章发货单（演示）");
+      }
+      function fileAction(action, name) {
+        showToast(action + "：" + name + "（演示）");
+      }
+      // 自己上传的文件可删除（系统生成的不可删）
+      function deleteFile(el, name) {
+        var stack = el.closest(".file-stack");
+        if (stack) {
+          var cards = stack.querySelectorAll(".egg-file");
+          if (cards.length > 1) { cards[cards.length - 1].remove(); }
+        }
+        showToast("已删除：" + name);
+      }
+      // 步骤条：草稿 → 提交 → 确认（已发货），可由 ?status= 控制
+      var STEP_ORDER = ["pending", "sent", "received"];
+      function setFlow(status) {
+        var alias = { draft: "pending", submit: "sent", shipped: "sent" };   // 兼容旧的 ?status= 取值
+        if (alias[status]) status = alias[status];
+        var cur = STEP_ORDER.indexOf(status);
+        if (cur < 0) cur = 1;
+        Array.prototype.forEach.call(document.querySelectorAll("#statusFlow .step-tab"), function (tab, idx) {
+          tab.classList.remove("active", "done");
+          if (idx < cur) tab.classList.add("done");
+          else if (idx === cur) tab.classList.add("active");
+        });
+      }
+      (function init() {
+        var no = getParam("no") || "SH20260906001";
+        document.getElementById("shipmentNo").textContent = no;
+        var _dn=document.getElementById("docNo"); if (_dn) _dn.textContent = no;
+        var _bn=document.getElementById("breadNo"); if (_bn) _bn.textContent = no;
+        document.title = "鸡蛋收货单详情 " + no + " - 供应商端";
+        setFlow(getParam("status") || "sent");
+      })();
+    </script>
+  
+<div id="stkToast" style="display:none;position:fixed;top:82px;left:50%;transform:translateX(-50%);padding:10px 18px;background:#f5fbff;border:1px solid #b7dcff;color:#1677d2;border-radius:6px;font-size:13px;z-index:1500"></div>
+
+
+
+
+<script>
+    // 盖章：仅按钮态变化，无弹窗、不展示签署流程（演示）
+    (function () {
+        var btn = document.getElementById('stkBtn');
+        if (!btn) return;
+        btn.onclick = function () {
+            if (btn.getAttribute('data-done') === '1') { return; }
+            btn.setAttribute('data-done', '1');
+            btn.textContent = '已签章';
+            btn.disabled = true;
+            if (typeof showToast === 'function') showToast('已跳转第三方电子签章平台完成签章（演示）');
+        };
+    })();
+</script>
+</body>
+</html>

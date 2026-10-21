@@ -51,12 +51,6 @@
         { text: "发票", href: "鸡蛋-发票列表.html", page: "鸡蛋-发票列表.html,鸡蛋-发票详情.html" },
         { text: "结算单", href: "鸡蛋-预付款列表.html", page: "鸡蛋-预付款列表.html,鸡蛋-预付款详情.html" }
       ]
-    },
-    {
-      standalone: true,
-      items: [
-        { text: "消息中心", href: "", page: "" }
-      ]
     }
   ];
 

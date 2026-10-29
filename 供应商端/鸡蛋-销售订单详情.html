@@ -168,7 +168,6 @@ table.items-table tbody tr:hover{background:#fafbff}
         .inv-row input:focus, .inv-row select:focus { border-color: #1890ff; }
         .inv-unit { margin-left: 8px; color: #666; font-size: 12px; flex-shrink: 0; }
         .inv-err { font-size: 12px; color: #ff4d4f; min-height: 16px; }
-        .inv-ocr { font-size: 12px; color: #389e0d; margin-top: 6px; display: none; }
         .inv-tip { grid-column: 1 / -1; padding: 9px 12px; margin-bottom: 4px; border-radius: 4px; font-size: 12px; line-height: 1.7; background: #f0faf5; border: 1px solid #b7e4cd; color: #1d6b46; }
         .inv-section { grid-column: 1 / -1; padding-top: 4px; margin-top: 2px; border-top: 1px solid #f0f0f0; color: #1890ff; font-size: 13px; font-weight: 600; }
         .inv-required { color: #ff4d4f; margin-right: 3px; }
@@ -394,7 +393,7 @@ table.items-table tbody tr:hover{background:#fafbff}
                     <div class="inv-modal-body">
                         <div class="inv-grid">
                             <div class="inv-tip">当前销售订单 <strong id="ivOrderNo"></strong>，无需再选择销售订单。</div>
-                            <div class="inv-row full top"><label><span class="inv-required">*</span>发票附件</label><span style="flex:1;"><span id="ivFiles"></span><span class="inv-upload" onclick="invAddFile()">⬆ 上传发票附件（PDF / 图片）</span><div class="inv-ocr" id="ivOcr"></div></span></div>
+                            <div class="inv-row full top"><label><span class="inv-required">*</span>发票附件</label><span style="flex:1;"><span id="ivFiles"></span><span class="inv-upload" onclick="invAddFile()">⬆ 上传发票附件（PDF / 图片）</span><div style="font-size:12px;color:#999;margin-top:6px;">技术侧暂不支持 OCR 识别，请根据发票票面手工填写下方信息。</div></span></div>
                             <div class="inv-section">发票信息</div>
                             <div class="inv-row"><label>购方（平台）</label><input id="ivBuyer" value="焱丰（山东）供应链管理有限公司" readonly></div>
                             <div class="inv-row"><label>本方（销方）</label><input id="ivSeller" readonly></div>
@@ -402,9 +401,9 @@ table.items-table tbody tr:hover{background:#fafbff}
                             <div class="inv-row"><label>待开票金额</label><input id="ivTodo" readonly></div>
                             <div class="inv-row"><label><span class="inv-required">*</span>发票号码</label><input id="ivNo" placeholder="请输入发票号码" maxlength="20"></div>
                             <div class="inv-row"><label>发票代码</label><input id="ivCode" placeholder="请输入发票代码"></div>
-                            <div class="inv-row"><label><span class="inv-required">*</span>开票日期</label><input id="ivDate" type="date" value="2026-10-14"></div>
-                            <div class="inv-row"><label>票种</label><input id="ivKind" value="增值税普通发票（免税）" readonly></div>
-                            <div class="inv-row"><label><span class="inv-required">*</span>金额（不含税）</label><input id="ivAmount" type="number" step="0.01" min="0" oninput="invCalc()"></div>
+                            <div class="inv-row"><label><span class="inv-required">*</span>开票日期</label><input id="ivDate" type="date"></div>
+                            <div class="inv-row"><label><span class="inv-required">*</span>发票类型</label><select id="ivKind"><option value="">请选择发票类型</option><option>增值税普通发票（免税）</option><option>增值税普通发票</option><option>增值税专用发票</option><option>数电发票</option></select></div>
+                            <div class="inv-row"><label><span class="inv-required">*</span>开票金额</label><input id="ivAmount" type="number" step="0.01" min="0" placeholder="请输入开票金额" oninput="invCalc()"></div>
                             <div class="inv-row"><label>税率 / 税额</label><input id="ivTax" value="免税 / 0.00" readonly></div>
                             <div class="inv-row full"><label>价税合计</label><input id="ivTotal" value="0.00" readonly></div>
                             <div class="inv-row full" style="margin-top:-6px;"><label></label><span class="inv-err" id="ivErr"></span></div>
@@ -646,11 +645,12 @@ table.items-table tbody tr:hover{background:#fafbff}
         document.getElementById('ivTodo').value = invMoney(Math.max(0, total - done));
         document.getElementById('ivNo').value = '';
         document.getElementById('ivCode').value = '';
-        document.getElementById('ivAmount').value = (Math.max(0, total - done)).toFixed(2);
+        document.getElementById('ivDate').value = '';
+        document.getElementById('ivKind').value = '';
+        document.getElementById('ivAmount').value = '';
         document.getElementById('ivRemark').value = '';
         document.getElementById('ivSeller').value = (document.querySelector('#tab-product .supplier-text') || {}).textContent || '平原县蛋鸡养殖合作社';
         document.getElementById('ivFiles').innerHTML = '';
-        var ocr = document.getElementById('ivOcr'); if (ocr) { ocr.style.display = 'none'; ocr.textContent = ''; }
         invErr(''); invCalc();
         document.getElementById('invModal').classList.add('show');
     }
@@ -665,30 +665,6 @@ table.items-table tbody tr:hover{background:#fafbff}
     function invAddFile() {
         INV_FILES.push('发票文件_' + (INV_FILES.length + 1) + '.pdf');
         invAddFileRefresh();
-        invOcrRead();
-    }
-    // 上传附件后模拟 OCR：自动读取票面信息（仅填空白项，可手动修改）
-    function invOcrRead() {
-        var n = INV_FILES.length;
-        var noEl = document.getElementById('ivNo'), codeEl = document.getElementById('ivCode'),
-            dateEl = document.getElementById('ivDate'), amtEl = document.getElementById('ivAmount'),
-            kindEl = document.getElementById('ivKind');
-        var filled = [];
-        if (!noEl.value.trim()) { noEl.value = '243510' + ('0' + n).slice(-2); filled.push('发票号码'); }
-        if (!codeEl.value.trim() && kindEl.value.indexOf('数电') < 0) { codeEl.value = '310023451300'; filled.push('发票代码'); }
-        if (!dateEl.value) { dateEl.value = '2026-10-14'; filled.push('开票日期'); }
-        if (!amtEl.value) { invFillAmount(); filled.push('金额'); }
-        invCalc();
-        var tip = document.getElementById('ivOcr');
-        if (tip) {
-            tip.style.display = filled.length ? 'block' : 'none';
-            tip.textContent = '已自动识别票面信息：' + filled.join('、') + '（可手动修改）';
-        }
-    }
-    function invFillAmount() {
-        var k = curOrderKey(), total = ORDER_TOTAL[k] || 0;
-        var done = invList().reduce(function (s, x) { return s + x.amount; }, 0);
-        document.getElementById('ivAmount').value = Math.max(0, total - done).toFixed(2);
     }
     function invDelFile(i) { INV_FILES.splice(i, 1); invAddFileRefresh(); }
     function invAddFileRefresh() {
@@ -698,15 +674,19 @@ table.items-table tbody tr:hover{background:#fafbff}
     }
     function submitInvoice() {
         var no = document.getElementById('ivNo').value.trim();
+        var date = document.getElementById('ivDate').value;
+        var kind = document.getElementById('ivKind').value;
         var amt = parseFloat((document.getElementById('ivAmount').value || '0').replace(/[^0-9.]/g, '')) || 0;
         var k = curOrderKey(), total = ORDER_TOTAL[k] || 0;
         var done = invList().reduce(function (s, x) { return s + x.amount; }, 0);
         if (!/^\d{8}$/.test(no)) { invErr('发票号码需为 8 位数字'); return; }
+        if (!date) { invErr('请选择开票日期'); return; }
+        if (!kind) { invErr('请选择发票类型'); return; }
         if (amt <= 0) { invErr('金额需大于 0'); return; }
         if (amt > total - done + 0.005) { invErr('超出待开票金额 ' + invMoney(Math.max(0, total - done)) + '，请调整'); return; }
         if (!INV_FILES.length) { invErr('请上传发票文件'); return; }
-        invList().push({ no: no, so: k, code: document.getElementById('ivCode').value.trim(), date: document.getElementById('ivDate').value,
-            kind: document.getElementById('ivKind').value, amount: amt, tax: 0,
+        invList().push({ no: no, so: k, code: document.getElementById('ivCode').value.trim(), date: date,
+            kind: kind, amount: amt, tax: 0,
             buyer: document.getElementById('ivBuyer').value, seller: document.getElementById('ivSeller').value,
             files: INV_FILES.slice(), remark: document.getElementById('ivRemark').value, by: '供应商上传' });
         if (window.EggInv) EggInv.sync(k, invList());

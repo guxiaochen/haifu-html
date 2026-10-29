@@ -196,6 +196,13 @@
         .toast { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); display: none; padding: 10px 18px; background: #f0faf5; border: 1px solid #b7e4cd; color: #1d6b46; border-radius: 6px; font-size: 13px; z-index: 1100; }
         .toast.show { display: block; }
 
+        /* 实收数量：允许整数删减，实收与实发不一致时整行标记 */
+        .qty-input{width:76px;height:28px;border:1px solid #d9d9d9;border-radius:2px;padding:0 6px;font:inherit;font-size:13px;text-align:right;color:#333;outline:none}
+        .qty-input:focus{border-color:#2BA471}
+        #detailBody tr.recv-diff{background:#fff7e6}
+        #detailBody tr.recv-diff td.recv-cell{color:#d46b08;font-weight:600}
+        #detailBody tr.recv-diff td:last-child{box-shadow:inset 3px 0 0 #ffd591}
+
         
     </style>
 </head>
@@ -271,6 +278,7 @@
                 <div>
                     <div class="section-title">结算与附件</div>
                     <div class="kv"><span class="k">实发总数量(箱)</span><span class="v" id="sumShip">1,314 箱</span></div>
+                    <div class="kv"><span class="k">实收总数量(箱)</span><span class="v" id="sumRecv">—</span></div>
                     <div class="kv"><span class="k">平均单价</span><span class="v">¥ 149.52 /箱</span></div>
                     <div class="kv"><span class="k">结算金额</span><span class="v">¥ 196,465.72</span></div>
                     <div class="kv"><span class="k">备注</span><span class="v">—</span></div>
@@ -300,6 +308,7 @@
                                 <th style="text-align:right;">均重（斤）</th>
                                 <th class="col-qty">总重(斤)</th>
                                 <th class="col-qty">实发数量</th>
+                                <th class="col-qty">实收数量</th>
                                 <th class="col-price">单价(含税.元)</th>
                                 <th class="col-price">总价</th>
                                 <th>装货地址</th>
@@ -435,10 +444,44 @@ document.querySelectorAll('.kv').forEach(function(kv){var k=kv.querySelector('.k
 </script>
 
 <script>
-    // 发货单仅展示实发数据：移除静态演示明细中的原实收列。
-    Array.prototype.forEach.call(document.querySelectorAll('#detailBody tr'), function (tr) {
-        if (tr.cells[9]) tr.deleteCell(9);
-    });
+    // 实收数量：默认等于实发数量，支持整数删减；不一致行突出标记并汇总。
+    function recvFmt(n){ return n.toLocaleString('zh-CN') + ' 箱'; }
+    function bindRecv(inp){
+        inp.addEventListener('input', function(){
+            var max = Number(inp.getAttribute('data-ship')) || 0;
+            var v = Math.floor(Number(inp.value));
+            if (isNaN(v)) v = max;
+            if (v > max) v = max;
+            if (v < 0) v = 0;
+            inp.value = v;
+            var tr = inp.closest('tr');
+            if (tr) tr.classList[(v === max) ? 'remove' : 'add']('recv-diff');
+            recalcRecv();
+        });
+    }
+    var BASE_SHIP = (function(){
+        var a = document.getElementById('sumShip');
+        var t = a ? a.textContent.replace(/[^\d.]/g, '') : '';
+        return Number(t) || 0;
+    })();
+    function recalcRecv(){
+        var short = 0;
+        Array.prototype.forEach.call(document.querySelectorAll('#detailBody input[data-ship]'), function(inp){
+            var m = Number(inp.getAttribute('data-ship')) || 0, v = Number(inp.value) || 0;
+            if (v !== m) short += (m - v);
+        });
+        var b = document.getElementById('sumRecv');
+        if (b) b.textContent = recvFmt(Math.max(0, BASE_SHIP - short));
+    }
+    (function(){
+        Array.prototype.forEach.call(document.querySelectorAll('#detailBody input[data-ship]'), function(inp){
+            var tr = inp.closest('tr');
+            var max = Number(inp.getAttribute('data-ship')) || 0, v = Number(inp.value) || 0;
+            if (tr && v !== max) tr.classList.add('recv-diff');
+            bindRecv(inp);
+        });
+        recalcRecv();
+    })();
 </script>
 <!-- 确认收货二次确认 -->
 <div class="modal-mask" id="confirmRecvMask">
@@ -452,18 +495,32 @@ document.querySelectorAll('.kv').forEach(function(kv){var k=kv.querySelector('.k
     </div>
 </div>
 <script>
+    function recvSummary() {
+        var total = 0, diff = 0, short = 0;
+        Array.prototype.forEach.call(document.querySelectorAll('#detailBody input[data-ship]'), function (inp) {
+            var m = Number(inp.getAttribute('data-ship')) || 0, v = Number(inp.value) || 0;
+            total++;
+            if (v !== m) { diff++; short += (m - v); }
+        });
+        return { total: total, diff: diff, short: short };
+    }
     function openConfirmRecv() {
+        var st = recvSummary();
         document.getElementById('confirmRecvBody').innerHTML =
-            '确认后单据状态将变为「已收货」，是否继续？';
+            '本次核对 <b>' + st.total + '</b> 项明细，实发合计 ' + (document.getElementById('sumShip') || {}).textContent +
+            (st.diff
+                ? '，<span class="hl">其中 ' + st.diff + ' 项实收 ≠ 实发，合计少收 ' + st.short + ' 箱</span>；确认后系统按实收数量同步更新收货确认单及文件。'
+                : '，实收与实发一致，确认后单据转为「已收货」。');
         document.getElementById('confirmRecvMask').classList.add('show');
     }
     function closeConfirmRecv() { document.getElementById('confirmRecvMask').classList.remove('show'); }
     function doConfirmRecv() {
         closeConfirmRecv();
+        var st = recvSummary();
         var tag = document.getElementById('recvState'), btn = document.getElementById('confirmRecvBtn');
         if (tag) { tag.textContent = '已收货'; tag.classList.add('done'); }
         if (btn) { btn.disabled = true; btn.classList.remove('active'); btn.textContent = '已收货'; }
-        showToast('已确认收货');
+        showToast(st.diff ? '已确认收货：' + st.diff + ' 项差异已同步至收货确认单文件' : '已确认收货，实收与实发一致');
     }
     document.getElementById('confirmRecvMask').addEventListener('click', function (e) { if (e.target === this) closeConfirmRecv(); });
 </script>

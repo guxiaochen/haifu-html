@@ -269,7 +269,7 @@ function showToast(msg) {
           <span class="upload-line" onclick="pickFile()">⬆ 上传发票附件（PDF / 图片）</span>
           <input type="file" id="iFile" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="onFilePicked(this)">
           <div id="fileList"></div>
-          <div class="ord-note">上传后系统自动 OCR 识别票面信息，回填下方发票号码、发票代码、开票日期与金额</div>
+          <div class="ord-note">技术侧暂不支持 OCR 识别，请根据发票票面手工填写下方信息。</div>
         </div>
         <div class="form-row full">发票信息</div>
         <div class="form-row"><label>购方（平台）</label><input id="iBuyer" readonly></div>
@@ -279,8 +279,8 @@ function showToast(msg) {
         <div class="form-row"><label><span class="req">*</span>发票号码</label><input id="iNo" placeholder="请输入发票号码"></div>
         <div class="form-row"><label>发票代码</label><input id="iCode" placeholder="请输入发票代码"></div>
         <div class="form-row"><label><span class="req">*</span>开票日期</label><input id="iDate" type="date"></div>
-        <div class="form-row"><label>票种</label><input id="iKind" readonly></div>
-        <div class="form-row"><label><span class="req">*</span>金额（不含税）</label><input id="iAmount" type="number" step="0.01" min="0" oninput="syncTotal()"></div>
+        <div class="form-row"><label><span class="req">*</span>发票类型</label><select id="iKind"><option value="">请选择发票类型</option><option>增值税普通发票（免税）</option><option>增值税普通发票</option><option>增值税专用发票</option><option>数电发票</option></select></div>
+        <div class="form-row"><label><span class="req">*</span>开票金额</label><input id="iAmount" type="number" step="0.01" min="0" placeholder="请输入开票金额" oninput="syncTotal()"></div>
         <div class="form-row"><label>税率 / 税额</label><input id="iTax" readonly></div>
         <div class="form-row full"><label>价税合计</label><input id="iTotal" readonly></div>
         <div class="form-row full"><label>备注</label><textarea id="iRemark" rows="2" placeholder="如：对应结算单 EGG-PP-XXXXXXXXXXX"></textarea></div>
@@ -316,7 +316,7 @@ function showToast(msg) {
         document.getElementById('iSeller').value = o ? o.seller : '';
         document.getElementById('iOrderAmt').value = o ? EggInv.money(o.amount) : '';
         document.getElementById('iTodo').value = o ? EggInv.money(EggInv.todo(no)) : '';
-        document.getElementById('iAmount').value = no ? EggInv.todo(no).toFixed(2) : '';
+        document.getElementById('iAmount').value = '';
         var exists = no ? EggInv.forOrder(no) : [];
         if (!o) { tip.className = 'tip-bar'; tip.textContent = '选择关联的销售订单后，自动带出平台（购方）与本单待开票金额。'; }
         else if (exists.length) {
@@ -337,10 +337,10 @@ function showToast(msg) {
         document.getElementById('iSo').value = '';
         document.getElementById('iSoSearch').value = '';
         renderSoChoices();
-        document.getElementById('iNo').value = EggInv.nextNo();
+        document.getElementById('iNo').value = '';
         document.getElementById('iCode').value = '';
-        document.getElementById('iDate').value = new Date().toISOString().slice(0, 10);
-        document.getElementById('iKind').value = EggInv.KIND;
+        document.getElementById('iDate').value = '';
+        document.getElementById('iKind').value = '';
         document.getElementById('iRemark').value = '';
         UPL_FILES = []; renderFiles();
         document.getElementById('upMask').classList.add('show');
@@ -351,15 +351,8 @@ function showToast(msg) {
     function onFilePicked(inp) {
         var f = inp.files && inp.files[0]; if (!f) return;
         UPL_FILES = [f.name];
-        // OCR：仅回填空白项，不覆盖已手工填写的内容
-        var so = document.getElementById('iSo').value, o = EggInv.order(so);
-        var setIf = function (id, v) { var el = document.getElementById(id); if (el && !String(el.value || '').trim()) el.value = v; };
-        setIf('iNo', f.name.replace(/[^0-9]/g, '').slice(-8) || EggInv.nextNo());
-        setIf('iCode', '310023451300');
-        setIf('iDate', new Date().toISOString().slice(0, 10));
-        setIf('iKind', EggInv.KIND);
-        if (o) setIf('iAmount', EggInv.todo(so).toFixed(2));
-        renderFiles(); syncTotal(); showToast('已 OCR 识别票面信息并回填，请核对后提交');
+        renderFiles();
+        showToast('附件已上传，请继续填写发票信息');
     }
     function renderFiles() {
         document.getElementById('fileList').innerHTML = UPL_FILES.map(function (n) {
@@ -370,15 +363,17 @@ function showToast(msg) {
     function submitUpload() {
         var so = document.getElementById('iSo').value, o = EggInv.order(so);
         var no = document.getElementById('iNo').value.trim(), date = document.getElementById('iDate').value;
+        var kind = document.getElementById('iKind').value;
         var amt = Number(document.getElementById('iAmount').value) || 0;
         if (!so) { showToast('请选择关联的销售订单'); return; }
         if (!o || Number(o.amount) <= 0) { showToast('该销售订单金额为 0，暂不能开票'); return; }
         if (!no) { showToast('请输入发票号码'); return; }
         if (!date) { showToast('请选择开票日期'); return; }
+        if (!kind) { showToast('请选择发票类型'); return; }
         if (amt <= 0) { showToast('开票金额需大于 0'); return; }
         if (amt > Number(o.amount) + 0.005) { showToast('开票金额不能超过销售订单金额 ' + EggInv.money(o.amount)); return; }
         if (!UPL_FILES.length) { showToast('请上传发票附件'); return; }
-        EggInv.add({ no: no, code: document.getElementById('iCode').value.trim(), date: date, kind: EggInv.KIND, so: so,
+        EggInv.add({ no: no, code: document.getElementById('iCode').value.trim(), date: date, kind: kind, so: so,
             buyer: EggInv.BUYER, seller: o.seller, amount: amt, tax: 0, files: UPL_FILES.slice(),
             remark: document.getElementById('iRemark').value.trim(), by: '供应商上传' });
         closeUpload(); render(invRows()); showToast('发票已上传并关联 ' + so);

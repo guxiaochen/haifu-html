@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>竞价主流程｜平台自采补充版</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#fff;color:#282828;font-family:Arial,"PingFang SC","Microsoft YaHei",sans-serif}header{max-width:1720px;margin:28px auto 12px;padding:0 24px;display:flex;align-items:center;justify-content:space-between}h1{margin:0;font-size:25px;text-align:center;flex:1}.tools{position:absolute;right:32px;top:26px;display:flex;gap:8px}.tools button{border:1px solid #bbb;background:#fff;padding:7px 14px;border-radius:5px;cursor:pointer;font-size:13px}.sheet{max-width:1760px;margin:auto;overflow:auto;padding:0 12px 28px}svg{display:block;width:1720px;height:auto;margin:auto}.hint{max-width:1650px;margin:0 auto 28px;padding:14px 20px;border:1px solid #e1e1e1;border-radius:6px;background:#fafafa;font-size:14px;line-height:1.8}.hint b{color:#555}@media print{header .tools,.hint{display:none}header{margin:8px auto}svg{width:100%}.sheet{padding:0}@page{size:A2 landscape;margin:8mm}}
+  </style>
+</head>
+<body>
+  <header><h1>竞价主流程</h1><div class="tools"><button onclick="window.print()">打印 / 导出文件</button></div></header>
+  <div class="sheet"><svg id="diagram" viewBox="0 0 1720 1860" role="img" aria-label="客户发布与平台自采竞价主流程图"></svg></div>
+  <div class="hint"><b>阅读说明：</b>左侧沿用原图的四泳道、黄色背景与彩色节点。客户发布保持需求审核路径；平台自采从平台泳道直接发布。供应商参与申请按竞价来源分别走客户发布双确认或平台自采单次审核。首次报价提交后直接进入排名，截止前修改报价即时生效，不设报价审核；系统在截止前 1 小时提醒。截止后，客户或平台分别查看自己发布竞价的排名并选定中标供应商。</div>
+  <script>
+  (()=>{
+    const svg=document.getElementById('diagram');
+    const NS='http://www.w3.org/2000/svg';
+    const color={buyer:['#fff0e0','#efa727'],platform:['#dcf0d9','#6db75b'],supplier:['#dfebff','#7ba6ed'],notice:['#ffded8','#eb7671'],purple:['#efe9ff','#a48adf'],neutral:['#f5f2eb','#bdbab1']};
+    function el(tag,attrs={},parent=svg){const n=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,v));parent.appendChild(n);return n}
+    function text(x,y,lines,opts={}){const t=el('text',{x,y,'text-anchor':opts.anchor||'middle','font-size':opts.size||14,'font-weight':opts.weight||'normal',fill:opts.fill||'#242424'});lines.forEach((line,i)=>{const s=el('tspan',{x,dy:i?17:0},t);s.textContent=line});return t}
+    const defs=el('defs');const marker=el('marker',{id:'arrow',viewBox:'0 0 10 10',refX:'8.8',refY:'5',markerWidth:'7',markerHeight:'7',orient:'auto-start-reverse'},defs);el('path',{d:'M1 1 L9 5 L1 9',fill:'none',stroke:'#222','stroke-width':'1.5'},marker);
+    function line(points,opts={}){el('path',{d:'M'+points.map(p=>p.join(' ')).join(' L'),fill:'none',stroke:opts.stroke||'#222','stroke-width':opts.width||1.4,'stroke-dasharray':opts.dash?'4 3':'none','marker-end':opts.arrow===false?'none':'url(#arrow)'})}
+    function node(id,x,y,w,h,lines,type='neutral',small=[]){const [fill,stroke]=color[type];el('rect',{x,y,width:w,height:h,rx:5,fill,stroke,'stroke-width':1.1});let yy=y+(h-(lines.length-1)*17-(small.length?13:0))/2+5;text(x+w/2,yy,lines,{size:14});if(small.length)text(x+w/2,y+h-8,small,{size:10,fill:'#555'});nodes[id]={x,y,w,h,cx:x+w/2,cy:y+h/2}}
+    function diamond(id,cx,cy,rx,ry,lines,type='supplier'){const [fill,stroke]=color[type];el('polygon',{points:`${cx},${cy-ry} ${cx+rx},${cy} ${cx},${cy+ry} ${cx-rx},${cy}`,fill,stroke,'stroke-width':1.1});text(cx,cy+4,lines,{size:13});nodes[id]={cx,cy,x:cx-rx,y:cy-ry,w:rx*2,h:ry*2}}
+    function connect(a,b,via=[],opts={}){const A=nodes[a],B=nodes[b];line([[A.cx,A.y+A.h],...via,[B.cx,B.y]],opts)}
+    const nodes={};
+    // 原图的四泳道与右侧说明区。
+    el('rect',{x:36,y:26,width:760,height:1788,fill:'#fff2cc',stroke:'#d9a835','stroke-width':1});
+    [226,416,606].forEach(x=>el('line',{x1:x,y1:26,x2:x,y2:1814,stroke:'#d9a835'}));
+    ['采购方（买家）','平台管理员 / 平台采购方','供应商（卖家）','系统通知'].forEach((s,i)=>text([131,321,511,701][i],47,[s],{size:14,weight:'bold'}));
+    el('line',{x1:36,y1:60,x2:796,y2:60,stroke:'#d9a835'});
+    // 原有客户发布路径。
+    node('c1',69,83,124,39,['发布竞价需求'],'buyer');node('c2',69,146,124,48,['填写竞价信息'],'purple',['基本信息/采购清单']);node('c3',69,218,124,49,['设置可见范围'],'purple',['指定供应商/开放申请']);node('c4',69,295,124,39,['提交审核'],'purple');
+    node('p1',259,295,124,39,['审核竞价需求'],'platform');diamond('p2',321,373,53,31,['审核通过?'],'platform');node('cr',69,358,124,39,['退回修改'],'buyer');
+    // 新增：平台以自己的企业主体作为采购方直接发布。
+    node('pstart',259,83,124,39,['平台发布竞价'],'platform');node('pfill',259,146,124,48,['填写竞价信息'],'platform',['基本信息/采购清单']);node('prange',259,218,124,49,['设置可见范围'],'platform',['指定供应商/开放申请']);node('ppublish',259,436,124,39,['直接发布'],'platform',['平台自采免需求审核']);
+    node('active',259,518,124,46,['竞价中'],'platform',['客户审核通过/平台直接发布']);node('n1',639,518,124,46,['站内信通知'],'notice',['指定供应商']);
+    connect('c1','c2');connect('c2','c3');connect('c3','c4');line([[193,314],[259,314]]);connect('p1','p2');line([[268,373],[224,373],[224,378],[193,378]],{dash:true});line([[69,378],[46,378],[46,314],[69,314]],{dash:true});text(242,363,['否'],{size:11});line([[321,404],[225,404],[225,495],[321,495],[321,518]]);text(244,422,['是'],{size:11});
+    connect('pstart','pfill');connect('pfill','prange');line([[383,242],[404,242],[404,455],[383,455]],{dash:true});connect('ppublish','active');line([[383,541],[639,541]]);
+    node('sHall',449,613,124,42,['查看竞价大厅'],'supplier',['仅显示基本信息']);diamond('access',511,691,54,30,['有查看权限?'],'supplier');node('apply',449,755,124,42,['申请参与竞价'],'supplier');
+    node('paudit',259,829,124,42,['平台审核申请'],'platform');node('caudit',69,893,124,44,['采购方确认'],'buyer',['仅客户发布竞价']);node('full',449,955,124,42,['查看完整需求'],'supplier');
+    line([[321,564],[321,590],[511,590],[511,613]]);connect('sHall','access');line([[511,721],[511,755]]);text(527,740,['否'],{size:11});line([[449,776],[321,776],[321,829]]);line([[259,850],[209,850],[209,915],[193,915]]);text(228,841,['客户发布'],{size:11});line([[131,937],[131,977],[449,977]]);line([[383,850],[407,850],[407,934],[511,934],[511,955]],{dash:true});text(425,843,['平台自采：通过后直接参与'],{size:11});line([[565,691],[590,691],[590,977],[573,977]],{dash:true});text(596,683,['是/指定供应商'],{size:11});
+    diamond('deposit',511,1047,54,30,['需保证金?'],'supplier');node('voucher',449,1112,124,42,['上传保证金凭证'],'supplier');node('quote',449,1184,124,42,['提交首次报价'],'supplier');node('nquote',639,1184,124,42,['站内信通知'],'notice',['新报价提醒，不展示价格']);
+    connect('full','deposit');connect('deposit','voucher');connect('voucher','quote');line([[565,1047],[590,1047],[590,1205],[573,1205]],{dash:true});text(597,1039,['否'],{size:11});line([[573,1205],[639,1205]]);
+    // 报价沿用原流程：提交、修改、截止；无报价审核节点。
+    node('rank',449,1264,124,43,['报价进入排名'],'supplier');
+    node('edit',449,1347,124,43,['修改报价'],'supplier',['截止前即时更新排名']);
+    node('deadline',449,1430,124,43,['竞价截止'],'buyer');
+    node('cview',69,1515,124,43,['客户查看排名'],'buyer');
+    node('pview',259,1515,124,43,['平台查看排名'],'platform');
+    node('cchoose',69,1600,124,43,['选定中标供应商'],'buyer');
+    node('pchoose',259,1600,124,43,['选定中标供应商'],'platform');
+    node('cfinish',69,1693,124,40,['竞价完成'],'buyer');
+    node('pfinish',259,1693,124,40,['竞价完成'],'platform');
+    node('deadlineNotice',639,1430,124,43,['截止前 1 小时提醒'],'notice');
+    node('endnotice',639,1693,124,40,['中标/落标通知'],'notice');
+    connect('quote','rank');connect('rank','edit');
+    line([[449,1368],[417,1368],[417,1285],[449,1285]],{dash:true});
+    connect('edit','deadline');
+    line([[511,1473],[511,1492],[321,1492],[321,1515]]);
+    line([[511,1473],[511,1501],[131,1501],[131,1515]],{dash:true});
+    text(203,1486,['客户发布'],{size:11});text(376,1486,['平台自采'],{size:11});
+    connect('cview','cchoose');connect('pview','pchoose');
+    connect('cchoose','cfinish');connect('pchoose','pfinish');
+    line([[131,1733],[131,1760],[701,1760],[701,1733]],{dash:true});
+    line([[321,1733],[321,1749],[701,1749],[701,1733]]);
+    // 右侧按原图恢复报价与排名的完整路径；平台自采仅补充承担采购方职责的文案。
+    el('rect',{x:832,y:26,width:850,height:758,fill:'#fff',stroke:'#ccc'});text(1257,56,['报价方式与排名逻辑'],{size:18,weight:'bold'});
+    node('q0',1162,80,190,48,['供应商进入报价页面'],'supplier');
+    diamond('qtype',1257,185,70,36,['报价方式?'],'neutral');
+    node('total',896,162,150,46,['填写单价'],'purple');
+    node('item',1468,162,150,46,['逐条填写分类单价'],'buyer');
+    node('totalcalc',896,224,150,46,['系统计算总价'],'purple');
+    node('itemcalc',1468,224,150,48,['系统计算各分类总价'],'buyer',['数量×单价']);
+    node('trank',896,310,150,50,['排名展示'],'platform',['按总价从低到高']);
+    node('irank',1468,310,150,50,['分类独立排名'],'platform',['每类最低价排第一']);
+    node('qcheck',1129,399,256,47,['提交报价（确认前可预览）'],'neutral');
+    node('categoryNote',853,399,175,47,['分类报价'],'neutral',['可多供应商中标']);
+    node('self',1129,477,256,48,['供应商视角（仅看自己）'],'supplier',['仅显示自身排名，隐藏他人价格']);
+    node('buyerView',1129,559,256,48,['采购方视角'],'purple',['竞价截止前，报价价格不可看']);
+    node('winner',1129,641,256,47,['选定中标方 → 竞价完成'],'platform',['线下交易']);
+    connect('q0','qtype');line([[1187,185],[1046,185]]);line([[1327,185],[1468,185]]);
+    connect('total','totalcalc');connect('item','itemcalc');connect('totalcalc','trank');connect('itemcalc','irank');
+    line([[971,360],[971,382],[1257,382],[1257,399]]);line([[1543,360],[1543,382],[1257,382]],{arrow:false});
+    connect('qcheck','self');connect('self','buyerView');connect('buyerView','winner');
+    el('rect',{x:852,y:718,width:810,height:46,rx:4,fill:'#f5f2eb',stroke:'#ddd'});
+    text(1257,746,['平台自采仅改变采购方身份：平台查看排名、选定中标方；报价与排名规则不变。'],{size:14});
+    // 状态流转沿用原图的四个主状态和两个结果状态，平台自采只增加旁注。
+    el('rect',{x:832,y:812,width:850,height:500,fill:'#999',stroke:'#999'});text(1257,844,['竞价需求状态流转'],{size:18,weight:'bold',fill:'#222'});
+    const states=[['草稿','#f5f2eb'],['审核中','#ffead1'],['进行中','#dff3e8'],['已截止','#e0eeff']];
+    states.forEach((s,i)=>{const x=852+i*204;el('rect',{x,y:884,width:150,height:63,rx:5,fill:s[1],stroke:'#ddd'});text(x+75,922,[s[0]],{size:17,weight:'bold'});if(i<3)line([[x+150,915],[x+204,915]])});
+    line([[1131,884],[1131,865],[927,865],[927,884]],{dash:true});
+    text(1029,857,['审核不通过，退回修改'],{size:11});
+    node('sCancel',955,1008,150,57,['已取消'],'notice',['采购方主动取消']);
+    node('sComplete',1363,1008,150,57,['已完成'],'platform',['选定中标方']);
+    line([[1539,947],[1539,980],[1438,980],[1438,1008]]);
+    line([[1335,947],[1335,980],[1030,980],[1030,1008]],{dash:true});
+    el('rect',{x:852,y:1090,width:810,height:95,rx:5,fill:'#f5f2eb',stroke:'#ddd'});
+    text(871,1118,['进行中状态可操作说明：'],{size:14,anchor:'start',weight:'bold'});
+    text(871,1144,['可修改：标题、截止时间、运输方式；已有供应商报价后不可修改采购清单。'],{size:14,anchor:'start'});
+    text(871,1170,['可取消：采购方主动取消，通知已参与供应商。'],{size:14,anchor:'start'});
+    el('rect',{x:852,y:1210,width:810,height:65,rx:5,fill:'#fff',stroke:'#ddd'});
+    text(871,1248,['平台自采补充：草稿发布后直接进入进行中，跳过审核中；其他状态流转保持一致。'],{size:14,anchor:'start'});
+  })();
+  </script>
+</body>
+</html>

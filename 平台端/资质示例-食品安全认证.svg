@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 480" role="img" aria-label="食品安全认证演示样张">
+  <rect width="360" height="480" fill="#eef4ef"/>
+  <rect x="12" y="12" width="336" height="456" fill="#fcfefd" stroke="#b7cdbd" stroke-width="2"/>
+  <text x="180" y="73" fill="#274a33" font-size="27" font-family="Microsoft YaHei,sans-serif" text-anchor="middle" font-weight="700">食品安全认证</text>
+  <text x="180" y="103" fill="#7b9a82" font-size="13" font-family="Microsoft YaHei,sans-serif" text-anchor="middle">资质演示样张 · 非真实证书</text>
+  <path d="M45 132h270M45 372h270" stroke="#d7e4d9"/>
+  <g fill="#4f6756" font-size="16" font-family="Microsoft YaHei,sans-serif">
+    <text x="46" y="172">获证单位：演示供应商有限公司</text>
+    <text x="46" y="218">认证项目：食品安全管理</text>
+    <text x="46" y="264">适用范围：农产品供应</text>
+    <text x="46" y="310">证书状态：演示</text>
+  </g>
+  <circle cx="258" cy="368" r="48" fill="none" stroke="#4f9b6b" stroke-width="6" opacity=".7"/>
+  <text x="258" y="375" fill="#4f9b6b" font-size="17" font-family="Microsoft YaHei,sans-serif" text-anchor="middle" font-weight="700">演示样张</text>
+  <text x="180" y="431" fill="#9aac9d" font-size="13" font-family="Microsoft YaHei,sans-serif" text-anchor="middle">仅供原型页面展示</text>
+</svg>

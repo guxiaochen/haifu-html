@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>泳道流程图模板</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#fff;color:#282828;font-family:Arial,"PingFang SC","Microsoft YaHei",sans-serif}
+    header{position:relative;max-width:1720px;margin:28px auto 12px;padding:0 24px;text-align:center}h1{margin:0;font-size:25px}
+    .tools{position:absolute;right:24px;top:0;display:flex;gap:8px}.tools button{border:1px solid #bbb;background:#fff;padding:7px 14px;border-radius:5px;cursor:pointer;font-size:13px}
+    .sheet{max-width:100%;overflow:auto;padding:0 12px 28px}svg{display:block;height:auto;margin:auto}
+    .hint{max-width:1620px;margin:0 auto 28px;padding:14px 20px;border:1px solid #e1e1e1;border-radius:6px;background:#fafafa;font-size:14px;line-height:1.8}
+    @media print{.tools,.hint{display:none}header{margin:8px auto}.sheet{padding:0}svg{max-width:100%}@page{size:A2 landscape;margin:8mm}}
+  </style>
+</head>
+<body>
+  <header><h1 id="title"></h1><div class="tools"><button type="button" id="saveSvg">下载 SVG</button><button type="button" onclick="window.print()">打印 / 导出 PDF</button></div></header>
+  <div class="sheet"><svg id="diagram" role="img"></svg></div>
+  <div class="hint" id="caption"></div>
+  <script>
+  /* 只修改 flow 数据。终端、节点及连接的填写方法见《泳道流程图模板说明.md》。 */
+  const flow={
+    title:'业务主流程',
+    terminals:[
+      {id:'client',label:'客户端（采购方）',kind:'buyer'},
+      {id:'platform',label:'平台端',kind:'platform'},
+      {id:'supplier',label:'供应商端',kind:'supplier'},
+      {id:'notice',label:'系统通知',kind:'notice'}
+    ],
+    // y 为自泳道标题下方开始的纵向位置；同一阶段尽量使用相同 y。
+    nodes:[
+      {id:'start',lane:'client',y:90,label:'发起业务',kind:'buyer'},
+      {id:'submit',lane:'client',y:175,label:'提交申请',kind:'purple'},
+      {id:'review',lane:'platform',y:260,label:'审核申请',kind:'platform'},
+      {id:'notify',lane:'notice',y:345,label:'站内信通知',kind:'notice'},
+      {id:'action',lane:'supplier',y:430,label:'处理业务',kind:'supplier'},
+      {id:'finish',lane:'client',y:515,label:'业务完成',kind:'buyer'}
+    ],
+    connections:[
+      {from:'start',to:'submit'},
+      {from:'submit',to:'review'},
+      {from:'review',to:'notify'},
+      {from:'review',to:'action'},
+      {from:'action',to:'finish'}
+    ],
+    // 对复杂分支可补充右侧说明卡片；每张卡片的 rows 为文本行。
+    panels:[
+      {title:'业务规则',rows:['在这里概述判断条件、并行关系和结果。','复杂规则不要挤进流程节点；节点只写动作或状态。']}
+    ],
+    caption:'阅读说明：沿用竞价主流程图的泳道配色、节点风格与正交连接线。'
+  };
+
+  (()=>{
+    const NS='http://www.w3.org/2000/svg';
+    const svg=document.getElementById('diagram');
+    const palette={buyer:['#fff0e0','#efa727'],platform:['#dcf0d9','#6db75b'],supplier:['#dfebff','#7ba6ed'],notice:['#ffded8','#eb7671'],purple:['#efe9ff','#a48adf'],neutral:['#f5f2eb','#bdbab1']};
+    const laneWidth=190,laneLeft=36,top=26,nodeWidth=124,nodeHeight=43;
+    const laneBottom=Math.max(650,...flow.nodes.map(n=>n.y+(n.height||nodeHeight)+85));
+    const swimWidth=flow.terminals.length*laneWidth;
+    const panelX=laneLeft+swimWidth+36,panelWidth=510;
+    const canvasWidth=panelX+panelWidth+36,canvasHeight=Math.max(laneBottom+46,180+flow.panels.length*250);
+    svg.setAttribute('viewBox',`0 0 ${canvasWidth} ${canvasHeight}`);svg.style.width=`${canvasWidth}px`;
+    document.getElementById('title').textContent=flow.title;
+    document.getElementById('caption').textContent=flow.caption;
+    function el(tag,attrs={},parent=svg){const e=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));parent.appendChild(e);return e}
+    function txt(x,y,value,size=14,weight='normal',anchor='middle',fill='#242424'){
+      const t=el('text',{x,y,'text-anchor':anchor,'font-size':size,'font-weight':weight,fill});
+      String(value).split('\n').forEach((part,i)=>{const span=el('tspan',{x,dy:i?17:0},t);span.textContent=part});return t
+    }
+    const defs=el('defs'),marker=el('marker',{id:'arrow',viewBox:'0 0 10 10',refX:'8.8',refY:'5',markerWidth:'7',markerHeight:'7',orient:'auto-start-reverse'},defs);
+    el('path',{d:'M1 1 L9 5 L1 9',fill:'none',stroke:'#222','stroke-width':'1.5'},marker);
+    el('rect',{x:laneLeft,y:top,width:swimWidth,height:laneBottom-top,fill:'#fff2cc',stroke:'#d9a835','stroke-width':1});
+    flow.terminals.forEach((lane,index)=>{
+      const cx=laneLeft+index*laneWidth+laneWidth/2;
+      if(index)el('line',{x1:laneLeft+index*laneWidth,y1:top,x2:laneLeft+index*laneWidth,y2:laneBottom,stroke:'#d9a835'});
+      txt(cx,47,lane.label,lane.label.length>12?12:14,'bold');
+    });
+    el('line',{x1:laneLeft,y1:60,x2:laneLeft+swimWidth,y2:60,stroke:'#d9a835'});
+    // 连接线组先放入 SVG，后续即使追加路径也始终位于节点下层。
+    const edgesLayer=el('g',{'aria-label':'连接线'});
+    const positions=new Map();
+    flow.nodes.forEach(n=>{
+      const laneIndex=flow.terminals.findIndex(l=>l.id===n.lane);
+      if(laneIndex<0)throw Error(`节点 ${n.id} 指向不存在的终端 ${n.lane}`);
+      if(positions.has(n.id))throw Error(`节点 ID 重复：${n.id}`);
+      const w=n.width||nodeWidth,h=n.height||nodeHeight;
+      const cx=laneLeft+laneIndex*laneWidth+laneWidth/2,x=cx-w/2,y=n.y;
+      const kind=n.kind||flow.terminals[laneIndex].kind||'neutral';
+      const [fill,stroke]=palette[kind]||palette.neutral;
+      if(n.shape==='diamond'){
+        el('polygon',{points:`${cx},${y} ${x+w},${y+h/2} ${cx},${y+h} ${x},${y+h/2}`,fill,stroke,'stroke-width':1.1});
+      }else{
+        el('rect',{x,y,width:w,height:h,rx:5,fill,stroke,'stroke-width':1.1});
+      }
+      txt(cx,y+h/2+(n.subtitle?-3:5),n.label,n.fontSize||14);
+      if(n.subtitle)txt(cx,y+h-8,n.subtitle,10,'normal','middle','#555');
+      positions.set(n.id,{x,y,w,h,cx,cy:y+h/2});
+    });
+    function draw(points,dashed=false){el('path',{d:'M'+points.map(p=>p.join(' ')).join(' L'),fill:'none',stroke:'#222','stroke-width':1.4,'stroke-dasharray':dashed?'4 3':'none','marker-end':'url(#arrow)'},edgesLayer)}
+    flow.connections.forEach(c=>{
+      const a=positions.get(c.from),b=positions.get(c.to);
+      if(!a||!b)throw Error(`连接线引用了不存在的节点：${c.from} → ${c.to}`);
+      let points;
+      if(c.via){points=[[a.cx,a.y+a.h],...c.via,[b.cx,b.y]]}
+      else if(a.cx===b.cx){points=[[a.cx,a.y+a.h],[b.cx,b.y]]}
+      else if(Math.abs(a.cy-b.cy)<25){points=[[a.x+a.w,a.cy],[b.x,b.cy]]}
+      else{const mid=(a.y+a.h+b.y)/2;points=[[a.cx,a.y+a.h],[a.cx,mid],[b.cx,mid],[b.cx,b.y]]}
+      draw(points,c.dashed);
+      if(c.label)txt(c.labelX??(a.cx+b.cx)/2,c.labelY??(a.cy+b.cy)/2,c.label,11);
+    });
+    flow.panels.forEach((p,i)=>{
+      const y=top+i*250,h=Math.max(200,85+p.rows.length*34);
+      el('rect',{x:panelX,y,width:panelWidth,height:h,fill:'#fff',stroke:'#ccc'});
+      txt(panelX+panelWidth/2,y+34,p.title,18,'bold');
+      p.rows.forEach((row,j)=>txt(panelX+22,y+80+j*34,row,14,'normal','start'));
+    });
+    document.getElementById('saveSvg').addEventListener('click',()=>{
+      const data=new XMLSerializer().serializeToString(svg);
+      const url=URL.createObjectURL(new Blob([data],{type:'image/svg+xml;charset=utf-8'}));
+      const a=document.createElement('a');a.href=url;a.download=`${flow.title}.svg`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    });
+  })();
+  </script>
+</body>
+</html>

@@ -4,15 +4,19 @@
  * 依赖：无
  *
  * 数据结构：
- *   部门(dept): { id, parentId, name, leader, phone, email, sort, status }
+ *   部门(dept): { id, enterpriseId, parentId, name, leader, phone, email, sort, status }
  *   菜单(menu): { id, parentId, name, type('M'目录/'C'菜单/'F'按钮), icon, path, perms, sort, visible, status }
- *   角色(role): { id, name, roleKey, sort, status, remark, menuIds[] }
- *   用户(user): { id, deptId, loginName, userName, phone, email, sex, status, roleIds[], pwd }
+ *   角色(role): { id, enterpriseId, scope, name, roleKey, sort, status, remark, menuIds[] }
+ *   用户(user): { id, enterpriseId, deptId, loginName, userName, phone, email, sex, status, roleIds[], pwd }
  *
  * 存储 key：
  *   rbac_depts / rbac_menus / rbac_roles / rbac_users
  */
 (function (window) {
+    var ENTERPRISES = [
+        { id: 'ENT000001', name: '海赋农产品运营管理有限公司', status: 'enabled' },
+        { id: 'ENT000002', name: '山东元象农产品运营有限公司', status: 'enabled' }
+    ];
     var STORAGE_KEYS = {
         depts: 'rbac_depts',
         menus: 'rbac_menus',
@@ -37,17 +41,34 @@
     /* ===== 预置数据 ===== */
     function initDepts() {
         var data = read(STORAGE_KEYS.depts);
-        if (data.length) return data;
+        if (data.length) {
+            var changed = false;
+            data.forEach(function (dept) {
+                if (!dept.enterpriseId) { dept.enterpriseId = 'ENT000001'; changed = true; }
+            });
+            if (data.some(function (dept) { return dept.id === 'D100'; })) {
+                data = data.filter(function (dept) { return dept.id !== 'D100'; });
+                data.forEach(function (dept) { if (dept.parentId === 'D100') dept.parentId = '0'; });
+                changed = true;
+            }
+            if (!data.some(function (dept) { return dept.enterpriseId === 'ENT000002'; })) {
+                data.push(
+                    { id: 'D201', enterpriseId: 'ENT000002', parentId: '0', name: '综合管理部', leader: '李经理', phone: '13900000001', email: 'li@yuanxiang.com', sort: 1, status: '0' },
+                    { id: 'D202', enterpriseId: 'ENT000002', parentId: '0', name: '业务运营部', leader: '周经理', phone: '13900000002', email: 'zhou@yuanxiang.com', sort: 2, status: '0' }
+                );
+                changed = true;
+            }
+            if (changed) write(STORAGE_KEYS.depts, data);
+            return data;
+        }
         data = [
-            { id: 'D100', parentId: '0',  name: '海赋科技',       leader: '张总', phone: '13800000001', email: 'zhang@haifu.com',   sort: 1, status: '0' },
-            { id: 'D101', parentId: 'D100', name: '济南总公司',     leader: '王经理', phone: '13800000002', email: 'wang@haifu.com',    sort: 1, status: '0' },
-            { id: 'D102', parentId: 'D100', name: '青岛分公司',     leader: '李经理', phone: '13800000003', email: 'li@haifu.com',      sort: 2, status: '0' },
-            { id: 'D103', parentId: 'D101', name: '销售部',         leader: '赵主管', phone: '13800000004', email: 'zhao@haifu.com',    sort: 1, status: '0' },
-            { id: 'D104', parentId: 'D101', name: '采购部',         leader: '钱主管', phone: '13800000005', email: 'qian@haifu.com',    sort: 2, status: '0' },
-            { id: 'D105', parentId: 'D101', name: '财务部',         leader: '孙主管', phone: '13800000006', email: 'sun@haifu.com',     sort: 3, status: '0' },
-            { id: 'D106', parentId: 'D101', name: '仓储物流部',     leader: '周主管', phone: '13800000007', email: 'zhou@haifu.com',    sort: 4, status: '0' },
-            { id: 'D107', parentId: 'D102', name: '青岛销售组',     leader: '吴组长', phone: '13800000008', email: 'wu@haifu.com',      sort: 1, status: '0' },
-            { id: 'D108', parentId: 'D102', name: '青岛采购组',     leader: '郑组长', phone: '13800000009', email: 'zheng@haifu.com',   sort: 2, status: '0' },
+            { id: 'D101', enterpriseId: 'ENT000001', parentId: '0', name: '总经理办公室', leader: '张总', phone: '13800000001', email: 'zhang@haifu.com', sort: 1, status: '0' },
+            { id: 'D103', enterpriseId: 'ENT000001', parentId: '0', name: '销售部', leader: '赵主管', phone: '13800000004', email: 'zhao@haifu.com', sort: 2, status: '0' },
+            { id: 'D104', enterpriseId: 'ENT000001', parentId: '0', name: '采购部', leader: '钱主管', phone: '13800000005', email: 'qian@haifu.com', sort: 3, status: '0' },
+            { id: 'D105', enterpriseId: 'ENT000001', parentId: '0', name: '财务部', leader: '孙主管', phone: '13800000006', email: 'sun@haifu.com', sort: 4, status: '0' },
+            { id: 'D106', enterpriseId: 'ENT000001', parentId: '0', name: '仓储物流部', leader: '周主管', phone: '13800000007', email: 'zhou@haifu.com', sort: 5, status: '0' },
+            { id: 'D201', enterpriseId: 'ENT000002', parentId: '0', name: '综合管理部', leader: '李经理', phone: '13900000001', email: 'li@yuanxiang.com', sort: 1, status: '0' },
+            { id: 'D202', enterpriseId: 'ENT000002', parentId: '0', name: '业务运营部', leader: '周经理', phone: '13900000002', email: 'zhou@yuanxiang.com', sort: 2, status: '0' }
         ];
         write(STORAGE_KEYS.depts, data);
         return data;
@@ -145,6 +166,8 @@
         var data = read(STORAGE_KEYS.roles);
         if (data.length) {
             data.forEach(function (role) {
+                if (!role.scope) role.scope = role.roleKey === 'admin' ? 'platform' : 'enterprise';
+                if (!role.enterpriseId) role.enterpriseId = role.scope === 'platform' ? 'PLATFORM' : 'ENT000001';
                 role.menuIds = (role.menuIds || []).filter(function (id) { return ['M1105', 'M1106', 'M1107', 'M1202', 'M1204'].indexOf(id) < 0; });
                 if (role.roleKey === 'sales') {
                     ['M1', 'M11', 'M1101', 'M1104', 'M1108', 'M12', 'M1201'].forEach(function (id) { if (role.menuIds.indexOf(id) < 0) role.menuIds.push(id); });
@@ -153,17 +176,21 @@
                     ['M1', 'M12', 'M1201', 'M1202', 'M1203', 'M13', 'M1301', 'M14', 'M1401', 'M1402'].forEach(function (id) { if (role.menuIds.indexOf(id) < 0) role.menuIds.push(id); });
                 }
             });
+            if (!data.some(function (role) { return role.enterpriseId === 'ENT000002'; })) {
+                data.push({ id: 'R6', enterpriseId: 'ENT000002', scope: 'enterprise', name: '企业管理员', roleKey: 'enterprise_admin', sort: 1, status: '0', remark: '企业级角色', menuIds: ['M1','M11','M1101','M12','M1201','M14','M1401'] });
+            }
             write(STORAGE_KEYS.roles, data);
             return data;
         }
         // 超级管理员拥有所有菜单权限
         var allMenuIds = initMenus().map(function (m) { return m.id; });
         data = [
-            { id: 'R1', name: '超级管理员', roleKey: 'admin',    sort: 1, status: '0', remark: '拥有所有权限', menuIds: allMenuIds },
-            { id: 'R2', name: '销售专员',   roleKey: 'sales',    sort: 2, status: '0', remark: '负责销售订单管理', menuIds: ['M1','M11','M1101','M1104','M12','M1201','M1202','M1203','M2','M21','M2101','M22'] },
-            { id: 'R3', name: '采购专员',   roleKey: 'purchase', sort: 3, status: '0', remark: '负责待采订单和采购订单管理', menuIds: ['M1','M12','M1201','M1202','M1203','M13','M1301','M14','M1401','M1402'] },
-            { id: 'R4', name: '财务专员',   roleKey: 'finance',  sort: 4, status: '0', remark: '负责结算付款',     menuIds: ['M1','M11','M1101','M12','M1201','M4','M41'] },
-            { id: 'R5', name: '仓储物流',   roleKey: 'logistics',sort: 5, status: '0', remark: '负责仓储发货',     menuIds: ['M1','M11','M1101','M12','M1201'] },
+            { id: 'R1', enterpriseId: 'PLATFORM', scope: 'platform', name: '总平台管理员', roleKey: 'admin', sort: 1, status: '0', remark: '平台级角色，拥有所有权限', menuIds: allMenuIds },
+            { id: 'R2', enterpriseId: 'ENT000001', scope: 'enterprise', name: '销售专员', roleKey: 'sales', sort: 2, status: '0', remark: '负责销售订单管理', menuIds: ['M1','M11','M1101','M1104','M12','M1201','M2','M21','M2101','M22'] },
+            { id: 'R3', enterpriseId: 'ENT000001', scope: 'enterprise', name: '采购专员', roleKey: 'purchase', sort: 3, status: '0', remark: '负责待采订单和采购订单管理', menuIds: ['M1','M12','M1201','M1202','M1203','M13','M1301','M14','M1401','M1402'] },
+            { id: 'R4', enterpriseId: 'ENT000001', scope: 'enterprise', name: '财务专员', roleKey: 'finance', sort: 4, status: '0', remark: '负责结算付款', menuIds: ['M1','M11','M1101','M12','M1201','M4','M41'] },
+            { id: 'R5', enterpriseId: 'ENT000001', scope: 'enterprise', name: '仓储物流', roleKey: 'logistics', sort: 5, status: '0', remark: '负责仓储发货', menuIds: ['M1','M11','M1101','M12','M1201'] },
+            { id: 'R6', enterpriseId: 'ENT000002', scope: 'enterprise', name: '企业管理员', roleKey: 'enterprise_admin', sort: 1, status: '0', remark: '企业级角色', menuIds: ['M1','M11','M1101','M12','M1201','M14','M1401'] }
         ];
         write(STORAGE_KEYS.roles, data);
         return data;
@@ -171,14 +198,25 @@
 
     function initUsers() {
         var data = read(STORAGE_KEYS.users);
-        if (data.length) return data;
+        if (data.length) {
+            var changed = false;
+            data.forEach(function (user) {
+                if (!user.enterpriseId) { user.enterpriseId = user.loginName === 'admin' ? 'PLATFORM' : 'ENT000001'; changed = true; }
+            });
+            if (!data.some(function (user) { return user.enterpriseId === 'ENT000002'; })) {
+                data.push({ id: 'U7', enterpriseId: 'ENT000002', deptId: 'D201', loginName: 'yuanxiang', userName: '元象管理员', phone: '13900000001', email: 'admin@yuanxiang.com', sex: '0', status: '0', roleIds: ['R6'], pwd: '123456' });
+                changed = true;
+            }
+            if (changed) write(STORAGE_KEYS.users, data);
+            return data;
+        }
         data = [
-            { id: 'U1', deptId: 'D101', loginName: 'admin',   userName: 'Administrator', phone: '13800000001', email: 'admin@haifu.com',  sex: '0', status: '0', roleIds: ['R1'], pwd: 'admin123' },
-            { id: 'U2', deptId: 'D103', loginName: 'zhangsan', userName: '张三',          phone: '13800000002', email: 'zhangsan@haifu.com', sex: '0', status: '0', roleIds: ['R2'], pwd: '123456' },
-            { id: 'U3', deptId: 'D104', loginName: 'lisi',     userName: '李四',          phone: '13800000003', email: 'lisi@haifu.com',     sex: '1', status: '0', roleIds: ['R3'], pwd: '123456' },
-            { id: 'U4', deptId: 'D105', loginName: 'wangwu',   userName: '王五',          phone: '13800000004', email: 'wangwu@haifu.com',   sex: '0', status: '0', roleIds: ['R4'], pwd: '123456' },
-            { id: 'U5', deptId: 'D106', loginName: 'zhaoliu',  userName: '赵六',          phone: '13800000005', email: 'zhaoliu@haifu.com',  sex: '1', status: '0', roleIds: ['R5'], pwd: '123456' },
-            { id: 'U6', deptId: 'D103', loginName: 'qianqi',   userName: '钱七',          phone: '13800000006', email: 'qianqi@haifu.com',   sex: '0', status: '1', roleIds: ['R2'], pwd: '123456' },
+            { id: 'U1', enterpriseId: 'PLATFORM', deptId: '', loginName: 'admin', userName: 'Administrator', phone: '13800000001', email: 'admin@haifu.com', sex: '0', status: '0', roleIds: ['R1'], pwd: 'admin123' },
+            { id: 'U2', enterpriseId: 'ENT000001', deptId: 'D103', loginName: 'zhangsan', userName: '张三', phone: '13800000002', email: 'zhangsan@haifu.com', sex: '0', status: '0', roleIds: ['R2'], pwd: '123456' },
+            { id: 'U3', enterpriseId: 'ENT000001', deptId: 'D104', loginName: 'lisi', userName: '李四', phone: '13800000003', email: 'lisi@haifu.com', sex: '1', status: '0', roleIds: ['R3'], pwd: '123456' },
+            { id: 'U4', enterpriseId: 'ENT000001', deptId: 'D105', loginName: 'wangwu', userName: '王五', phone: '13800000004', email: 'wangwu@haifu.com', sex: '0', status: '0', roleIds: ['R4'], pwd: '123456' },
+            { id: 'U5', enterpriseId: 'ENT000001', deptId: 'D106', loginName: 'zhaoliu', userName: '赵六', phone: '13800000005', email: 'zhaoliu@haifu.com', sex: '1', status: '0', roleIds: ['R5'], pwd: '123456' },
+            { id: 'U7', enterpriseId: 'ENT000002', deptId: 'D201', loginName: 'yuanxiang', userName: '元象管理员', phone: '13900000001', email: 'admin@yuanxiang.com', sex: '0', status: '0', roleIds: ['R6'], pwd: '123456' }
         ];
         write(STORAGE_KEYS.users, data);
         return data;
@@ -188,6 +226,8 @@
     window.RBAC = {
         KEYS: STORAGE_KEYS,
         genId: genId,
+        getEnterprises: function () { return ENTERPRISES.slice(); },
+        getEnterpriseById: function (id) { return ENTERPRISES.find(function (x) { return x.id === id; }); },
 
         init: function () {
             initDepts();
@@ -197,12 +237,13 @@
         },
 
         // ---- 部门 ----
-        getDepts:    function () { return read(STORAGE_KEYS.depts); },
+        getDepts:    function (enterpriseId) { var data = read(STORAGE_KEYS.depts); return enterpriseId ? data.filter(function (x) { return x.enterpriseId === enterpriseId; }) : data; },
         saveDepts:   function (d) { write(STORAGE_KEYS.depts, d); },
         getDeptById: function (id) { return read(STORAGE_KEYS.depts).find(function (x) { return x.id === id; }); },
         // 获取部门树（含 children）
-        getDeptTree: function () {
+        getDeptTree: function (enterpriseId) {
             var all = read(STORAGE_KEYS.depts);
+            if (enterpriseId) all = all.filter(function (d) { return d.enterpriseId === enterpriseId; });
             function build(parentId) {
                 return all.filter(function (d) { return d.parentId === parentId; })
                     .sort(function (a, b) { return a.sort - b.sort; })
@@ -215,8 +256,9 @@
             return build('0');
         },
         // 获取某部门及所有子部门 ID（含自身）
-        getDeptChildIds: function (deptId) {
+        getDeptChildIds: function (deptId, enterpriseId) {
             var all = read(STORAGE_KEYS.depts);
+            if (enterpriseId) all = all.filter(function (d) { return d.enterpriseId === enterpriseId; });
             var ids = [deptId];
             function collect(pid) {
                 all.filter(function (d) { return d.parentId === pid; }).forEach(function (d) {
@@ -246,12 +288,12 @@
         },
 
         // ---- 角色 ----
-        getRoles:    function () { return read(STORAGE_KEYS.roles); },
+        getRoles:    function (enterpriseId) { var data = read(STORAGE_KEYS.roles); return enterpriseId ? data.filter(function (x) { return x.enterpriseId === enterpriseId; }) : data; },
         saveRoles:   function (r) { write(STORAGE_KEYS.roles, r); },
         getRoleById: function (id) { return read(STORAGE_KEYS.roles).find(function (x) { return x.id === id; }); },
 
         // ---- 用户 ----
-        getUsers:    function () { return read(STORAGE_KEYS.users); },
+        getUsers:    function (enterpriseId) { var data = read(STORAGE_KEYS.users); return enterpriseId ? data.filter(function (x) { return x.enterpriseId === enterpriseId; }) : data; },
         saveUsers:   function (u) { write(STORAGE_KEYS.users, u); },
         getUserById: function (id) { return read(STORAGE_KEYS.users).find(function (x) { return x.id === id; }); },
 

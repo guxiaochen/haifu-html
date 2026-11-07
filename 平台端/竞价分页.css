@@ -1,0 +1,6 @@
+.pagination{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding-top:16px;color:#8b9299;font-size:13px}
+.pagination .page-total{margin-right:6px}
+.pagination button{min-width:32px;height:32px;padding:0 9px;border:1px solid #d9dfe2;border-radius:4px;background:#fff;color:#555;font:inherit;cursor:pointer}
+.pagination button:hover:not(:disabled){border-color:#2ba471;color:#2ba471}
+.pagination button.active{border-color:#2ba471;background:#2ba471;color:#fff}
+.pagination button:disabled{color:#b8bfc3;cursor:not-allowed}

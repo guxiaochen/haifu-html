@@ -108,7 +108,7 @@
             <!-- 左侧部门树 -->
             <div class="rbac-tree-panel">
                 <div class="tree-head">
-                    <span>部门组织</span>
+                    <span id="dept-tree-title">部门组织</span>
                     <span class="tree-refresh" onclick="loadDeptTree()">刷新</span>
                 </div>
                 <div id="dept-tree"></div>
@@ -118,6 +118,10 @@
             <div class="rbac-list-panel">
                 <div class="filter-card">
                     <div class="filter-row">
+                        <div class="filter-item">
+                            <label>所属运营企业</label>
+                            <select id="f-enterprise" onchange="changeEnterprise(this.value)"></select>
+                        </div>
                         <div class="filter-item">
                             <label>登录名称</label>
                             <input type="text" id="f-loginName" placeholder="请输入登录名称">
@@ -190,6 +194,10 @@
         </div>
         <div class="rbac-modal-body">
             <div class="rbac-form">
+                <div class="form-row full">
+                    <label>所属运营企业</label>
+                    <input type="text" id="m-enterpriseName" disabled>
+                </div>
                 <div class="form-row">
                     <label>登录名称 <span class="req">*</span></label>
                     <input type="text" id="m-loginName" placeholder="请输入登录名称">
@@ -278,10 +286,32 @@
 var selectedDeptId = null;   // 选中的部门 ID（null = 全部）
 var editingUserId  = null;   // 当前编辑的用户 ID
 var pwdResetUserId = null;   // 当前重置密码的用户 ID
+var queryEnterpriseId = new URLSearchParams(location.search).get('enterprise');
+var currentEnterpriseId = queryEnterpriseId || 'ENT000001';
+
+function initEnterpriseContext() {
+    var enterprises = RBAC.getEnterprises();
+    if (!RBAC.getEnterpriseById(currentEnterpriseId)) currentEnterpriseId = enterprises[0].id;
+    document.getElementById('f-enterprise').innerHTML = '<option value="">全部</option>' + enterprises.map(function (item) {
+        return '<option value="' + item.id + '"' + (item.id === currentEnterpriseId ? ' selected' : '') + '>' + item.name + '</option>';
+    }).join('');
+    updateEnterpriseTitle();
+}
+function updateEnterpriseTitle() {
+    var enterprise = RBAC.getEnterpriseById(currentEnterpriseId);
+    document.getElementById('dept-tree-title').textContent = enterprise ? enterprise.name : '全部企业 · 部门组织';
+}
+function changeEnterprise(enterpriseId) {
+    currentEnterpriseId = enterpriseId;
+    selectedDeptId = null;
+    updateEnterpriseTitle();
+    loadDeptTree();
+    renderUsers();
+}
 
 /* ===== 部门树 ===== */
 function loadDeptTree() {
-    var tree = RBAC.getDeptTree();
+    var tree = RBAC.getDeptTree(currentEnterpriseId);
     var html = '<div class="tree-node' + (selectedDeptId === null ? ' active' : '') + '" onclick="selectDept(null)">' +
                '<span class="tree-toggle empty"></span><span class="tree-icon">🏠</span><span class="tree-label">全部</span></div>';
     html += renderDeptNodes(tree, 0);
@@ -311,13 +341,13 @@ function selectDept(deptId) {
 
 /* ===== 用户列表 ===== */
 function renderUsers() {
-    var users = RBAC.getUsers();
-    var roles = RBAC.getRoles();
-    var depts = RBAC.getDepts();
+    var users = RBAC.getUsers(currentEnterpriseId);
+    var roles = RBAC.getRoles(currentEnterpriseId);
+    var depts = RBAC.getDepts(currentEnterpriseId);
 
     // 按部门筛选
     if (selectedDeptId) {
-        var deptIds = RBAC.getDeptChildIds(selectedDeptId);
+        var deptIds = RBAC.getDeptChildIds(selectedDeptId, currentEnterpriseId);
         users = users.filter(function (u) { return deptIds.indexOf(u.deptId) >= 0; });
     }
     // 搜索条件
@@ -391,12 +421,14 @@ function openUserModal(userId) {
     document.getElementById('user-modal-title').textContent = userId ? '编辑用户' : '新增用户';
 
     // 部门下拉
-    var deptTree = RBAC.getDeptTree();
+    var enterprise = RBAC.getEnterpriseById(currentEnterpriseId);
+    document.getElementById('m-enterpriseName').value = enterprise ? enterprise.name : '';
+    var deptTree = RBAC.getDeptTree(currentEnterpriseId);
     var deptOpts = '<option value="">请选择部门</option>' + RBAC.renderTreeOptions(deptTree, 'name', 'id', '');
     document.getElementById('m-deptId').innerHTML = deptOpts;
 
     // 角色复选
-    var roles = RBAC.getRoles();
+    var roles = RBAC.getRoles(currentEnterpriseId);
     var roleHtml = '';
     roles.forEach(function (r) {
         roleHtml += '<label style="display:flex;align-items:center;gap:4px;font-size:13px;color:#333;">' +
@@ -452,6 +484,7 @@ function saveUser() {
     if (editingUserId) {
         var u = users.find(function (x) { return x.id === editingUserId; });
         u.loginName = loginName;
+        u.enterpriseId = currentEnterpriseId;
         u.userName  = userName;
         u.deptId    = document.getElementById('m-deptId').value;
         u.phone     = document.getElementById('m-phone').value.trim();
@@ -465,6 +498,7 @@ function saveUser() {
         if (!pwd) { alert('请输入密码'); return; }
         users.push({
             id: RBAC.genId('U'),
+            enterpriseId: currentEnterpriseId,
             loginName: loginName,
             userName: userName,
             pwd: pwd,
@@ -519,9 +553,9 @@ function confirmResetPwd() {
 
 /* ===== 导出 ===== */
 function exportUsers() {
-    var users = RBAC.getUsers();
-    var roles = RBAC.getRoles();
-    var depts = RBAC.getDepts();
+    var users = RBAC.getUsers(currentEnterpriseId);
+    var roles = RBAC.getRoles(currentEnterpriseId);
+    var depts = RBAC.getDepts(currentEnterpriseId);
     var deptMap = {}; depts.forEach(function (d) { deptMap[d.id] = d.name; });
     var roleMap = {}; roles.forEach(function (r) { roleMap[r.id] = r.name; });
     var header = '用户编号,登录名称,用户昵称,部门,手机号码,状态,角色\n';
@@ -538,6 +572,7 @@ function exportUsers() {
 }
 
 /* ===== 初始化 ===== */
+initEnterpriseContext();
 loadDeptTree();
 renderUsers();
 </script>

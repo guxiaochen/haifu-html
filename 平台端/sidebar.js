@@ -24,6 +24,11 @@
         { type: 'item', label: '询价单', url: '平台询价单列表.html', activeKeys: ['平台询价单列表.html', '平台询价单详情.html', '新建平台询价单.html', '邀请供应商报价-选择询价明细.html', '邀请供应商报价-选择供应商.html', '填写供应商询价.html', '供应商报价列表.html'] },
         { type: 'item', label: '报价单', url: '报价单列表.html', activeKeys: ['报价单列表.html', '平台报价单详情.html'] },
 
+        { type: 'group', label: '竞价管理', icon: '🏆' },
+        { type: 'item', label: '平台竞价', url: '平台竞价.html', activeKeys: ['平台竞价.html'] },
+        { type: 'item', label: '客户竞价', url: '客户竞价.html', activeKeys: ['客户竞价.html'] },
+        { type: 'item', label: '报价申请', url: '报价申请.html', activeKeys: ['报价申请.html'] },
+
         { type: 'group', label: '结算', icon: '💰' },
         { type: 'item', label: '预付款', url: '鸡蛋-预付款列表.html', activeKeys: ['鸡蛋-预付款列表.html', '鸡蛋-预付款详情.html'] },
 
@@ -43,6 +48,7 @@
         { type: 'item', label: '公共信息配置', url: '公共信息配置.html', activeKeys: ['公共信息配置.html'] },
 
         { type: 'group', label: '系统管理', icon: '⚙️' },
+        { type: 'item', label: '运营企业管理', url: '企业管理.html', activeKeys: ['企业管理.html'] },
         { type: 'item', label: '用户管理', url: '用户管理.html', activeKeys: ['用户管理.html'] },
         { type: 'item', label: '角色管理', url: '角色管理.html', activeKeys: ['角色管理.html'] },
         { type: 'item', label: '菜单管理', url: '菜单管理.html', activeKeys: ['菜单管理.html'] },
@@ -58,6 +64,7 @@
             html += '<div class="menu-subtitle">' + menu.label + '</div>';
         } else if (menu.type === 'item') {
             var isActive = menu.activeKeys && menu.activeKeys.indexOf(filename) >= 0;
+            if (filename === '竞价详情.html') isActive = menu.label === ({ platform: '平台竞价', customer: '客户竞价', application: '报价申请' }[new URLSearchParams(query).get('kind')]);
             if (filename === '采购订单详情.html' && query.indexOf('order=%E5%BE%85%E9%87%87-') >= 0) isActive = menu.label === '待采订单';
             var onclick = menu.url && menu.url !== '#' ? ' onclick="location.href=\'' + menu.url + '\'"' : '';
             html += '<div class="menu-item' + (isActive ? ' active' : '') + (menu.top ? ' top-level' : '') + '"' + onclick + '>' + menu.label + '</div>';

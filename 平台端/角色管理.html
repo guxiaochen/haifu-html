@@ -103,6 +103,10 @@
         <div class="filter-card">
             <div class="filter-row">
                 <div class="filter-item">
+                    <label>所属运营企业</label>
+                    <select id="f-enterprise" onchange="changeRoleScope(this.value)"></select>
+                </div>
+                <div class="filter-item">
                     <label>角色名称</label>
                     <input type="text" id="f-name" placeholder="请输入角色名称">
                 </div>
@@ -141,6 +145,7 @@
                     <tr>
                         <th style="width:32px;"><input type="checkbox" id="check-all" onchange="toggleAll(this)"></th>
                         <th>角色编号</th>
+                        <th>角色范围</th>
                         <th>角色名称</th>
                         <th>权限字符</th>
                         <th>显示顺序</th>
@@ -165,6 +170,10 @@
         </div>
         <div class="rbac-modal-body">
             <div class="rbac-form">
+                <div class="form-row full">
+                    <label>角色归属</label>
+                    <input type="text" id="m-enterpriseName" disabled>
+                </div>
                 <div class="form-row">
                     <label>角色名称 <span class="req">*</span></label>
                     <input type="text" id="m-name" placeholder="请输入角色名称">
@@ -212,10 +221,24 @@
 <script src="sidebar.js"></script>
 <script>
 var editingRoleId = null;
+var queryEnterpriseId = new URLSearchParams(location.search).get('enterprise');
+var currentRoleScope = queryEnterpriseId || 'ENT000001';
+
+function initRoleScope() {
+    var options = [{ id: '', name: '全部' }, { id: 'PLATFORM', name: '平台级角色' }].concat(RBAC.getEnterprises());
+    if (!options.some(function (item) { return item.id === currentRoleScope; })) currentRoleScope = 'ENT000001';
+    document.getElementById('f-enterprise').innerHTML = options.map(function (item) {
+        return '<option value="' + item.id + '"' + (item.id === currentRoleScope ? ' selected' : '') + '>' + item.name + '</option>';
+    }).join('');
+}
+function changeRoleScope(scopeId) {
+    currentRoleScope = scopeId;
+    renderRoles();
+}
 
 /* ===== 角色列表 ===== */
 function renderRoles() {
-    var roles = RBAC.getRoles();
+    var roles = RBAC.getRoles(currentRoleScope);
     var name   = document.getElementById('f-name').value.trim();
     var key    = document.getElementById('f-key').value.trim();
     var status = document.getElementById('f-status').value;
@@ -230,6 +253,7 @@ function renderRoles() {
         html += '<tr>' +
             '<td><input type="checkbox" class="row-check" data-id="' + r.id + '"' + (r.roleKey === 'admin' ? ' disabled' : '') + '></td>' +
             '<td>' + r.id + '</td>' +
+            '<td>' + (r.scope === 'platform' ? '<span class="rbac-tag tag-dir">平台级</span>' : '<span class="rbac-tag tag-menu">企业级</span>') + '</td>' +
             '<td>' + r.name + '</td>' +
             '<td>' + r.roleKey + '</td>' +
             '<td>' + (r.sort || 0) + '</td>' +
@@ -243,7 +267,7 @@ function renderRoles() {
             '</td>' +
         '</tr>';
     });
-    if (!html) html = '<tr><td colspan="9" style="text-align:center;padding:40px;color:#999;">暂无数据</td></tr>';
+    if (!html) html = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#999;">暂无数据</td></tr>';
     document.getElementById('role-tbody').innerHTML = html;
     document.getElementById('role-count').textContent = '共 ' + roles.length + ' 条';
 }
@@ -341,6 +365,8 @@ function onPermCheck(el) {
 function openRoleModal(roleId) {
     editingRoleId = roleId || null;
     document.getElementById('role-modal-title').textContent = roleId ? '编辑角色' : '新增角色';
+    var enterprise = RBAC.getEnterpriseById(currentRoleScope);
+    document.getElementById('m-enterpriseName').value = currentRoleScope === 'PLATFORM' ? '平台级角色' : (enterprise ? enterprise.name : '');
     if (roleId) {
         var r = RBAC.getRoleById(roleId);
         document.getElementById('m-name').value   = r.name;
@@ -383,6 +409,8 @@ function saveRole() {
     } else {
         roles.push({
             id: RBAC.genId('R'),
+            enterpriseId: currentRoleScope,
+            scope: currentRoleScope === 'PLATFORM' ? 'platform' : 'enterprise',
             name: name,
             roleKey: key,
             sort: parseInt(document.getElementById('m-sort').value) || 0,
@@ -417,6 +445,7 @@ function openDataScope(roleId) {
 }
 
 /* ===== 初始化 ===== */
+initRoleScope();
 renderRoles();
 </script>
 </body>

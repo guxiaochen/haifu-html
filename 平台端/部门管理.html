@@ -91,6 +91,10 @@
         <div class="filter-card">
             <div class="filter-row">
                 <div class="filter-item">
+                    <label>所属运营企业</label>
+                    <select id="f-enterprise" onchange="changeEnterprise(this.value)"></select>
+                </div>
+                <div class="filter-item">
                     <label>部门名称</label>
                     <input type="text" id="f-name" placeholder="请输入部门名称">
                 </div>
@@ -112,7 +116,7 @@
         <div class="table-card">
             <div class="table-toolbar">
                 <div class="table-title">
-                    部门列表
+                    部门列表 <span id="enterprise-context" style="color:#2BA471;font-weight:400;margin-left:8px;"></span>
                     <span class="count" id="dept-count"></span>
                 </div>
                 <div class="table-toolbar-right rbac-toolbar-btns">
@@ -149,6 +153,10 @@
         </div>
         <div class="rbac-modal-body">
             <div class="rbac-form">
+                <div class="form-row full">
+                    <label>所属运营企业</label>
+                    <input type="text" id="m-enterpriseName" disabled>
+                </div>
                 <div class="form-row full">
                     <label>上级部门</label>
                     <select id="m-parentId">
@@ -196,10 +204,31 @@
 <script>
 var editingDeptId = null;
 var expandedNodes = {};
+var queryEnterpriseId = new URLSearchParams(location.search).get('enterprise');
+var currentEnterpriseId = queryEnterpriseId || 'ENT000001';
+
+function initEnterpriseContext() {
+    var enterprises = RBAC.getEnterprises();
+    if (!RBAC.getEnterpriseById(currentEnterpriseId)) currentEnterpriseId = enterprises[0].id;
+    document.getElementById('f-enterprise').innerHTML = '<option value="">全部</option>' + enterprises.map(function (item) {
+        return '<option value="' + item.id + '"' + (item.id === currentEnterpriseId ? ' selected' : '') + '>' + item.name + '</option>';
+    }).join('');
+    updateEnterpriseContext();
+}
+function updateEnterpriseContext() {
+    var enterprise = RBAC.getEnterpriseById(currentEnterpriseId);
+    document.getElementById('enterprise-context').textContent = enterprise ? '· ' + enterprise.name : '· 全部企业';
+}
+function changeEnterprise(enterpriseId) {
+    currentEnterpriseId = enterpriseId;
+    expandedNodes = {};
+    updateEnterpriseContext();
+    renderDeptTable();
+}
 
 /* ===== 渲染树表格 ===== */
 function renderDeptTable() {
-    var tree = RBAC.getDeptTree();
+    var tree = RBAC.getDeptTree(currentEnterpriseId);
     var searchName = document.getElementById('f-name').value.trim();
     var searchStatus = document.getElementById('f-status').value;
 
@@ -222,7 +251,7 @@ function renderDeptTable() {
     var html = buildRows(filtered, 0);
     if (!html) html = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#999;">暂无数据</td></tr>';
     document.getElementById('dept-tbody').innerHTML = html;
-    document.getElementById('dept-count').textContent = '共 ' + RBAC.getDepts().length + ' 条';
+    document.getElementById('dept-count').textContent = '共 ' + RBAC.getDepts(currentEnterpriseId).length + ' 条';
 }
 
 function buildRows(nodes, level) {
@@ -258,7 +287,7 @@ function buildRows(nodes, level) {
 }
 
 function isAncestorExpanded(parentId) {
-    var depts = RBAC.getDepts();
+    var depts = RBAC.getDepts(currentEnterpriseId);
     var pid = parentId;
     while (pid && pid !== '0') {
         if (!expandedNodes[pid]) return false;
@@ -276,7 +305,7 @@ function toggleExpand(deptId) {
 }
 function expandAll(expand) {
     if (expand) {
-        RBAC.getDepts().forEach(function (d) { expandedNodes[d.id] = true; });
+        RBAC.getDepts(currentEnterpriseId).forEach(function (d) { expandedNodes[d.id] = true; });
     } else {
         expandedNodes = {};
     }
@@ -294,7 +323,9 @@ function openDeptModal(deptId, presetParentId) {
     editingDeptId = deptId || null;
     document.getElementById('dept-modal-title').textContent = deptId ? '编辑部门' : '新增部门';
 
-    var tree = RBAC.getDeptTree();
+    var enterprise = RBAC.getEnterpriseById(currentEnterpriseId);
+    document.getElementById('m-enterpriseName').value = enterprise ? enterprise.name : '';
+    var tree = RBAC.getDeptTree(currentEnterpriseId);
     var opts = '<option value="0">顶级</option>' + RBAC.renderTreeOptions(tree, 'name', 'id', '');
 
     // 编辑时，不能把自己或子部门设为父节点（防止环）
@@ -337,6 +368,7 @@ function saveDept() {
     if (!name) { alert('请输入部门名称'); return; }
 
     var data = {
+        enterpriseId: currentEnterpriseId,
         parentId: document.getElementById('m-parentId').value,
         name:     name,
         sort:     parseInt(document.getElementById('m-sort').value) || 0,
@@ -378,6 +410,7 @@ function deleteDept(deptId) {
 }
 
 /* ===== 初始化 ===== */
+initEnterpriseContext();
 renderDeptTable();
 </script>
 </body>

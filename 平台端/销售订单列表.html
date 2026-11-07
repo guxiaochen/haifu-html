@@ -177,7 +177,7 @@
         table td {
             padding: 12px; color: #333; border-bottom: 1px solid #f5f5f5;
         }
-        table tbody tr:hover { background: #fafdfb; }
+        .sales-order-row-unread { background: #F7FCF9; }
 
         /* 状态徽标 */
         .status {
@@ -552,6 +552,54 @@
             localStorage.setItem('haifu_egg_auto_pending_orders', JSON.stringify(pending)); all.checked = false;
             alert('已批量确认销售订单并生成待采订单');
         });
+    })();
+</script>
+<script>
+    // ===== 销售订单查看标记：按当前登录用户分别记录 =====
+    (function () {
+        var accountEl = document.querySelector('.account-name');
+        var currentUser = accountEl ? accountEl.textContent.trim() : 'current-user';
+        var storageKey = 'haifu_sales_order_viewed_' + encodeURIComponent(currentUser);
+
+        function readViewedOrders() {
+            try { return JSON.parse(localStorage.getItem(storageKey) || '[]'); }
+            catch (e) { return []; }
+        }
+        function getOrderNo(row) {
+            return row && row.cells && row.cells[1] ? row.cells[1].textContent.trim() : '';
+        }
+        function markViewed(orderNo) {
+            if (!orderNo) return;
+            var viewed = readViewedOrders();
+            if (viewed.indexOf(orderNo) < 0) viewed.push(orderNo);
+            try { localStorage.setItem(storageKey, JSON.stringify(viewed)); } catch (e) {}
+        }
+        function decorateRows() {
+            var viewed = readViewedOrders();
+            var selector = '#eggSalesBatchBody tr, .table-card.cat-other tbody tr';
+            document.querySelectorAll(selector).forEach(function (row) {
+                var orderNo = getOrderNo(row);
+                var cell = row.cells && row.cells[1];
+                if (!orderNo || !cell) return;
+                var unread = viewed.indexOf(orderNo) < 0;
+                row.classList.toggle('sales-order-row-unread', unread);
+            });
+        }
+
+        // 使用捕获阶段记录，保证在页面跳转前完成“已查看”写入。
+        document.addEventListener('click', function (event) {
+            var row = event.target.closest('tr');
+            if (!row || event.target.closest('input, button, select')) return;
+            var isEggOrder = !!row.closest('#eggSalesBatchBody');
+            var action = event.target.closest('a.link');
+            var isOtherView = !!row.closest('.table-card.cat-other') && action && action.textContent.trim() === '查看';
+            if (!isEggOrder && !isOtherView) return;
+            var orderNo = getOrderNo(row);
+            markViewed(orderNo);
+            row.classList.remove('sales-order-row-unread');
+        }, true);
+
+        decorateRows();
     })();
 </script>
 </body>

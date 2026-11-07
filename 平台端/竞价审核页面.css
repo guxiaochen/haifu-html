@@ -1,0 +1,36 @@
+/* 保留原型的字段和分组，视觉沿用平台竞价页面。 */
+.stats .stat{min-width:138px}
+.stats .stat span{display:block}
+.stats .stat b{margin-top:2px}
+.auction-table,.application-table{min-width:1180px;table-layout:fixed;white-space:normal}
+.auction-table th,.auction-table td,.application-table th,.application-table td{
+  vertical-align:middle;overflow-wrap:anywhere;font-size:13px;
+}
+.auction-table th:first-child,.application-table th:first-child{width:17%}
+.auction-table th:last-child{width:9%}
+.application-table th:nth-child(5){width:18%}
+.application-table th:last-child{width:9%}
+.auction-table tbody tr,.application-table tbody tr{cursor:pointer}
+.auction-table tbody tr:hover,.application-table tbody tr:hover{background:#f7fcf9}
+.auction-table tbody tr:focus-visible,.application-table tbody tr:focus-visible{outline:2px solid #2ba471;outline-offset:-2px}
+.tabs{display:flex;gap:22px;margin-bottom:0;border-bottom:1px solid #edf0f2}
+.tabs button{
+  padding:0 4px 11px;border:0;border-bottom:2px solid transparent;background:none;
+  color:#667078;font:inherit;cursor:pointer;
+}
+.tabs button.active{border-color:#2ba471;color:#209361;font-weight:600}
+.credential-images{display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap}
+.credential-images img{width:48px;height:64px;object-fit:cover;border:1px solid #d9dfe2;border-radius:3px;background:#fff}
+.audit-options{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.audit-options label{padding:6px 10px;border:1px solid #d9dfe2;border-radius:4px;cursor:pointer}
+.audit-options label:last-child{border-color:#f0bcbc;color:#d55151}
+.audit-options input{accent-color:#2ba471}
+.audit-reason{display:flex;align-items:flex-start;gap:10px}
+.audit-reason textarea{flex:1;min-height:88px;padding:9px 10px;border:1px solid #d9dfe2;border-radius:4px;font:inherit;resize:vertical}
+.design-modal-note{margin-bottom:16px;padding:10px 12px;border-radius:4px;background:#fff0f0;color:#d55151}
+.voucher-table{width:100%;border-collapse:collapse}
+.voucher-table th,.voucher-table td{padding:9px;border-bottom:1px solid #edf0f2;text-align:left;font-size:12px}
+.voucher-table th{background:#fafafa}
+.voucher-thumb{width:52px;height:48px;object-fit:cover;border:1px solid #edf0f2;border-radius:3px}
+.modal-stats{margin-bottom:16px}
+@media(max-width:800px){.stats{display:flex}}

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 480" role="img" aria-label="营业执照演示样张">
+  <rect width="360" height="480" fill="#f7f3e9"/>
+  <rect x="12" y="12" width="336" height="456" fill="#fffdf8" stroke="#d9cbb1" stroke-width="2"/>
+  <text x="180" y="70" fill="#322d27" font-size="30" font-family="Microsoft YaHei,sans-serif" text-anchor="middle" font-weight="700">营业执照</text>
+  <text x="180" y="100" fill="#9b8d78" font-size="13" font-family="Microsoft YaHei,sans-serif" text-anchor="middle">资质演示样张 · 非真实证照</text>
+  <path d="M40 132h280M40 370h280" stroke="#e8dfd1"/>
+  <g fill="#635e56" font-size="16" font-family="Microsoft YaHei,sans-serif">
+    <text x="42" y="169">企业名称：演示供应商有限公司</text>
+    <text x="42" y="213">经营范围：农产品销售与配送</text>
+    <text x="42" y="257">登记状态：正常</text>
+    <text x="42" y="301">登记机关：演示信息</text>
+  </g>
+  <circle cx="258" cy="367" r="49" fill="none" stroke="#c8514d" stroke-width="6" opacity=".72"/>
+  <text x="258" y="374" fill="#c8514d" font-size="17" font-family="Microsoft YaHei,sans-serif" text-anchor="middle" font-weight="700">演示样张</text>
+  <text x="180" y="431" fill="#aaa49a" font-size="13" font-family="Microsoft YaHei,sans-serif" text-anchor="middle">仅供原型页面展示</text>
+</svg>

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>报价申请 - 运营管理平台</title>
+  <link rel="stylesheet" href="竞价管理.css">
+  <link rel="stylesheet" href="竞价审核页面.css">
+  <link rel="stylesheet" href="竞价分页.css">
+</head>
+<body data-kind="application">
+  <header class="topbar"><div class="brand"><i>叶</i>运营管理平台</div><div class="user">🔔　Administrator</div></header>
+  <div class="layout"><aside id="sidebar-container"></aside><main>
+    <div class="crumb">首页 / 竞价管理 / <strong>报价申请</strong></div>
+    <section class="card pagehead"><h1>报价申请</h1></section>
+    <section class="card"><div class="tabs"><button class="active" data-tab="客户竞价">客户报价申请</button><button data-tab="平台竞价">平台报价申请</button></div></section>
+    <section class="card filters">
+      <div class="field wide"><label for="q">竞价标题</label><input id="q"></div>
+      <div class="field"><label for="status">审核状态</label><select id="status"><option value="">全部</option><option>待审核</option><option>已通过</option><option>已拒绝</option></select></div>
+      <div class="actions"><button class="btn primary" data-action="search">查询</button><button class="btn" data-action="reset">重置</button></div>
+    </section>
+    <section class="card"><div class="tablewrap"><table class="application-table"><thead><tr><th>竞价信息</th><th>采购方</th><th>供应商</th><th>申请时间</th><th>申请理由</th><th>已有资质</th><th>审核状态</th></tr></thead><tbody id="rows"></tbody></table></div><nav class="pagination" id="pageNav" aria-label="报价申请列表分页"></nav></section>
+  </main></div>
+  <div class="overlay" id="overlay"><div class="modal small" id="dialog" role="dialog" aria-modal="true"><div class="modalhead"><h2 id="modalTitle"></h2><button id="modalClose" aria-label="关闭">×</button></div><div class="modalbody" id="modalBody"></div><div class="modalfoot" id="modalFoot"></div></div></div>
+  <script src="sidebar.js"></script><script src="竞价审核页面.js"></script>
+</body>
+</html>

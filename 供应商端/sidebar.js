@@ -42,6 +42,7 @@
       items: [
         { text: "商家入驻", href: "商家入驻.html", page: "商家入驻.html,企业开店.html,企业开店详情.html" },
         { text: "企业认证", href: "企业认证.html", page: "企业认证.html" },
+        { text: "企业信息", href: "企业信息.html", page: "企业信息.html" },
         { text: "账号设置", href: "", page: "" }
       ]
     },
@@ -78,7 +79,9 @@
     ".sidebar .menu-group-title{padding:18px 24px 10px;color:#9fb0c0;font-size:15px;font-weight:600;letter-spacing:.04em;display:flex;align-items:center;gap:8px}",
     ".sidebar .menu-group-title.active{color:#91d5ff}",
     ".sidebar .menu-subtitle{padding:14px 24px 6px 22px;color:#6b7c8f;font-size:12px;font-weight:600;letter-spacing:.05em}",
-    ".sidebar .menu-group-title .arrow{margin-left:auto;font-size:11px;color:#60758a}"
+    ".sidebar .menu-group-title .arrow{margin-left:auto;font-size:11px;color:#60758a}",
+    ".license-preview,.id-preview{position:relative;cursor:pointer}",
+    ".license-preview::after,.id-preview::after{content:'🔍';position:absolute;right:8px;top:8px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:4px;background:rgba(0,0,0,.48);color:#fff;font-size:13px;box-shadow:0 1px 3px rgba(0,0,0,.16)}"
   ].join("");
 
   var styleEl = document.createElement("style");
@@ -122,4 +125,20 @@
     "</aside>";
 
   document.body.insertAdjacentHTML("afterbegin", html);
+  function addEnterpriseEntry() {
+    var host = document.querySelector('.top-actions, .top-nav-right, .breadcrumb-bar-right, .nav-user, .user');
+    if (!host || host.querySelector('[data-enterprise-entry]')) return;
+    var shortcut = document.createElement('a');
+    shortcut.dataset.enterpriseEntry = 'true';
+    shortcut.href = '企业信息.html';
+    shortcut.textContent = '企业信息';
+    shortcut.style.cssText = 'color:#1890ff;text-decoration:none;font-size:13px;white-space:nowrap;cursor:pointer';
+    host.insertBefore(shortcut, host.firstChild);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addEnterpriseEntry);
+  else addEnterpriseEntry();
+  document.addEventListener('click', function (event) {
+    var preview = event.target.closest && event.target.closest('.license-preview, .id-preview');
+    if (preview) alert('预览（演示）');
+  });
 })();

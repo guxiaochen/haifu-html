@@ -910,7 +910,8 @@
             document.getElementById('pending-submit-btn').style.display = 'none';
             document.getElementById('pending-status').textContent = '';
             // 采购订单无需等待特定状态即可创建预付款；预付款记录由下方台账脚本同步数量
-            document.getElementById('prepay-pill').classList.add('show');
+            var pill = document.getElementById('prepay-pill');
+            if (pill) pill.classList.add('show');
             setSupplierInputsDisabled(true);
             var steps = [document.getElementById('step-1'), document.getElementById('step-2'), document.getElementById('step-3')];
             if (status === 'pending') {
@@ -1075,9 +1076,10 @@
         + '<td>' + (i + 1) + '</td><td style="color:#2BA471;">' + d.no + '</td><td>¥ ' + fmtMoney(d.amt) + '</td><td>' + d.way + '</td><td>' + d.date + '</td>'
         + '<td><span class="receive-status ' + stCls + '">' + d.status + '</span></td><td>' + (d.vouchers ? d.vouchers + ' 个' : '—') + '</td></tr>';
     }).join('');
-    document.getElementById('prepay-sum').textContent = '¥ ' + fmtMoney(paidSum() + holdSum());
-    document.getElementById('prepay-pill-count').textContent = PREPAY_DOCS.length;
-  }
+  document.getElementById('prepay-sum').textContent = '¥ ' + fmtMoney(paidSum() + holdSum());
+  var pillCount = document.getElementById('prepay-pill-count');
+  if (pillCount) pillCount.textContent = PREPAY_DOCS.length;
+}
   function showErr(msg){ document.getElementById('pp-err').textContent = msg || ''; }
   // 百分比 → 预付金额（基数为剩余可付）
   function linkFromPercent() {

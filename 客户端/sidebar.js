@@ -33,6 +33,7 @@
 
         { type: 'group', label: '账号管理', icon: '👥' },
         { type: 'item', label: '登录账号', url: '账号管理.html', activeKeys: ['账号管理.html'] },
+        { type: 'item', label: '企业信息', url: '企业信息.html', activeKeys: ['企业信息.html'] },
 
         { type: 'group', label: '竞价管理', icon: '🏆' },
         { type: 'item', label: '发布竞价', url: '#' },
@@ -81,6 +82,15 @@
         container.className = 'sidebar';
         container.innerHTML = html;
     }
+    var accountMenu = document.querySelector('.account-menu');
+    if (accountMenu && !accountMenu.querySelector('[data-enterprise-entry]')) {
+        var enterpriseEntry = document.createElement('div');
+        enterpriseEntry.className = 'account-menu-item';
+        enterpriseEntry.dataset.enterpriseEntry = 'true';
+        enterpriseEntry.textContent = '🏢 企业信息';
+        enterpriseEntry.onclick = function () { location.href = '企业信息.html'; };
+        accountMenu.insertBefore(enterpriseEntry, accountMenu.querySelector('.account-menu-divider'));
+    }
 
     // 注入菜单所需CSS（如果页面未包含则自动注入）
     if (!document.getElementById('sidebar-component-css')) {
@@ -119,7 +129,15 @@
 .menu-item.standalone {
     padding-left: 24px; font-size: 15px; font-weight: 600; color: #333;
 }
+.license-preview,.id-preview{position:relative;cursor:pointer}
+.id-preview::after{content:'🔍';position:absolute;right:8px;top:8px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:4px;background:rgba(0,0,0,.48);color:#fff;font-size:13px;box-shadow:0 1px 3px rgba(0,0,0,.16)}
 `;
         document.head.appendChild(css);
     }
+    document.addEventListener('click', function (event) {
+        var preview = event.target.closest && event.target.closest('.license-preview, .id-preview');
+        if (preview) alert('预览（演示）');
+    });
+    var licenseMeta = document.querySelector('.license-wrap .preview-meta');
+    if (licenseMeta) licenseMeta.innerHTML = '营业执照.pdf<br><span class="file-action">重新上传</span>';
 })();

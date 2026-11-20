@@ -273,7 +273,14 @@
                         <option value="所有产品 / 商品存储 / 劳保服...">所有产品 / 商品存储 / 劳保服...</option>
                     </select>
                 </div>
-                <div class="form-item" id="maintain-customer-field" style="display:none">
+                <div class="form-item full">
+                    <label class="form-label"><span class="required">*</span>产品库</label>
+                    <div class="radio-group">
+                        <label class="radio-item"><input type="radio" name="product-library-type" value="customer" checked onchange="toggleCustomerField()"> 客户产品库</label>
+                        <label class="radio-item"><input type="radio" name="product-library-type" value="platform" onchange="toggleCustomerField()"> 平台产品库</label>
+                    </div>
+                </div>
+                <div class="form-item" id="maintain-customer-field">
                     <label class="form-label"><span class="required">*</span>归属客户</label>
                     <select class="form-select" id="f-customer">
                         <option value="aqtest薄眠（山东）数字产业发展有限公司">aqtest薄眠（山东）数字产业发展有限公司</option>
@@ -309,13 +316,13 @@
 
 <script>
     var maintainedProductKey = 'haifu_customer_maintained_products_v1';
-    var isCustomerMaintenance = new URLSearchParams(location.search).get('maintain') === 'customer';
-    if (isCustomerMaintenance) {
-        document.getElementById('product-page-title').textContent = '代维护客户产品';
-        document.querySelector('.breadcrumb-bar .current').textContent = '代维护客户产品';
-        document.getElementById('maintain-customer-field').style.display = 'flex';
-        document.querySelector('.supplier-card').style.display = 'none';
+    function selectedLibraryType() { return document.querySelector('input[name="product-library-type"]:checked').value; }
+    function toggleCustomerField() {
+        var isCustomer = selectedLibraryType() === 'customer';
+        document.getElementById('maintain-customer-field').style.display = isCustomer ? 'flex' : 'none';
+        document.querySelector('.supplier-card').style.display = isCustomer ? 'none' : '';
     }
+    toggleCustomerField();
     function previewProductImage(input) {
         var file = input.files && input.files[0];
         if (!file) return;
@@ -336,11 +343,11 @@
         if (!name) { alert('请输入产品名称'); return; }
         if (!price) { alert('请输入销售价'); return; }
 
-        if (isCustomerMaintenance) {
+        if (selectedLibraryType() === 'customer') {
             var records = [];
             try { records = JSON.parse(localStorage.getItem(maintainedProductKey) || '[]'); } catch (e) {}
             var stamp = Date.now();
-            records.unshift({id:'cp_'+stamp,code:'KH'+String(stamp).slice(-8),name:name,spec:document.getElementById('f-spec').value.trim(),brand:document.getElementById('f-brand').value.trim(),color:document.getElementById('f-color').value.trim(),grade:document.getElementById('f-grade').value,price:price,unit:document.getElementById('f-unit').value,customer:document.getElementById('f-customer').value,createdAt:new Date().toISOString()});
+            records.unshift({id:'cp_'+stamp,code:'KH'+String(stamp).slice(-8),name:name,spec:document.getElementById('f-spec').value.trim(),brand:document.getElementById('f-brand').value.trim(),color:document.getElementById('f-color').value.trim(),grade:document.getElementById('f-grade').value,price:price,unit:document.getElementById('f-unit').value,libraryType:'customer',customer:document.getElementById('f-customer').value,createdAt:new Date().toISOString()});
             localStorage.setItem(maintainedProductKey, JSON.stringify(records));
             document.querySelector('#successAlert span:last-child').textContent = '产品已加入客户产品库，客户端可查看。';
             document.getElementById('successAlert').classList.add('show');
@@ -348,6 +355,17 @@
             setTimeout(function() { location.href = '产品库.html'; }, 1200);
             return;
         }
+
+        var platformRecords = [];
+        try { platformRecords = JSON.parse(localStorage.getItem(maintainedProductKey) || '[]'); } catch (e) {}
+        var platformStamp = Date.now();
+        platformRecords.unshift({id:'pp_'+platformStamp,code:'PT'+String(platformStamp).slice(-8),name:name,spec:document.getElementById('f-spec').value.trim(),brand:document.getElementById('f-brand').value.trim(),color:document.getElementById('f-color').value.trim(),grade:document.getElementById('f-grade').value,price:price,unit:document.getElementById('f-unit').value,libraryType:'platform',customer:'',createdAt:new Date().toISOString()});
+        localStorage.setItem(maintainedProductKey, JSON.stringify(platformRecords));
+        document.querySelector('#successAlert span:last-child').textContent = '产品已加入平台产品库。';
+        document.getElementById('successAlert').classList.add('show');
+        window.scrollTo(0, 0);
+        setTimeout(function() { location.href = '产品库.html'; }, 1200);
+        return;
 
         // 演示：仅显示成功提示，不实际持久化
         document.getElementById('successAlert').classList.add('show');

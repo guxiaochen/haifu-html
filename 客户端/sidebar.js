@@ -30,6 +30,7 @@
         { type: 'item', label: '询价单', url: '询价单列表.html', activeKeys: ['询价单列表.html', '询价单详情.html', '平台报价单列表.html', '平台报价单详情.html'] },
         { type: 'item', label: '我的产品库', url: '我的产品库.html',  activeKeys: ['我的产品库.html'] },
         { type: 'item', label: '收货人管理', url: '联系人管理.html',  activeKeys: ['联系人管理.html'] },
+        { type: 'item', label: '销售管理', url: '销售管理.html', activeKeys: ['销售管理.html'] },
 
         { type: 'group', label: '账号管理', icon: '👥' },
         { type: 'item', label: '登录账号', url: '账号管理.html', activeKeys: ['账号管理.html'] },

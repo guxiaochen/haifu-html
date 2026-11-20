@@ -77,6 +77,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
 .upload-preview{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
 .upload-preview-item{width:100px;height:100px;border:1px solid #f0f0f0;border-radius:2px;position:relative;overflow:hidden;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:24px;color:#ccc}
 .upload-preview-item .remove{position:absolute;top:2px;right:2px;width:18px;height:18px;background:rgba(0,0,0,.5);color:#fff;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px}
+.profile-image-placeholder{width:190px;height:118px;border:1px solid #e8e8e8;border-radius:4px;background:linear-gradient(135deg,#fffdf5,#f7ead2);display:flex;align-items:center;justify-content:center;flex-direction:column;color:#a66d2c;font-size:18px;cursor:pointer;overflow:hidden;position:relative}
+.profile-image-placeholder::after{content:'⌕';position:absolute;right:6px;top:5px;width:24px;height:24px;border-radius:3px;background:rgba(0,0,0,.48);color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center}
+.profile-image-placeholder img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.profile-license-layout,.profile-id-layout{display:flex;align-items:flex-start;gap:14px;flex:1}
+.profile-license-meta{font-size:13px;color:#667382;line-height:1.8}
+.profile-attachment-actions{color:#1890ff;cursor:pointer}
+.profile-attachment-actions.disabled{color:#bfbfbf;cursor:not-allowed;pointer-events:none}
+.profile-id-layout .id-label{font-size:13px;color:#333;margin-bottom:8px;text-align:left}
+.image-preview-modal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:3000;display:none;align-items:center;justify-content:center;padding:40px}
+.image-preview-modal.open{display:flex}
+.image-preview-content{position:relative;max-width:min(900px,90vw);max-height:85vh}
+.image-preview-content img{display:block;max-width:100%;max-height:85vh;object-fit:contain;background:#fff;border-radius:4px}
+.image-preview-close{position:absolute;right:-14px;top:-14px;width:32px;height:32px;border:0;border-radius:50%;background:#fff;color:#333;font-size:22px;cursor:pointer;line-height:1}
 .face-recognition-box{text-align:center;padding:40px 20px}
 .face-camera{width:200px;height:200px;border-radius:50%;border:3px solid #1890ff;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:60px;color:#1890ff;background:#f0f8ff;cursor:pointer;transition:all .3s}
 .face-camera:hover{background:#e6f4ff;box-shadow:0 0 20px rgba(24,144,255,.3)}
@@ -123,8 +136,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
 <div class="audit-banner fail" id="auditBanner" style="display:none">
 <span>❌</span><span>认证审核未通过，请修改信息后重新提交。驳回原因：银行卡信息有误，请核对账户类型与银行卡号后重新提交</span>
 </div>
+<div id="approvedActions" style="display:none;background:#f0f9f5;border:1px solid #b7ebc6;border-radius:4px;padding:14px 18px;margin-bottom:14px;align-items:center;gap:12px;color:#237a4b">
+<span style="flex:1">企业认证已通过。企业资料可在下方查看和维护。</span>
+<button class="btn btn-primary" onclick="location.href='商家入驻.html'">申请店铺入驻</button>
+</div>
 
-<div class="steps-container">
+<section id="companyProfileView" style="display:none">
+<div class="card" style="margin-bottom:14px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px"><div><div style="font-size:20px;font-weight:600;color:#262626">企业信息</div><div style="font-size:13px;color:#8c8c8c;margin-top:6px">管理企业基本资料、结算账户与认证资料</div></div><span style="padding:5px 12px;border-radius:14px;background:#f0f9f5;color:#2ba471;font-size:13px">✓ 企业认证已通过</span></div>
+<div class="section-title">基本信息</div>
+<div class="form-grid">
+<div class="form-item full-row"><label class="form-label">营业执照</label><div class="profile-license-layout"><div class="profile-image-placeholder" role="button" tabindex="0" aria-label="预览营业执照" onclick="openProfileImagePreview(this,'营业执照')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProfileImagePreview(this,'营业执照')}"><b>营业执照</b><span style="font-size:12px;margin-top:8px">已上传文件预览</span></div><div class="profile-license-meta"><label class="profile-attachment-actions">重新上传<input type="file" id="profileLicenseFile" accept="image/*" style="display:none" onchange="onProfileUpload(this,'profileLicensePreview','营业执照')"></label><div id="profileLicensePreview" style="display:none"></div></div></div></div>
+<div class="form-item"><label class="form-label">公司名称</label><input class="form-input profile-basic" id="profile-company" value="平原县蛋鸡养殖合作社" disabled></div>
+<div class="form-item"><label class="form-label">统一信用代码</label><input class="form-input profile-basic" id="profile-credit" value="91371426XXXXXXXXXX" disabled></div>
+<div class="form-item full-row"><label class="form-label">公司地址</label><input class="form-input profile-basic" id="profile-address" value="山东省德州市平原县鸡蛋产业园3号仓" disabled></div>
+<div class="form-item"><label class="form-label">紧急联系人电话</label><input class="form-input profile-basic" id="profile-phone" value="13905310001" disabled></div>
+<div class="form-item"><label class="form-label">注册类型</label><input class="form-input" value="供应商" disabled></div>
+</div>
+<div class="section-title" style="margin-top:24px">银行卡信息</div>
+<div class="form-grid"><div class="form-item full-row"><label class="form-label">账户类型</label><div class="radio-group"><div class="radio-item"><div class="radio-circle checked"></div><span>对公</span></div><div class="radio-item"><div class="radio-circle"></div><span>对私</span></div></div></div><div class="form-item"><label class="form-label">银行卡号</label><input class="form-input profile-basic" id="profile-bank" value="6222 1888 8888 6666" disabled></div><div class="form-item"><label class="form-label">开户行所在地</label><input class="form-input profile-basic" id="profile-bank-region" value="山东省德州市" disabled></div><div class="form-item"><label class="form-label">开户支行名称</label><input class="form-input profile-basic" id="profile-branch" value="中国农业银行平原县支行" disabled></div><div class="form-item"><label class="form-label">银行代码</label><input class="form-input" value="103" disabled></div><div class="form-item"><label class="form-label">支行行号</label><input class="form-input" value="103468000001" disabled></div></div>
+<div id="basicProfileActions" style="display:none"></div>
+<div class="section-title" style="margin:28px 0 16px">法人信息</div>
+<div id="certChangeTip" class="audit-banner" style="background:#e6f7ff;border-color:#91d5ff;color:#096dd9;margin-bottom:16px"><span>ℹ</span><span>营业执照或法人信息如需修改，请编辑后提交；提交时将校验并进入平台审核，审核通过后生效。</span></div>
+<div id="certPendingNotice" class="audit-banner" style="display:none;margin-bottom:16px"><span>⏳</span><span>认证资料修改审核中，当前生效信息保持不变。</span></div>
+<div class="form-grid">
+<div class="form-item"><label class="form-label">法人姓名</label><input class="form-input cert-profile" value="王志远" disabled></div><div class="form-item"><label class="form-label">法人手机号</label><input class="form-input cert-profile" value="13905310001" disabled></div><div class="form-item"><label class="form-label">证件类型</label><input class="form-input cert-profile" value="身份证" disabled></div><div class="form-item"><label class="form-label">法人身份证</label><input class="form-input cert-profile" value="371426199001011234" disabled></div>
+<div class="form-item full-row"><label class="form-label">证件附件</label><div class="profile-id-layout"><div class="id-item"><div class="id-label">身份证正面（人像面）</div><div class="profile-image-placeholder" role="button" tabindex="0" aria-label="预览身份证正面" onclick="openProfileImagePreview(this,'身份证正面')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProfileImagePreview(this,'身份证正面')}">身份证正面预览</div><div class="profile-attachment-actions" style="margin-top:7px"><label class="profile-attachment-actions">重新上传<input type="file" id="profileIdFront" accept="image/*" style="display:none" onchange="onProfileUpload(this,'profileIdFrontPreview','法人信息')"></label></div><div id="profileIdFrontPreview" style="display:none"></div></div><div class="id-item"><div class="id-label">身份证反面（国徽面）</div><div class="profile-image-placeholder" role="button" tabindex="0" aria-label="预览身份证反面" onclick="openProfileImagePreview(this,'身份证反面')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProfileImagePreview(this,'身份证反面')}">身份证反面预览</div><div class="profile-attachment-actions" style="margin-top:7px"><label class="profile-attachment-actions">重新上传<input type="file" id="profileIdBack" accept="image/*" style="display:none" onchange="onProfileUpload(this,'profileIdBackPreview','法人信息')"></label></div><div id="profileIdBackPreview" style="display:none"></div></div></div></div>
+</div>
+</div>
+<div class="actions" id="companyProfileActions" style="text-align:center"><button class="btn btn-default" id="profileCancelButton" style="display:none" onclick="cancelCompanyProfileEdit()">取消</button><button class="btn btn-primary" id="profileSaveButton" onclick="toggleCompanyProfileEdit(true)">修改</button></div>
+</section>
+
+<div class="steps-container" id="certificationSteps">
 <div class="steps-bar" id="stepsBar">
 <div class="step-item active" data-step="0"><div class="step-circle">1</div><div class="step-label"><div class="step-name">基本信息</div><div class="step-desc">企业信息</div></div></div>
 <div class="step-line"></div>
@@ -137,7 +180,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
 </div>
 
 <!-- 步骤1：企业信息 -->
-<div class="step-content active" id="step-0">
+<div class="step-content active" id="step-0" data-certification-step="true">
 <div class="card">
 <div class="section-title">公司信息</div>
 <div class="form-grid">
@@ -167,7 +210,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
 </div>
 
 <!-- 步骤2：法人信息 -->
-<div class="step-content" id="step-1">
+<div class="step-content" id="step-1" data-certification-step="true">
 <div class="card">
 <div class="form-grid">
 <div class="form-item full-row"><label class="form-label"><span class="required">*</span>用户身份</label><div style="flex:1"><div class="radio-group"><div class="radio-item" onclick="setRadio(this)"><div class="radio-circle"></div><span>法人</span></div><div class="radio-item" onclick="setRadio(this)"><div class="radio-circle"></div><span>代理人</span></div></div></div></div>
@@ -197,7 +240,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
 </div>
 
 <!-- 步骤3：人脸识别 -->
-<div class="step-content" id="step-2">
+<div class="step-content" id="step-2" data-certification-step="true">
 <div class="card">
 <div class="section-title">法人人脸认证</div>
 <div class="face-recognition-box">
@@ -218,7 +261,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
 </div>
 
 <!-- 审核状态页面 -->
-<div class="step-content" id="step-audit">
+<div class="step-content" id="step-audit" data-certification-step="true">
 <div class="card" style="text-align:center;padding:60px 40px">
 <div id="auditIcon" style="font-size:64px;margin-bottom:20px">⏳</div>
 <div id="auditTitle" style="font-size:20px;font-weight:600;color:#333;margin-bottom:8px">审核中</div>
@@ -233,8 +276,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
 
 <!-- 演示工具栏：模拟审核结果切换 -->
 <div style="position:fixed;bottom:20px;right:20px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:12px 16px;box-shadow:0 4px 12px rgba(0,0,0,.12);z-index:999;font-size:12px">
-<div style="font-weight:600;color:#666;margin-bottom:8px">演示：模拟审核结果</div>
+<div style="font-weight:600;color:#666;margin-bottom:8px">演示：页面状态</div>
 <div style="display:flex;gap:8px">
+<button class="btn btn-default" style="padding:4px 12px;font-size:12px" onclick="showCertificationForm()">首次认证</button>
 <button class="btn btn-default" style="padding:4px 12px;font-size:12px" onclick="simulateAuditResult('pending')">审核中</button>
 <button class="btn btn-primary" style="padding:4px 12px;font-size:12px;background:#2BA471" onclick="simulateAuditResult('approved')">审核通过</button>
 <button class="btn btn-danger" style="padding:4px 12px;font-size:12px;background:#ff4d4f" onclick="simulateAuditResult('rejected')">审核驳回</button>
@@ -245,10 +289,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC
 </main>
 </div>
 
+<div class="image-preview-modal" id="profileImageModal" role="dialog" aria-modal="true" aria-label="附件预览" onclick="if(event.target===this)closeProfileImagePreview()">
+<div class="image-preview-content"><button class="image-preview-close" type="button" aria-label="关闭预览" onclick="closeProfileImagePreview()">×</button><img id="profileImageModalImg" alt="附件预览"></div>
+</div>
+
 <script>
 var currentStep = 0;
 var faceVerified = false;
-var certificationStatus = 'editing'; // editing / pending / approved / rejected
+var certificationStatus = 'approved'; // 默认展示已认证企业资料；演示工具可切换认证状态
 
 // 步骤切换
 function showStep(step) {
@@ -533,6 +581,8 @@ function showAuditPage() {
     var desc = document.getElementById('auditDesc');
     var actions = document.getElementById('auditActions');
     var banner = document.getElementById('auditBanner');
+    var approvedActions = document.getElementById('approvedActions');
+    approvedActions.style.display = 'none';
 
     if (certificationStatus === 'pending') {
         icon.textContent = '⏳';
@@ -547,9 +597,7 @@ function showAuditPage() {
         icon.style.color = '#2BA471';
         title.textContent = '认证通过';
         title.style.color = '#2BA471';
-        desc.textContent = '恭喜！您的企业认证已通过，现在可以申请店铺入驻或在商城发布商品。';
-        banner.style.display = 'none';
-        actions.innerHTML = '<button class="btn btn-default" onclick="viewSubmittedInfo()">查看已提交企业信息</button><button class="btn btn-primary" onclick="location.href=\'商家入驻.html\'">申请店铺入驻</button>';
+        showCompanyProfile();
     } else if (certificationStatus === 'rejected') {
         icon.textContent = '❌';
         icon.style.color = '#ff4d4f';
@@ -569,17 +617,116 @@ function editAfterReject() {
     showStep(0);
 }
 
-// 认证通过后，在同一认证页面查看已提交的信息
-function viewSubmittedInfo() {
-    showStep(0);
-    document.getElementById('step-1').classList.add('active');
-    document.querySelectorAll('#step-0 input, #step-0 select, #step-1 input, #step-1 select').forEach(function (el) { el.disabled = true; });
-    document.querySelectorAll('#step-0 .step-footer, #step-1 .step-footer').forEach(function (el) { el.style.display = 'none'; });
-    var banner = document.getElementById('auditBanner');
-    banner.className = 'audit-banner';
-    banner.innerHTML = '<span>✓</span><span>以下为认证通过时已提交的企业信息。</span>';
-    banner.style.display = 'flex';
+var profilePending = false;
+var companyProfileSnapshot = '';
+function showCompanyProfile() {
+    document.querySelectorAll('.step-content').forEach(function (el) { el.classList.remove('active'); });
+    document.getElementById('certificationSteps').style.display = 'none';
+    document.getElementById('companyProfileView').style.display = 'block';
+    document.getElementById('approvedActions').style.display = 'flex';
+    document.getElementById('auditBanner').style.display = 'none';
+    document.getElementById('certPendingNotice').style.display = profilePending ? 'flex' : 'none';
+    companyProfileSnapshot = companyProfileValues();
+    toggleCompanyProfileEdit(false);
 }
+
+function openCompanyProfile() { showCompanyProfile(); }
+
+function companyProfileValues() {
+    return Array.from(document.querySelectorAll('#companyProfileView input:not([type=file])')).map(function (el) { return el.value; }).join('|');
+}
+
+function toggleCompanyProfileEdit(editing) {
+    document.querySelectorAll('.profile-basic, .cert-profile').forEach(function (el) { el.disabled = !editing; });
+    document.querySelectorAll('#companyProfileView input[type=file]').forEach(function (el) { el.disabled = !editing; });
+    document.querySelectorAll('#companyProfileView .profile-attachment-actions label').forEach(function (el) { el.classList.toggle('disabled', !editing); });
+    document.getElementById('profileSaveButton').textContent = editing ? '保存' : '修改';
+    document.getElementById('profileSaveButton').onclick = editing ? saveCompanyProfile : function () { toggleCompanyProfileEdit(true); };
+    document.getElementById('profileCancelButton').style.display = editing ? '' : 'none';
+}
+
+function cancelCompanyProfileEdit() {
+    var values = companyProfileSnapshot.split('|');
+    Array.from(document.querySelectorAll('#companyProfileView input:not([type=file])')).forEach(function (el, index) { if (values[index] !== undefined) el.value = values[index]; });
+    document.querySelectorAll('#companyProfileView input[type=file]').forEach(function (el) { el.value = ''; });
+    toggleCompanyProfileEdit(false);
+}
+
+function saveCompanyProfile() {
+    var current = companyProfileValues().split('|');
+    var previous = companyProfileSnapshot.split('|');
+    var inputs = Array.from(document.querySelectorAll('#companyProfileView input:not([type=file])'));
+    var approvalIds = Array.from(document.querySelectorAll('.cert-profile')).map(function (el) { return el; });
+    var certTextChanged = approvalIds.some(function (el) { var index = inputs.indexOf(el); return index >= 0 && current[index] !== previous[index]; });
+    var approvalChanged = certTextChanged || !!document.getElementById('profileLicenseFile').files.length || !!document.getElementById('profileIdFront').files.length || !!document.getElementById('profileIdBack').files.length;
+    if (approvalChanged) {
+        if (!confirm('检测到营业执照或法人信息有变更，保存后将提交平台审核；审核通过后新信息生效。是否继续？')) return;
+        profilePending = true;
+        document.getElementById('certPendingNotice').style.display = 'flex';
+        document.getElementById('certChangeTip').style.display = 'none';
+        showToast('认证资料变更已提交平台审核', 'success');
+    } else {
+        showToast('企业信息已保存', 'success');
+    }
+    companyProfileSnapshot = companyProfileValues();
+    toggleCompanyProfileEdit(false);
+}
+
+function showCertificationForm() {
+    document.getElementById('companyProfileView').style.display = 'none';
+    document.getElementById('approvedActions').style.display = 'none';
+    document.getElementById('certificationSteps').style.display = '';
+    document.getElementById('auditBanner').style.display = certificationStatus === 'rejected' ? 'flex' : 'none';
+    showStep(0);
+}
+
+function onProfileUpload(input, previewId, type) {
+    if (input.files && input.files.length) {
+        markCertificationChange(type);
+        previewUpload(input, previewId);
+        var preview = document.getElementById(previewId);
+        var target = previewId === 'profileLicensePreview' ? document.querySelector('#profileLicensePreview').closest('.profile-license-layout').querySelector('.profile-image-placeholder')
+            : previewId === 'profileIdFrontPreview' ? document.querySelector('#profileIdFrontPreview').closest('.id-item').querySelector('.profile-image-placeholder')
+            : document.querySelector('#profileIdBackPreview').closest('.id-item').querySelector('.profile-image-placeholder');
+        var uploaded = preview.querySelector('.upload-preview-item');
+        if (target && uploaded) {
+            var uploadedSrc = URL.createObjectURL(input.files[0]);
+            target.dataset.previewSrc = uploadedSrc;
+            target.innerHTML = '<img src="' + uploadedSrc + '" alt="' + type + '">';
+        }
+    }
+}
+
+function openProfileImagePreview(placeholder, title) {
+    var img = placeholder.querySelector('img');
+    var src = img ? img.src : (placeholder.dataset.previewSrc || '');
+    var modal = document.getElementById('profileImageModal');
+    var preview = document.getElementById('profileImageModalImg');
+    preview.alt = title;
+    if (src) {
+        preview.src = src;
+        preview.style.display = '';
+        preview.parentElement.style.minWidth = '';
+    } else {
+        preview.src = buildPlaceholderPreview(title);
+        preview.style.display = '';
+        preview.parentElement.style.minWidth = '';
+    }
+    modal.classList.add('open');
+}
+
+function buildPlaceholderPreview(title) {
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="900" height="560" viewBox="0 0 900 560"><rect width="900" height="560" fill="#eef2f6"/><rect x="28" y="28" width="844" height="504" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="12 8"/><g fill="#a8b3c2" transform="translate(390 175)"><path d="M0 24V0h90l30 30v155H0z"/><path d="M90 0v32h30" fill="#d4dce5"/><rect x="20" y="65" width="80" height="9" rx="4" fill="#eef2f6"/><rect x="20" y="88" width="80" height="9" rx="4" fill="#eef2f6"/><rect x="20" y="111" width="62" height="9" rx="4" fill="#eef2f6"/></g><text x="450" y="405" text-anchor="middle" font-family="Arial,sans-serif" font-size="26" fill="#667382">' + title + ' 图片占位预览</text></svg>';
+    return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+}
+
+function closeProfileImagePreview() {
+    document.getElementById('profileImageModal').classList.remove('open');
+}
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') closeProfileImagePreview();
+});
 
 // 模拟审核结果切换（演示用）
 function simulateAuditResult(result) {

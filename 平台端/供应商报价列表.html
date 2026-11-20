@@ -12,7 +12,7 @@
   <header class="top"><div class="brand"><span class="logo">叶</span>运营管理平台</div><div class="user">Administrator</div></header>
   <div class="layout"><div id="sidebar-container"></div><main>
     <div class="crumb"><a href="平台询价单列表.html">平台询价单</a> / <a id="inquiryCrumb" href="平台询价单详情.html">XJ2026080062</a> / 供应商报价</div>
-    <section class="intro"><div><h1>供应商报价 <span class="status" id="statusLabel">待采用</span></h1><p>统一查看供应商报价与采用结果。</p></div><div class="search"><input id="keyword" placeholder="搜索产品、供应商" oninput="filterCurrentView()"><button onclick="filterCurrentView()">⌕</button></div></section>
+    <section class="intro"><div><h1>供应商报价 <span class="status" id="statusLabel">待采用</span></h1><p>统一查看供应商报价与采用结果。仅平台采购角色可选择并提交采用结果。</p></div><div class="search"><input id="keyword" placeholder="搜索产品、供应商" oninput="filterCurrentView()"><button onclick="filterCurrentView()">⌕</button></div></section>
     <section class="workbench"><div class="tabs"><button class="tab active" id="productTab" onclick="switchView('product')">按产品明细比价</button><button class="tab" id="supplierTab" onclick="switchView('supplier')">按供应商报价</button></div><div class="view-note" id="viewNote"></div><div class="view-panel" id="viewPanel"></div></section>
   </main></div>
   <footer class="sticky"><span>已选择 <b id="count">0</b> / <span id="lineCount">2</span> 条产品明细</span><span class="hint" id="hint">请为每条产品明细选择一份供应商报价</span><span class="total">已采用含税金额：¥<span id="total">0.00</span></span><button class="btn primary submit" id="submit" disabled onclick="openConfirm()">提交采用</button></footer>

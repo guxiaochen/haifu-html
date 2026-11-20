@@ -1031,8 +1031,8 @@
         <div class="pp-sum left"><div class="lbl">剩余可付</div><div class="val" id="s-left">¥ 0.00</div></div>
       </div>
       <div class="pp-grid">
-        <div class="form-row"><label>付款方式</label><input id="pp-way" value="银行"></div>
-        <div class="form-row"><label>付款性质</label><select id="pp-nature" onchange="onNatureChange()"><option>预付/收</option><option>尾款</option></select></div>
+        <div class="form-row"><label>付款方式</label><select id="pp-way"><option>银行转账</option><option>其他</option></select></div>
+        <div class="form-row"><label>付款性质</label><select id="pp-nature" onchange="onNatureChange()"><option>预付款</option><option>尾款</option></select></div>
         <div class="form-row"><label>百分比</label><span class="pp-static" style="display:flex;align-items:center;"><input id="pp-percent" value="100.00" oninput="linkFromPercent()" title="按剩余可付金额计算"><span class="pp-unit">%</span></span></div>
         <div class="form-row"><label>预付金额</label><span class="pp-static" style="display:flex;align-items:center;"><input id="pp-amount" value="0.00" oninput="linkFromAmount()"></span></div>
         <div class="form-row full" style="margin-top:-8px;"><label></label><span class="pp-err" id="pp-err"></span></div>
@@ -1106,7 +1106,8 @@
     document.getElementById('pp-percent').value = '100.00';
     document.getElementById('pp-amount').value = fmtMoney(left);
     document.getElementById('pp-remark').value = '';
-    document.getElementById('pp-nature').value = '预付/收';
+    document.getElementById('pp-way').value = '银行转账';
+    document.getElementById('pp-nature').value = '预付款';
     showErr(left > 0 ? '' : '剩余可付为 0，本单款项已付清，无需再创建预付');
     document.getElementById('prepayModal').classList.add('show');
   }
@@ -1120,7 +1121,7 @@
     PREPAY_DOCS.push({
       no: no, amt: amt,
       nature: document.getElementById('pp-nature').value,
-      way: document.getElementById('pp-way').value || '银行',
+      way: document.getElementById('pp-way').value || '银行转账',
       date: '2026-10-14', status: '待审核', vouchers: 0
     });
     renderPrepayState();

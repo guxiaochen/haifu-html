@@ -186,7 +186,7 @@
 
         <!-- 标题卡片 -->
         <div class="title-card">
-            <div class="page-title">新增产品</div>
+                <div class="page-title" id="product-page-title">新增产品</div>
             <div class="title-actions">
                 <button class="btn" onclick="location.href='产品库.html'">返回</button>
                 <button class="btn btn-primary" onclick="saveProduct()">保存</button>
@@ -273,6 +273,13 @@
                         <option value="所有产品 / 商品存储 / 劳保服...">所有产品 / 商品存储 / 劳保服...</option>
                     </select>
                 </div>
+                <div class="form-item" id="maintain-customer-field" style="display:none">
+                    <label class="form-label"><span class="required">*</span>归属客户</label>
+                    <select class="form-select" id="f-customer">
+                        <option value="aqtest薄眠（山东）数字产业发展有限公司">aqtest薄眠（山东）数字产业发展有限公司</option>
+                        <option value="平原县蛋鸡养殖合作社">平原县蛋鸡养殖合作社</option>
+                    </select>
+                </div>
                 <div class="form-item full">
                     <label class="form-label">备注</label>
                     <textarea class="form-textarea" id="f-remark" placeholder="请输入备注"></textarea>
@@ -301,6 +308,14 @@
 </style>
 
 <script>
+    var maintainedProductKey = 'haifu_customer_maintained_products_v1';
+    var isCustomerMaintenance = new URLSearchParams(location.search).get('maintain') === 'customer';
+    if (isCustomerMaintenance) {
+        document.getElementById('product-page-title').textContent = '代维护客户产品';
+        document.querySelector('.breadcrumb-bar .current').textContent = '代维护客户产品';
+        document.getElementById('maintain-customer-field').style.display = 'flex';
+        document.querySelector('.supplier-card').style.display = 'none';
+    }
     function previewProductImage(input) {
         var file = input.files && input.files[0];
         if (!file) return;
@@ -320,6 +335,19 @@
 
         if (!name) { alert('请输入产品名称'); return; }
         if (!price) { alert('请输入销售价'); return; }
+
+        if (isCustomerMaintenance) {
+            var records = [];
+            try { records = JSON.parse(localStorage.getItem(maintainedProductKey) || '[]'); } catch (e) {}
+            var stamp = Date.now();
+            records.unshift({id:'cp_'+stamp,code:'KH'+String(stamp).slice(-8),name:name,spec:document.getElementById('f-spec').value.trim(),brand:document.getElementById('f-brand').value.trim(),color:document.getElementById('f-color').value.trim(),grade:document.getElementById('f-grade').value,price:price,unit:document.getElementById('f-unit').value,customer:document.getElementById('f-customer').value,createdAt:new Date().toISOString()});
+            localStorage.setItem(maintainedProductKey, JSON.stringify(records));
+            document.querySelector('#successAlert span:last-child').textContent = '产品已加入客户产品库，客户端可查看。';
+            document.getElementById('successAlert').classList.add('show');
+            window.scrollTo(0, 0);
+            setTimeout(function() { location.href = '产品库.html'; }, 1200);
+            return;
+        }
 
         // 演示：仅显示成功提示，不实际持久化
         document.getElementById('successAlert').classList.add('show');

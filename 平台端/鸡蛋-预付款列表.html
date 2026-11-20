@@ -61,11 +61,24 @@
         .order-search { display: flex; margin-bottom: 10px; }
         .order-search input { width: 100%; padding: 8px 10px; border: 1px solid #d9d9d9; border-radius: 3px; outline: none; }
         .order-search input:focus { border-color: #2BA471; }
-        .order-picker { max-height: 190px; overflow: auto; border: 1px solid #f0f0f0; border-radius: 4px; }
-        .order-picker table { font-size: 12px; }
-        .order-picker th, .order-picker td { padding: 8px 10px; }
-        .order-picker tbody tr { cursor: pointer; }
-        .order-picker tbody tr.selected td { background: #f0faf5; }
+        .order-picker { max-height: 250px; overflow-y: auto; overflow-x: hidden; border: 1px solid #f0f0f0; border-radius: 4px; }
+        .order-group { border-bottom:1px solid #eee; }
+        .order-group:last-child { border-bottom:0; }
+        .order-parent { display:flex;align-items:center;gap:10px;padding:11px 12px;background:#fafafa;cursor:pointer;font-size:13px; }
+        .order-parent:hover { background:#f0faf5; }
+        .order-parent .arrow { color:#888;transition:transform .15s; }
+        .order-group.open .order-parent .arrow { transform:rotate(90deg); }
+        .order-parent .order-parent-meta { margin-left:auto;color:#888;font-size:12px; }
+        .order-children { display:none;padding:4px 8px 10px 18px; }
+        .order-group.open .order-children { display:block; }
+        .po-child-head { display:grid;grid-template-columns:18px minmax(105px,1.15fr) minmax(90px,1fr) minmax(52px,.55fr) minmax(72px,.78fr) minmax(88px,.9fr) minmax(88px,.9fr);gap:5px;padding:6px 0;color:#888;font-size:12px;border-bottom:1px solid #eee; }
+        .po-child-head span { min-width:0; }
+        .po-child { display:grid;grid-template-columns:18px minmax(105px,1.15fr) minmax(90px,1fr) minmax(52px,.55fr) minmax(72px,.78fr) minmax(88px,.9fr) minmax(88px,.9fr);gap:5px;align-items:center;padding:8px 0;font-size:12px;border-bottom:1px solid #f5f5f5; }
+        .po-child > span { min-width:0;overflow-wrap:anywhere; }
+        .po-child small { display:block;margin-top:4px;color:#888;font-size:11px; }
+        .po-child:last-child { border-bottom:0; }
+        .po-child.selected { color:#25865e; }
+        .choice-radio { accent-color: #2BA471; }
         .choice-radio { accent-color: #2BA471; }
         .order-tip { margin: 12px 0 16px; padding: 10px 12px; border-radius: 4px; background: #f6ffed; color: #56745f; border: 1px solid #d9f7be; line-height: 1.6; }
         .order-tip.warn { background: #fff7e6; color: #ad6800; border-color: #ffd591; }
@@ -129,21 +142,19 @@
             <div class="modal-head">创建预付款<button class="modal-close" type="button" onclick="closeCreateModal()">×</button></div>
             <div class="modal-body">
                 <div class="section-name">关联采购订单</div>
-                <div class="order-search"><input id="poSearch" placeholder="搜索采购订单号 / 供应商" oninput="renderPoChoices()"></div>
-                <div class="order-picker">
-                    <table><thead><tr><th></th><th>采购订单号</th><th>供应商</th><th class="num">订单金额</th><th class="num">剩余可付</th></tr></thead><tbody id="poChoiceBody"></tbody></table>
-                </div>
+                <div class="order-search"><input id="poSearch" placeholder="搜索采购订单号 / 订货单号" oninput="renderPoChoices()"></div>
+                <div class="order-picker" id="poChoiceBody"></div>
                 <div class="order-tip" id="poTip">请选择关联采购订单，系统将自动带出供应商、订单金额和剩余可付金额。</div>
 
                 <div class="section-name">预付款信息</div>
                 <div class="form-grid">
                     <div class="form-row"><label>供应商</label><input id="createSupplier" readonly></div>
                     <div class="form-row"><label>订单金额</label><input id="createOrderTotal" readonly></div>
-                    <div class="form-row"><label>已申请金额</label><input id="createApplied" readonly></div>
                     <div class="form-row"><label>剩余可付</label><input id="createAvailable" readonly></div>
-                    <div class="form-row"><label><span class="req">*</span>付款方式</label><select id="createWay"><option>银行转账</option><option>线下转账</option></select></div>
+                    <div class="form-row"><label><span class="req">*</span>付款方式</label><select id="createWay"><option>银行转账</option><option>其他</option></select></div>
                     <div class="form-row"><label>付款性质</label><select id="createNature"><option>预付款</option><option>尾款</option></select></div>
-                    <div class="form-row"><label><span class="req">*</span>付款金额</label><input id="createAmount" type="number" min="0.01" step="0.01" placeholder="请输入付款金额"></div>
+                    <div class="form-row"><label><span class="req">*</span>付款百分比</label><input id="createPercent" type="number" min="0.01" max="100" step="0.01" value="100" oninput="linkPrepayFromPercent()"></div>
+                    <div class="form-row"><label><span class="req">*</span>付款金额</label><input id="createAmount" type="number" min="0.01" step="0.01" placeholder="请输入付款金额" oninput="linkPrepayFromAmount()"></div>
                     <div class="form-row full"><label>备注</label><textarea id="createRemark" placeholder="请输入备注（选填）"></textarea></div>
                 </div>
                 <div class="form-error" id="createError"></div>
@@ -214,21 +225,18 @@
 <script>
     // 预付款列表创建：交互结构与供应商端「创建发票—关联销售订单」保持一致
     var PURCHASE_ORDERS = [
-        { no:'EGG-PO-20260905001', supplier:'平原县蛋鸡养殖合作社', total:128587.20, applied:20000 },
-        { no:'EGG-PO-20260901002', supplier:'平原县蛋鸡养殖合作社', total:128587.20, applied:80000 },
-        { no:'EGG-PO-20260828003', supplier:'夏津县绿源养殖专业合作社', total:196465.72, applied:105000 }
+        { no:'EGG-PO-20260905001', customerOrder:'EGG-DH-20260905-001', customer:'aqtest薄眠（山东）数字产业发展有限公司', supplier:'平原县蛋鸡养殖合作社', total:128587.20, applied:20000, buyer:'侯振鲁', orderDate:'2026-09-05', customerOrderTotal:257174.40 },
+        { no:'EGG-PO-20260901002', customerOrder:'EGG-DH-20260905-001', customer:'aqtest薄眠（山东）数字产业发展有限公司', supplier:'平原县蛋鸡养殖合作社', total:128587.20, applied:80000, buyer:'侯振鲁', orderDate:'2026-09-05', customerOrderTotal:257174.40 },
+        { no:'EGG-PO-20260828003', customerOrder:'EGG-DH-20260828-003', customer:'夏津县绿源养殖专业合作社', supplier:'夏津县绿源养殖专业合作社', total:196465.72, applied:105000, buyer:'王敏', orderDate:'2026-08-28', customerOrderTotal:196465.72 }
     ];
-    var selectedPo = '';
+    var selectedPos = [];
+    var expandedCustomerOrder = '';
 
     function formatMoney(n) {
         return '¥ ' + Number(n || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
-    function selectedOrder() {
-        for (var i = 0; i < PURCHASE_ORDERS.length; i++) if (PURCHASE_ORDERS[i].no === selectedPo) return PURCHASE_ORDERS[i];
-        return null;
-    }
     function openCreateModal() {
-        selectedPo = '';
+        selectedPos = []; expandedCustomerOrder = '';
         document.getElementById('poSearch').value = '';
         document.getElementById('createAmount').value = '';
         document.getElementById('createWay').value = '银行转账';
@@ -242,33 +250,43 @@
     function closeCreateModal() { document.getElementById('createModal').classList.remove('show'); }
     function renderPoChoices() {
         var kw = document.getElementById('poSearch').value.trim().toLowerCase();
-        var list = PURCHASE_ORDERS.filter(function(o) { return !kw || (o.no + ' ' + o.supplier).toLowerCase().indexOf(kw) >= 0; });
-        document.getElementById('poChoiceBody').innerHTML = list.length ? list.map(function(o) {
-            var available = Math.max(0, o.total - o.applied);
-            return '<tr class="' + (selectedPo === o.no ? 'selected' : '') + '" onclick="choosePo(\'' + o.no + '\')"><td><input class="choice-radio" type="radio" name="poChoice" ' + (selectedPo === o.no ? 'checked' : '') + ' onclick="event.stopPropagation();choosePo(\'' + o.no + '\')"></td><td>' + o.no + '</td><td>' + o.supplier + '</td><td class="num">' + formatMoney(o.total) + '</td><td class="num">' + formatMoney(available) + '</td></tr>';
-        }).join('') : '<tr><td colspan="5" style="padding:22px;text-align:center;color:#999;">未找到匹配的采购订单</td></tr>';
+        var list = PURCHASE_ORDERS.filter(function(o) { return !kw || (o.no + ' ' + o.customerOrder + ' ' + o.customer + ' ' + o.supplier + ' ' + o.buyer + ' ' + o.orderDate).toLowerCase().indexOf(kw) >= 0; });
+        var groups={}; list.forEach(function(o){(groups[o.customerOrder]||(groups[o.customerOrder]=[])).push(o);});
+        var html=Object.keys(groups).map(function(orderNo){var orders=groups[orderNo], isOpen=expandedCustomerOrder===orderNo || !!kw || selectedPos.some(function(no){var p=PURCHASE_ORDERS.find(function(x){return x.no===no;});return p&&p.customerOrder===orderNo;}), first=orders[0];
+            var children=orders.map(function(o){var checked=selectedPos.indexOf(o.no)>=0,disabled=selectedPos.length&&!checked&&selectedPos.some(function(no){var p=PURCHASE_ORDERS.find(function(x){return x.no===no;});return p.customerOrder!==o.customerOrder;});return '<div class="po-child '+(checked?'selected':'')+'"><input class="choice-radio" type="checkbox" '+(checked?'checked':'')+' '+(disabled?'disabled':'')+' onchange="togglePo(\''+o.no+'\')"><span>'+o.no+'</span><span>'+o.customer+'</span><span>'+o.buyer+'</span><span>'+o.orderDate+'</span><span>'+formatMoney(o.total)+'</span><span>'+formatMoney(Math.max(0,o.total-o.applied))+'</span></div>';}).join('');
+            var childHead='<div class="po-child-head"><span></span><span>采购订单号</span><span>客户</span><span>采购员</span><span>订单日期</span><span>订单金额</span><span>剩余可付</span></div>';
+            return '<div class="order-group '+(isOpen?'open':'')+'"><div class="order-parent" onclick="toggleOrderGroup(\''+orderNo+'\')"><span class="arrow">▶</span><b>订货单</b><span>'+orderNo+'</span><span class="order-parent-meta">供应商：'+first.supplier+'　'+orders.length+' 张采购订单</span></div><div class="order-children">'+childHead+children+'</div></div>';
+        }).join('');
+        document.getElementById('poChoiceBody').innerHTML=html||'<div style="padding:22px;text-align:center;color:#999;">未找到匹配的订货单或采购订单</div>';
     }
-    function choosePo(no) {
-        selectedPo = no;
+    function toggleOrderGroup(orderNo){expandedCustomerOrder=expandedCustomerOrder===orderNo?'':orderNo;renderPoChoices();}
+    function togglePo(no) {
+        var order=PURCHASE_ORDERS.find(function(item){return item.no===no;});
+        var idx=selectedPos.indexOf(no);
+        if(idx>=0) selectedPos.splice(idx,1);
+        else if(!selectedPos.length || PURCHASE_ORDERS.find(function(item){return item.no===selectedPos[0];}).customerOrder===order.customerOrder) selectedPos.push(no);
+        else return;
         renderPoChoices();
         updatePoDetail();
     }
     function updatePoDetail() {
-        var o = selectedOrder();
-        document.getElementById('createSupplier').value = o ? o.supplier : '';
-        document.getElementById('createOrderTotal').value = o ? formatMoney(o.total) : '';
-        document.getElementById('createApplied').value = o ? formatMoney(o.applied) : '';
-        document.getElementById('createAvailable').value = o ? formatMoney(Math.max(0, o.total - o.applied)) : '';
+        var orders=PURCHASE_ORDERS.filter(function(o){return selectedPos.indexOf(o.no)>=0;}), total=orders.reduce(function(s,o){return s+o.total;},0), applied=orders.reduce(function(s,o){return s+o.applied;},0);
+        var sameOrder=orders.length && orders.every(function(o){return o.customerOrder===orders[0].customerOrder;});
+        document.getElementById('createSupplier').value=orders.length?orders[0].supplier:'';
+        document.getElementById('createOrderTotal').value=orders.length?formatMoney(total):'';
+        document.getElementById('createAvailable').value=orders.length?formatMoney(Math.max(0,total-applied)):'';
         var tip = document.getElementById('poTip');
-        if (!o) {
+        if (!orders.length) {
             tip.className = 'order-tip';
-            tip.textContent = '请选择关联采购订单，系统将自动带出供应商、订单金额和剩余可付金额。';
-        } else if (o.applied >= o.total) {
+            tip.textContent = '可选择同一订货单下的一张或多张采购订单；不支持跨订货单。';
+        } else if (!sameOrder) {
+            tip.className='order-tip warn'; tip.textContent='所选采购订单必须属于同一张订货单。';
+        } else if (applied >= total) {
             tip.className = 'order-tip warn';
             tip.textContent = '该采购订单已无剩余可付金额，不能继续创建预付款。';
         } else {
             tip.className = 'order-tip';
-            tip.textContent = '已选择 ' + o.no + '，本次最多可申请 ' + formatMoney(o.total - o.applied) + '。';
+            tip.textContent = '已选择 ' + orders.length + ' 张采购订单，订货单：' + orders[0].customerOrder + '，本次最多可申请 ' + formatMoney(total-applied) + '。';
         }
         document.getElementById('createError').textContent = '';
     }
@@ -277,29 +295,37 @@
         var ymd = '' + now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
         return 'EGG-PP-' + ymd + String(document.querySelectorAll('#prepayListBody tr').length + 1).padStart(3, '0');
     }
+    function linkPrepayFromPercent(){var orders=PURCHASE_ORDERS.filter(function(o){return selectedPos.indexOf(o.no)>=0;}),available=Math.max(0,orders.reduce(function(s,o){return s+o.total-o.applied;},0)),pct=Number(document.getElementById('createPercent').value)||0;document.getElementById('createAmount').value=(available*pct/100).toFixed(2);}
+    function linkPrepayFromAmount(){var orders=PURCHASE_ORDERS.filter(function(o){return selectedPos.indexOf(o.no)>=0;}),available=Math.max(0,orders.reduce(function(s,o){return s+o.total-o.applied;},0)),amount=Number(document.getElementById('createAmount').value)||0;document.getElementById('createPercent').value=available?(amount/available*100).toFixed(2):'0.00';}
     function submitCreatePrepay() {
-        var o = selectedOrder();
+        var orders=PURCHASE_ORDERS.filter(function(o){return selectedPos.indexOf(o.no)>=0;});
         var amount = Number(document.getElementById('createAmount').value || 0);
+        var percent=Number(document.getElementById('createPercent').value||0);
         var error = document.getElementById('createError');
-        if (!o) { error.textContent = '请选择关联采购订单'; return; }
-        var available = Math.max(0, o.total - o.applied);
+        if (!orders.length) { error.textContent = '请选择关联采购订单'; return; }
+        if (!orders.every(function(o){return o.customerOrder===orders[0].customerOrder;})) { error.textContent='请选择同一订货单下的采购订单'; return; }
+        var total=orders.reduce(function(s,o){return s+o.total;},0), applied=orders.reduce(function(s,o){return s+o.applied;},0);
+        var available = Math.max(0, total - applied);
         if (available <= 0) { error.textContent = '该采购订单已无剩余可付金额'; return; }
         if (amount <= 0) { error.textContent = '付款金额必须大于 0'; return; }
+        if (percent <= 0 || percent > 100) { error.textContent = '付款百分比需大于0且不能超过100%'; return; }
         if (amount > available + 0.005) { error.textContent = '付款金额不能超过剩余可付金额 ' + formatMoney(available); return; }
         var no = nextPrepayNo();
         var now = new Date();
         var date = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+        var poNos=orders.map(function(o){return o.no;});
         var tr = document.createElement('tr');
+        tr.setAttribute('data-prepay-no',no); tr.setAttribute('data-order-nos',poNos.join(',')); tr.setAttribute('data-customer-order',orders[0].customerOrder);
         tr.onclick = function() { location.href = '鸡蛋-预付款详情.html?no=' + encodeURIComponent(no) + '&status=review'; };
-        tr.innerHTML = '<td></td><td>' + no + '</td><td>' + o.no + '</td><td>' + o.supplier + '</td><td class="num">' + formatMoney(amount) + '</td><td>' + document.getElementById('createWay').value + '</td><td>' + date + '</td><td><span class="status-tag status-review">待审核</span></td><td>—</td>';
+        tr.innerHTML = '<td></td><td>' + no + '</td><td>' + poNos.join('、') + '<br><small>' + orders[0].customerOrder + '</small></td><td>' + orders[0].supplier + '</td><td class="num">' + formatMoney(amount) + '</td><td>' + document.getElementById('createWay').value + '</td><td>' + date + '</td><td><span class="status-tag status-review">待审核</span></td><td>—</td>';
         document.getElementById('prepayListBody').insertBefore(tr, document.getElementById('prepayListBody').firstChild);
-        o.applied += amount;
+        orders.forEach(function(o){o.applied+=amount/orders.length;});
         Array.prototype.forEach.call(document.querySelectorAll('#prepayListBody tr'), function(row, index) { row.cells[0].textContent = index + 1; });
         var count = document.querySelectorAll('#prepayListBody tr').length;
         document.querySelector('.table-title .count').textContent = '共 ' + count + ' 条';
         document.querySelector('.page-info').textContent = '共 ' + count + ' 条';
         closeCreateModal();
-        alert('预付款创建成功，状态为“待审核”');
+        alert('预付款创建成功，已关联采购订单：' + poNos.join('、') + '。详情页将以“多订单合并预付”统一展示该笔记录。');
     }
 </script>
 </body>

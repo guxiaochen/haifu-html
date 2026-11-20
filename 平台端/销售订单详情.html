@@ -243,6 +243,10 @@
             text-align: center; padding: 40px 20px;
             color: #999; font-size: 13px;
         }
+        .general-sales-voucher-thumb { width:58px;height:58px;object-fit:cover;border:1px solid #eee;border-radius:4px;cursor:zoom-in; }
+        .general-sales-voucher-preview { display:none;position:fixed;inset:0;z-index:1200;padding:32px;background:rgba(0,0,0,.72);align-items:center;justify-content:center; }
+        .general-sales-voucher-preview.show { display:flex; }
+        .general-sales-voucher-preview img { max-width:min(92vw,1100px);max-height:88vh;object-fit:contain;background:#fff; }
 
         /* 明细表 */
         table.items-table {
@@ -444,7 +448,7 @@
             <!-- Tab 切换 -->
             <div class="tab-bar">
                 <div class="tab-btn active" onclick="switchTab('detail', this)">订单明细</div>
-                <div class="tab-btn" onclick="switchTab('prepay', this)">预收款</div>
+                <div class="tab-btn" onclick="switchTab('prepay', this)">预付款</div>
             </div>
 
             <!-- 订单明细 -->
@@ -506,9 +510,14 @@
             </div>
 
 
-            <!-- 预收款（空） -->
+            <!-- 客户预付款：平台只读查看 -->
             <div class="tab-content" id="tab-prepay">
-                <div class="empty-tip">暂无预收款内容，待客户提供</div>
+                <div style="margin-bottom:12px;color:#888;font-size:13px;">客户提交的预付款信息及付款凭证，仅供平台查看。</div>
+                <table class="items-table" style="min-width:900px;">
+                    <thead><tr><th>预付款单号</th><th>付款金额</th><th>付款方式</th><th>付款性质</th><th>预付比例</th><th>提交日期</th><th>付款凭证</th></tr></thead>
+                    <tbody id="generalSalesPrepayBody"></tbody>
+                </table>
+                <div class="empty-tip" id="generalSalesPrepayEmpty" style="display:none">暂无预付款记录</div>
             </div>
 
         </div>
@@ -527,6 +536,7 @@
         </div>
     </div>
 </div>
+<div class="general-sales-voucher-preview" id="generalSalesVoucherPreview" onclick="if(event.target===this)closeGeneralSalesPrepayImage()"><button type="button" aria-label="关闭预览" onclick="closeGeneralSalesPrepayImage()" style="position:absolute;top:18px;right:24px;border:0;background:transparent;color:#fff;font-size:32px;cursor:pointer;">×</button><img id="generalSalesVoucherPreviewImage" alt="付款凭证预览"></div>
 
 <script src="库存演示数据.js"></script>
 <script>
@@ -675,6 +685,21 @@
     // 页面加载初始化
     initByStatus();
     renderShipmentAlert();
+    (function renderGeneralSalesPrepayments(){
+        var demoRows=[
+            {no:'YFK-20260805-001',amount:1500,way:'银行转账',nature:'预付款',ratio:31.79,date:'2026-08-05',voucher:'付款凭证_第一笔.png',voucherData:generalSalesMockVoucher('第一笔')},
+            {no:'YFK-20260806-002',amount:1000,way:'银行转账',nature:'预付款',ratio:31.08,date:'2026-08-06',voucher:'付款凭证_第二笔.png',voucherData:generalSalesMockVoucher('第二笔')}
+        ];
+        var rows=demoRows;
+        try { var all=JSON.parse(localStorage.getItem('haifu_other_client_prepayments')||'{}'); rows=all.PO20260802003||demoRows; } catch(e) {}
+        function esc(value){return String(value||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+        var priorAmount=0;
+        document.getElementById('generalSalesPrepayBody').innerHTML=rows.map(function(r){var ratio=Number(r.ratio);if(!ratio&&4717.98>priorAmount)ratio=Number(r.amount)/(4717.98-priorAmount)*100;priorAmount+=Number(r.amount||0);var voucher=r.voucherData&&/^data:image\//i.test(r.voucherData)?'<img class="general-sales-voucher-thumb" src="'+esc(r.voucherData)+'" alt="付款凭证" title="点击放大预览" onclick="openGeneralSalesPrepayImage(this.src)" loading="lazy">':(r.voucherData?'<a href="'+esc(r.voucherData)+'" target="_blank" download="'+esc(r.voucherName)+'" style="color:#2BA471">'+esc(r.voucherName)+'</a>':esc(r.voucher));return '<tr><td>'+esc(r.no)+'</td><td>¥ '+Number(r.amount).toLocaleString('zh-CN',{minimumFractionDigits:2})+'</td><td>'+esc(r.way)+'</td><td>'+esc(r.nature)+'</td><td>'+ratio.toFixed(2)+'%</td><td>'+esc(r.date)+'</td><td>'+voucher+'</td></tr>';}).join('');
+        if(rows.length)document.getElementById('generalSalesPrepayEmpty').style.display='none';
+        function generalSalesMockVoucher(label){var svg='<svg xmlns="http://www.w3.org/2000/svg" width="480" height="640" viewBox="0 0 480 640"><rect width="480" height="640" fill="#f2f5f3"/><rect x="42" y="35" width="396" height="570" rx="12" fill="#fff" stroke="#d9e4dd" stroke-width="3"/><text x="240" y="105" text-anchor="middle" font-size="30" fill="#287c55">付款凭证</text><path d="M80 145h320M80 205h320M80 265h320M80 325h320M80 385h220" stroke="#d9d9d9" stroke-width="3"/><text x="80" y="187" font-size="20" fill="#666">付款方式：银行转账</text><text x="80" y="247" font-size="20" fill="#666">凭证批次：'+label+'</text><circle cx="330" cy="475" r="62" fill="none" stroke="#d9534f" stroke-width="7"/><text x="330" y="486" text-anchor="middle" font-size="25" fill="#d9534f">演示</text></svg>';return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);}
+        function openGeneralSalesPrepayImage(src){document.getElementById('generalSalesVoucherPreviewImage').src=src;document.getElementById('generalSalesVoucherPreview').classList.add('show');}
+        function closeGeneralSalesPrepayImage(){document.getElementById('generalSalesVoucherPreview').classList.remove('show');document.getElementById('generalSalesVoucherPreviewImage').src='';}
+    })();
 </script>
 
 <!-- 左侧菜单组件 -->

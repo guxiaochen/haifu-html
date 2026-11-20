@@ -41,8 +41,7 @@
       title: "店铺与资质",
       items: [
         { text: "商家入驻", href: "商家入驻.html", page: "商家入驻.html,企业开店.html,企业开店详情.html" },
-        { text: "企业认证", href: "企业认证.html", page: "企业认证.html" },
-        { text: "企业信息", href: "企业信息.html", page: "企业信息.html" },
+        { text: "企业认证", href: "企业认证.html", page: "企业认证.html,企业信息.html" },
         { text: "账号设置", href: "", page: "" }
       ]
     },
@@ -130,8 +129,8 @@
     if (!host || host.querySelector('[data-enterprise-entry]')) return;
     var shortcut = document.createElement('a');
     shortcut.dataset.enterpriseEntry = 'true';
-    shortcut.href = '企业信息.html';
-    shortcut.textContent = '企业信息';
+    shortcut.href = '企业认证.html';
+    shortcut.textContent = '企业信息与认证';
     shortcut.style.cssText = 'color:#1890ff;text-decoration:none;font-size:13px;white-space:nowrap;cursor:pointer';
     host.insertBefore(shortcut, host.firstChild);
   }

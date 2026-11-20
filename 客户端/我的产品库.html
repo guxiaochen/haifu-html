@@ -337,11 +337,7 @@ body {
         <!-- 页面标题 + 操作按钮 -->
         <div class="page-header-bar">
             <div class="page-title">我的产品库</div>
-            <div class="page-actions">
-                <button class="btn btn-default">批量导入</button>
-                <button class="btn btn-default">批量导出</button>
-                <button class="btn btn-primary" onclick="openProductForm('new')">+ 新建产品</button>
-            </div>
+            <div class="page-actions"><span class="filter-label">产品由平台统一维护</span></div>
         </div>
         <div class="quote-sync-result" id="quote-sync-result">✓ 平台报价单 <strong id="quote-sync-no">BJ20260825062</strong> 已同步 <strong id="quote-sync-count">0</strong> 条已接受产品至我的产品库；供应商为空，价格取平台销售价。</div>
 
@@ -393,6 +389,7 @@ body {
                     </tr>
                 </thead>
                 <tbody>
+                    <tr class="customer-maintained-row" style="display:none"><td class="col-checkbox">—</td><td class="maintained-code"></td><td class="maintained-name"></td><td class="maintained-spec"></td><td class="maintained-brand"></td><td class="maintained-color"></td><td class="maintained-grade"></td><td>平台代维护</td><td class="maintained-price"></td><td class="maintained-unit"></td><td class="col-action"><a class="maintained-view">查看</a></td></tr>
                     <tr class="quote-sync-row" data-quote-index="0">
                         <td class="col-checkbox"><span class="checkbox-wrap"></span></td>
                         <td><div class="product-cell"><div class="product-thumb">🧄</div><div class="product-info"><div>大蒜 <span class="quote-sync-badge">平台报价同步</span></div><div class="product-code">[CP20260801]</div></div></div></td>
@@ -415,7 +412,7 @@ body {
                         <td>aqtest薄眠（山东）数...</td>
                         <td>625.00</td>
                         <td>台</td>
-                        <td class="col-action"><a onclick="openProductForm('edit',this)">编辑</a><a class="danger" onclick="deleteProduct(this)">删除</a></td>
+                        <td class="col-action"><a onclick="openProductForm('view',this)">查看</a></td>
                     </tr>
                     <tr>
                         <td class="col-checkbox"><span class="checkbox-wrap"></span></td>
@@ -427,7 +424,7 @@ body {
                         <td>aqtest薄眠（山东）数...</td>
                         <td>625.00</td>
                         <td>个</td>
-                        <td class="col-action"><a onclick="openProductForm('edit',this)">编辑</a><a class="danger" onclick="deleteProduct(this)">删除</a></td>
+                        <td class="col-action"><a onclick="openProductForm('view',this)">查看</a></td>
                     </tr>
                     <tr>
                         <td class="col-checkbox"><span class="checkbox-wrap"></span></td>
@@ -439,7 +436,7 @@ body {
                         <td>aqtest薄眠（山东）数...</td>
                         <td>625.00</td>
                         <td>个</td>
-                        <td class="col-action"><a onclick="openProductForm('edit',this)">编辑</a><a class="danger" onclick="deleteProduct(this)">删除</a></td>
+                        <td class="col-action"><a onclick="openProductForm('view',this)">查看</a></td>
                     </tr>
                     <tr>
                         <td class="col-checkbox"><span class="checkbox-wrap"></span></td>
@@ -451,7 +448,7 @@ body {
                         <td>aqtest薄眠（山东）数...</td>
                         <td>8.75</td>
                         <td>台</td>
-                        <td class="col-action"><a onclick="openProductForm('edit',this)">编辑</a><a class="danger" onclick="deleteProduct(this)">删除</a></td>
+                        <td class="col-action"><a onclick="openProductForm('view',this)">查看</a></td>
                     </tr>
                     <tr>
                         <td class="col-checkbox"><span class="checkbox-wrap"></span></td>
@@ -463,7 +460,7 @@ body {
                         <td>aqtest薄眠（山东）数...</td>
                         <td>15.00</td>
                         <td>个</td>
-                        <td class="col-action"><a onclick="openProductForm('edit',this)">编辑</a><a class="danger" onclick="deleteProduct(this)">删除</a></td>
+                        <td class="col-action"><a onclick="openProductForm('view',this)">查看</a></td>
                     </tr>
                     <tr>
                         <td class="col-checkbox"><span class="checkbox-wrap"></span></td>
@@ -475,7 +472,7 @@ body {
                         <td>aqtest薄眠（山东）数...</td>
                         <td>15.00</td>
                         <td>付</td>
-                        <td class="col-action"><a onclick="openProductForm('edit',this)">编辑</a><a class="danger" onclick="deleteProduct(this)">删除</a></td>
+                        <td class="col-action"><a onclick="openProductForm('view',this)">查看</a></td>
                     </tr>
                     <tr>
                         <td class="col-checkbox"><span class="checkbox-wrap"></span></td>
@@ -487,7 +484,7 @@ body {
                         <td>aqtest薄眠（山东）数...</td>
                         <td>15.00</td>
                         <td>付</td>
-                        <td class="col-action"><a onclick="openProductForm('edit',this)">编辑</a><a class="danger" onclick="deleteProduct(this)">删除</a></td>
+                        <td class="col-action"><a onclick="openProductForm('view',this)">查看</a></td>
                     </tr>
                     <tr>
                         <td class="col-checkbox"><span class="checkbox-wrap"></span></td>
@@ -499,7 +496,7 @@ body {
                         <td>aqtest薄眠（山东）数...</td>
                         <td>2,300.00</td>
                         <td>个</td>
-                        <td class="col-action"><a onclick="openProductForm('edit',this)">编辑</a><a class="danger" onclick="deleteProduct(this)">删除</a></td>
+                        <td class="col-action"><a onclick="openProductForm('view',this)">查看</a></td>
                     </tr>
                     <tr>
                         <td class="col-checkbox"><span class="checkbox-wrap"></span></td>
@@ -511,7 +508,7 @@ body {
                         <td>aqtest薄眠（山东）数...</td>
                         <td>15,009.50</td>
                         <td>套</td>
-                        <td class="col-action"><a onclick="openProductForm('edit',this)">编辑</a><a class="danger" onclick="deleteProduct(this)">删除</a></td>
+                        <td class="col-action"><a onclick="openProductForm('view',this)">查看</a></td>
                     </tr>
                     <tr>
                         <td class="col-checkbox"><span class="checkbox-wrap"></span></td>
@@ -523,7 +520,7 @@ body {
                         <td>aqtest薄眠（山东）数...</td>
                         <td>75.00</td>
                         <td>卷</td>
-                        <td class="col-action"><a onclick="openProductForm('edit',this)">编辑</a><a class="danger" onclick="deleteProduct(this)">删除</a></td>
+                        <td class="col-action"><a onclick="openProductForm('view',this)">查看</a></td>
                     </tr>
                     <tr>
                         <td class="col-checkbox"><span class="checkbox-wrap"></span></td>
@@ -535,7 +532,7 @@ body {
                         <td>aqtest薄眠（山东）数...</td>
                         <td>200.00</td>
                         <td>个</td>
-                        <td class="col-action"><a onclick="openProductForm('edit',this)">编辑</a><a class="danger" onclick="deleteProduct(this)">删除</a></td>
+                        <td class="col-action"><a onclick="openProductForm('view',this)">查看</a></td>
                     </tr>
                     <tr>
                         <td class="col-checkbox"><span class="checkbox-wrap"></span></td>
@@ -547,7 +544,7 @@ body {
                         <td>aqtest薄眠（山东）数...</td>
                         <td>960.00</td>
                         <td>个</td>
-                        <td class="col-action"><a onclick="openProductForm('edit',this)">编辑</a><a class="danger" onclick="deleteProduct(this)">删除</a></td>
+                        <td class="col-action"><a onclick="openProductForm('view',this)">查看</a></td>
                     </tr>
                     <tr>
                         <td class="col-checkbox"><span class="checkbox-wrap"></span></td>
@@ -559,7 +556,7 @@ body {
                         <td>aqtest薄眠（山东）数...</td>
                         <td>1,200.00</td>
                         <td>卷</td>
-                        <td class="col-action"><a onclick="openProductForm('edit',this)">编辑</a><a class="danger" onclick="deleteProduct(this)">删除</a></td>
+                        <td class="col-action"><a onclick="openProductForm('view',this)">查看</a></td>
                     </tr>
                     <tr>
                         <td class="col-checkbox"><span class="checkbox-wrap"></span></td>
@@ -571,7 +568,7 @@ body {
                         <td>aqtest薄眠（山东）数...</td>
                         <td>178.82</td>
                         <td>个</td>
-                        <td class="col-action"><a onclick="openProductForm('edit',this)">编辑</a><a class="danger" onclick="deleteProduct(this)">删除</a></td>
+                        <td class="col-action"><a onclick="openProductForm('view',this)">查看</a></td>
                     </tr>
                     <tr>
                         <td class="col-checkbox"><span class="checkbox-wrap"></span></td>
@@ -583,7 +580,7 @@ body {
                         <td>aqtest薄眠（山东）数...</td>
                         <td>696.47</td>
                         <td>个</td>
-                        <td class="col-action"><a onclick="openProductForm('edit',this)">编辑</a><a class="danger" onclick="deleteProduct(this)">删除</a></td>
+                        <td class="col-action"><a onclick="openProductForm('view',this)">查看</a></td>
                     </tr>
                 </tbody>
             </table>
@@ -686,6 +683,31 @@ body {
 </div>
 
 <script>
+var maintainedClientProductsKey = 'haifu_customer_maintained_products_v1';
+function renderMaintainedClientProducts() {
+    var currentCustomer = 'aqtest薄眠（山东）数字产业发展有限公司';
+    var tbody = document.querySelector('.data-table tbody');
+    tbody.querySelectorAll('.customer-maintained-row[data-id]').forEach(function(row) { row.remove(); });
+    var products = [];
+    try { products = JSON.parse(localStorage.getItem(maintainedClientProductsKey) || '[]'); } catch (e) {}
+    products.filter(function(item) { return item.customer === currentCustomer; }).forEach(function(item) {
+        var row = document.querySelector('.customer-maintained-row').cloneNode(true);
+        row.style.display = '';
+        row.dataset.id = item.id;
+        row.querySelector('.maintained-code').textContent = item.code || '—';
+        row.querySelector('.maintained-name').textContent = item.name || '—';
+        row.querySelector('.maintained-spec').textContent = item.spec || '—';
+        row.querySelector('.maintained-brand').textContent = item.brand || '—';
+        row.querySelector('.maintained-color').textContent = item.color || '—';
+        row.querySelector('.maintained-grade').textContent = item.grade || '—';
+        row.querySelector('.maintained-price').textContent = item.price || '—';
+        row.querySelector('.maintained-unit').textContent = item.unit || '—';
+        row.querySelector('.maintained-view').onclick = function() { alert('产品：' + item.name + '\n规格：' + (item.spec || '—') + '\n品牌：' + (item.brand || '—') + '\n归属：' + item.customer); };
+        tbody.insertBefore(row, tbody.firstChild);
+    });
+}
+renderMaintainedClientProducts();
+
 document.querySelectorAll('.data-table tbody tr').forEach(function(row) {
     var oldCell = row.querySelectorAll('td')[1];
     var info = oldCell.querySelector('.product-info');

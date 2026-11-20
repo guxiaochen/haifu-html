@@ -377,6 +377,14 @@
                         <option>付</option>
                     </select>
                 </div>
+                <div class="filter-item">
+                    <label>客户</label>
+                    <select id="maintain-customer-filter">
+                        <option value="">全部客户</option>
+                        <option value="平原县蛋鸡养殖合作社">平原县蛋鸡养殖合作社</option>
+                        <option value="aqtest薄眠（山东）数字产业发展有限公司">aqtest薄眠（山东）数字产业发展有限公司</option>
+                    </select>
+                </div>
                 <div class="filter-actions">
                     <button class="btn btn-search">🔍 搜索</button>
                     <button class="btn">重置</button>
@@ -389,13 +397,21 @@
             <div class="table-toolbar">
                 <div class="table-title">
                     产品库
-                    <span class="count">共 2070 条</span>
+                    <span class="count" id="product-count">共 2070 条</span>
                 </div>
                 <div class="table-toolbar-right">
-                    <button class="btn">📥 导入</button>
+                    <button class="btn" onclick="openBatchImport()">📥 批量导入</button>
                     <button class="btn">📤 导出</button>
-                    <button class="btn-add" onclick="location.href='产品新增.html'">+ 新增</button>
+                    <button class="btn-add" onclick="location.href='产品新增.html?maintain=customer'">+ 代维护产品</button>
                 </div>
+            </div>
+            <div class="filter-row" style="padding:12px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:12px">
+                <label for="maintain-customer">代维护客户</label>
+                <select id="maintain-customer" style="height:32px;min-width:280px;padding:0 10px;border:1px solid #d9d9d9;border-radius:2px">
+                    <option value="平原县蛋鸡养殖合作社">平原县蛋鸡养殖合作社</option>
+                    <option value="aqtest薄眠（山东）数字产业发展有限公司">aqtest薄眠（山东）数字产业发展有限公司</option>
+                </select>
+                <span style="color:#999;font-size:12px">新增及导入的产品将归属所选客户，保存后客户端可查看</span>
             </div>
             <div class="sync-result" id="sync-result">✓ 本次询价 <b id="sync-inquiry-no">XJ2026080098</b> 已同步 <b>2 条产品—供应商采购关系</b>，已定位至列表顶部。</div>
 
@@ -418,6 +434,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <tr class="customer-maintained-product" style="display:none"><td><input type="checkbox"></td><td class="customer-product-code"></td><td class="customer-product-name"></td><td class="customer-product-color"></td><td class="customer-product-spec"></td><td class="customer-product-brand"></td><td class="customer-product-grade">—</td><td></td><td class="customer-product-price"></td><td class="customer-product-tax">13%</td><td class="customer-product-type">所有产品</td><td><span class="tag tag-real">实物</span></td><td class="customer-product-unit"></td><td><span class="customer-product-owner"></span></td><td><a class="link customer-product-view">查看</a></td></tr>
                     <tr class="sync-product" data-sync-index="0">
                         <td><input type="checkbox"></td>
                         <td><a class="link" onclick="location.href='产品详情.html?code=0000807&fromInquiry=XJ2026080098'">0000807</a></td>
@@ -727,6 +744,52 @@
         var items = (query.get('items') || '0,1').split(',').filter(function (value) { return value !== ''; });
         document.querySelectorAll('.sync-product').forEach(function (row) { if (items.indexOf(row.dataset.syncIndex) >= 0) row.classList.add('show'); });
     })();
+</script>
+
+<div id="batch-import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1000;align-items:center;justify-content:center">
+    <div style="width:560px;background:#fff;border-radius:4px;box-shadow:0 4px 16px rgba(0,0,0,.18)">
+        <div style="padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:600">批量导入客户产品<button class="btn" onclick="closeBatchImport()">×</button></div>
+        <div style="padding:20px">
+            <div style="margin-bottom:14px">导入客户：<strong id="batch-import-customer"></strong></div>
+            <div style="color:#666;font-size:13px;line-height:1.8;margin-bottom:14px">支持 CSV 文件，字段顺序：产品名称、规格、品牌、颜色、采购价、计量单位。每行一条产品。</div>
+            <textarea id="batch-import-data" style="width:100%;height:110px;padding:10px;border:1px solid #d9d9d9;resize:vertical" placeholder="也可直接粘贴CSV内容，例如：\n红皮洋葱,80-100mm,金乡,紫红,1307.06,吨"></textarea>
+            <input type="file" id="batch-import-file" accept=".csv,text/csv" style="margin-top:12px">
+            <div id="batch-import-feedback" style="margin-top:10px;color:#666;font-size:13px"></div>
+        </div>
+        <div style="padding:12px 20px;border-top:1px solid #f0f0f0;text-align:right"><button class="btn" onclick="closeBatchImport()">取消</button> <button class="btn-add" onclick="importCustomerProducts()">导入并发布</button></div>
+    </div>
+</div>
+<script>
+var CUSTOMER_PRODUCTS_KEY = 'haifu_customer_maintained_products_v1';
+function readCustomerProducts(){try{return JSON.parse(localStorage.getItem(CUSTOMER_PRODUCTS_KEY)||'[]')}catch(e){return []}}
+function renderCustomerProducts(){
+    var selected=document.getElementById('maintain-customer-filter').value;
+    var tbody=document.querySelector('.table-card table tbody');
+    tbody.querySelectorAll('.customer-maintained-product[data-id]').forEach(function(row){row.remove()});
+    readCustomerProducts().filter(function(item){return !selected||item.customer===selected}).forEach(function(item){
+        var row=document.querySelector('.customer-maintained-product').cloneNode(true);row.style.display='';row.dataset.id=item.id;
+        row.querySelector('.customer-product-code').textContent=item.code;row.querySelector('.customer-product-name').textContent=item.name;
+        row.querySelector('.customer-product-color').textContent=item.color||'—';row.querySelector('.customer-product-spec').textContent=item.spec||'—';row.querySelector('.customer-product-brand').textContent=item.brand||'—';
+        row.querySelector('.customer-product-price').textContent=item.price||'—';row.querySelector('.customer-product-unit').textContent=item.unit||'—';row.querySelector('.customer-product-owner').textContent=item.customer;
+        row.querySelector('.customer-product-view').onclick=function(){alert('产品：'+item.name+'\n归属客户：'+item.customer+'\n规格：'+(item.spec||'—'))};tbody.insertBefore(row,tbody.firstChild);
+    });
+    var count=tbody.querySelectorAll('tr:not(.customer-maintained-product)').length+tbody.querySelectorAll('.customer-maintained-product[data-id]').length;
+    document.getElementById('product-count').textContent='共 '+count+' 条';
+}
+function openBatchImport(){document.getElementById('batch-import-customer').textContent=document.getElementById('maintain-customer').value;document.getElementById('batch-import-modal').style.display='flex'}
+function closeBatchImport(){document.getElementById('batch-import-modal').style.display='none'}
+function importCustomerProducts(){
+    var text=document.getElementById('batch-import-data').value.trim(),file=document.getElementById('batch-import-file').files[0],customer=document.getElementById('maintain-customer').value;
+    if(file&&!text){var reader=new FileReader();reader.onload=function(){document.getElementById('batch-import-data').value=String(reader.result||'').replace(/^\uFEFF/,'');importCustomerProducts()};reader.readAsText(file);return}
+    var lines=text.split(/\r?\n/).filter(function(line){return line.trim()&&!/^产品名称[,，]/.test(line.trim())});
+    if(!lines.length){document.getElementById('batch-import-feedback').textContent='请粘贴CSV内容或选择CSV文件。';return}
+    var records=readCustomerProducts(),added=0,failed=[];
+    lines.forEach(function(line,index){var cols=line.split(/[,，\t]/).map(function(x){return x.trim()});if(!cols[0]){failed.push(index+1);return}records.unshift({id:'cp_'+Date.now()+'_'+index,code:'KH'+String(Date.now()).slice(-6)+String(index+1).padStart(2,'0'),name:cols[0],spec:cols[1]||'',brand:cols[2]||'',color:cols[3]||'',price:cols[4]||'',unit:cols[5]||'',customer:customer,createdAt:new Date().toISOString()});added++});
+    localStorage.setItem(CUSTOMER_PRODUCTS_KEY,JSON.stringify(records));renderCustomerProducts();document.getElementById('batch-import-feedback').textContent='已导入 '+added+' 条'+(failed.length?'；第 '+failed.join('、')+' 行缺少产品名称，未导入':'');
+    if(added)setTimeout(closeBatchImport,800);
+}
+document.getElementById('maintain-customer-filter').addEventListener('change',renderCustomerProducts);
+renderCustomerProducts();
 </script>
 
 </body>

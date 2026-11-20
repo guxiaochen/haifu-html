@@ -182,9 +182,14 @@
     const handler = query.get('handler') || (inquiryStatus === '待分配' ? '待分配' : '张三');
     const handlerCompanies = { '张三': '海赋（山东）数字产业发展有限公司', '李四': '海赋（山东）数字产业发展有限公司', '王五': '海赋供应链有限公司' };
     let createdRecord = null;
-    try { var savedRecord = JSON.parse(sessionStorage.getItem('platformNewInquiry') || 'null'); if (savedRecord && savedRecord.no === inquiryNo) createdRecord = savedRecord; } catch (e) {}
+    try {
+      var savedRecords = JSON.parse(sessionStorage.getItem('platformNewInquiries') || '[]');
+      if (Array.isArray(savedRecords)) createdRecord = savedRecords.find(function (record) { return record && record.no === inquiryNo; }) || null;
+      if (!createdRecord) { var savedRecord = JSON.parse(sessionStorage.getItem('platformNewInquiry') || 'null'); if (savedRecord && savedRecord.no === inquiryNo) createdRecord = savedRecord; }
+    } catch (e) {}
     const sourceOrder = query.get('source') || '';
     const isPendingSource = sourceOrder.indexOf('待采-') === 0;
+    const pendingDetailPage = sourceOrder.indexOf('待采-EGG-PC-') === 0 ? '鸡蛋-待采订单详情.html' : '待采订单详情.html';
     const pendingItemIndexes = (query.get('items') || '').split(',').filter(function (value) { return value !== ''; }).map(function (value) { return Number(value); });
     const currentIndex = flowIndex[inquiryStatus] ?? 0;
     document.querySelectorAll('.status').forEach(function (node) { node.textContent = inquiryStatus; });
@@ -230,10 +235,10 @@
     if (inquiryStatus === '已完成') document.getElementById('quoteOrderPill').classList.add('show');
     if (isPendingSource) {
       document.getElementById('inquiry-title').textContent = '平台询价单 ' + inquiryNo;
-      document.getElementById('breadcrumb').innerHTML = '<a href="销售订单审核.html">待采订单</a><span class="sep">/</span><a href="待采订单详情.html?order=' + encodeURIComponent(sourceOrder) + '">' + sourceOrder + '</a><span class="sep">/</span><a href="平台询价单列表.html">平台询价单</a><span class="sep">/</span><span>' + inquiryNo + '</span>';
+      document.getElementById('breadcrumb').innerHTML = '<a href="销售订单审核.html">待采订单</a><span class="sep">/</span><a href="' + pendingDetailPage + '?order=' + encodeURIComponent(sourceOrder) + '">' + sourceOrder + '</a><span class="sep">/</span><a href="平台询价单列表.html">平台询价单</a><span class="sep">/</span><span>' + inquiryNo + '</span>';
       document.getElementById('sourceOrderNo').textContent = sourceOrder;
       document.getElementById('sourceOrderPill').classList.add('show');
-      document.getElementById('sourceOrderPill').onclick = function () { location.href = '待采订单详情.html?order=' + encodeURIComponent(sourceOrder); };
+      document.getElementById('sourceOrderPill').onclick = function () { location.href = pendingDetailPage + '?order=' + encodeURIComponent(sourceOrder); };
       document.querySelectorAll('.field').forEach(function (field) {
         var label = field.querySelector('label'), value = field.querySelector('span');
         if (!label || !value) return;
@@ -249,7 +254,7 @@
       const backfillButton = document.createElement('button');
       backfillButton.className = 'btn primary';
       backfillButton.textContent = '回填待采订单';
-      backfillButton.onclick = function () { location.href = '待采订单详情.html?order=' + encodeURIComponent(sourceOrder) + '&demo=completed'; };
+      backfillButton.onclick = function () { location.href = pendingDetailPage + '?order=' + encodeURIComponent(sourceOrder) + '&demo=completed'; };
       actionBar.insertBefore(backfillButton, actionBar.querySelector('.steps'));
       const summary = document.createElement('div');
       summary.className = 'sync-summary';
@@ -272,7 +277,7 @@
     ];
     function money(value) { return '¥' + value.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
     function renderInquiryItems() {
-      const rows = isPendingSource ? pendingInquiryItems.filter(function (row, index) { return !pendingItemIndexes.length || pendingItemIndexes.indexOf(index) >= 0; }) : customerInquiryItems;
+      const rows = isPendingSource && !createdRecord ? pendingInquiryItems.filter(function (row, index) { return !pendingItemIndexes.length || pendingItemIndexes.indexOf(index) >= 0; }) : customerInquiryItems;
       document.getElementById('inquiry-items').innerHTML = rows.map(function (row) {
         return '<tr><td>' + row.seq + '</td><td>' + row.name + '</td><td class="item-image">📦</td><td>' + row.brand + '</td><td>' + row.spec + '</td><td>' + row.unit + '</td><td class="num">' + row.qty + '</td><td>' + row.expectedDelivery + '</td><td class="' + (row.note === '—' ? 'muted' : '') + '">' + row.note + '</td></tr>';
       }).join('');
@@ -294,7 +299,7 @@
           return;
         }
         text.innerHTML = isPendingSource ? '该待采订单询价已完成，采用结果已可回填至待采订单。' : '该询价单已完成询价，已生成最终采用结果。';
-        foot.innerHTML = isPendingSource ? '<button class="btn primary" onclick="location.href=\'待采订单详情.html?order=' + encodeURIComponent(sourceOrder) + '&demo=completed\'">回填待采订单</button><button class="btn" onclick="closeComplete()">关闭</button>' : '<button class="btn" onclick="openSupplierQuote()">查看供应商报价</button><button class="btn primary" onclick="location.href=\'平台报价单详情.html?inquiry=' + encodeURIComponent(inquiryNo) + '\'">生成报价单</button><button class="btn" onclick="closeComplete()">关闭</button>';
+        foot.innerHTML = isPendingSource ? '<button class="btn primary" onclick="location.href=\'' + pendingDetailPage + '?order=' + encodeURIComponent(sourceOrder) + '&demo=completed\'">回填待采订单</button><button class="btn" onclick="closeComplete()">关闭</button>' : '<button class="btn" onclick="openSupplierQuote()">查看供应商报价</button><button class="btn primary" onclick="location.href=\'平台报价单详情.html?inquiry=' + encodeURIComponent(inquiryNo) + '\'">生成报价单</button><button class="btn" onclick="closeComplete()">关闭</button>';
       } else {
         text.innerHTML = inquiryStatus === '待分配' ? '当前询价单尚未分配处理人，请先完成分配。' : '当前询价单尚未进入采用阶段，暂不能完成询价。';
         foot.innerHTML = '<button class="btn" onclick="closeComplete()">关闭</button>';
